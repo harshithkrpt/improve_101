@@ -1,0 +1,9 @@
+Learn more about decoratos
+learn more about context manager
+data classes
+https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-1
+https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-2
+https://www.pythoncheatsheet.org/blog/python-projects-with-poetry-and-vscode-part-3
+
+
+Virtual Environments
