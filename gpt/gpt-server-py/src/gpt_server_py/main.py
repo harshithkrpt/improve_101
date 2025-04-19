@@ -1,7 +1,9 @@
-from typing import Union
+from typing import Union, Literal
+from datetime import datetime, time, timedelta
 
-from fastapi import FastAPI, Query # type: ignore
-from pydantic import BaseModel, AfterValidator # type: ignore
+from fastapi import FastAPI, Query, Path, Body, Cookie, Header # type: ignore
+from pydantic import BaseModel, AfterValidator, Field, HttpUrl; # type: ignore
+from uuid import UUID
 
 app = FastAPI()
 
@@ -124,6 +126,188 @@ async def ewew(q: Annotated[str, AfterValidator(check)]):
         "q": q
     }
 
+
+# Query Parameters with Additional MetaData
+@app.get("/app/additional_query")
+# Query options -> max_length, min_length, alias, description, title, AfterValidator, deprecated, pattern
+async def add_query_param(q: Annotated[str, Query(max_length=20,min_length=4, title="THIS IS A TITLE FOR ADD QUERY PARAM", description="This is a description field", deprecated=True)]):
+    return {
+        "query": q,
+    }
+
+
+# Path Parameters with Additional Metadata
+@app.get("/path/{item_id}")
+# ge -> grater equal
+# le -> less than equal
+# gt -> greater than
+# lt -> less then
+async def path_param_add_metadata(q: Annotated[int, Path(title="This is a Path Parameter of the Object Id", description="This is the description of the field", ge=1, le=10 )]):
+    return {
+        "query": q,
+    }
+
+
+# Pydantic Models With Additional Parameters
+class FilterParams(BaseModel):
+    limit: int = Field(100, gt=0, le=100)
+    offset: int = Field(0, ge=0)
+    order_by: Literal["created_at", "updated_at"] = "created_at"
+    tags: list[str] = []
+
+@app.get("/pydantic_query_param_models")
+def pydantic_query_param(query: Annotated[FilterParams, Query()]):
+    query_dict = dict(query)
+    print(query_dict)
+    return {
+        "query": query
+    }
+
+
+# Mix Path, Query And Body Parameters
+class BodyObject(BaseModel):
+    title: str
+    description: str
+    price: int
+    c_gst: float
+
+@app.put("/update/{item_id}")
+def update_patch(item_id: int, price: float, item: BodyObject | None = None):
+    
+    dictionary = {
+        "item_id": item_id,
+        "price": price,
+
+    }
+
+    if item is not None:
+        dictionary.update(item)
+
+    return dictionary
+
+# Adding Body Validations
+
+class BodyValidations(BaseModel):
+    price: int | None = Field(default=None, ge=100)
+    string: str | None = Field(default=None, max_length=100)
+
+@app.put("/adding/body_fields/api/{item_id}")
+def adding_body_fields(item_id: int,body_fields: Annotated[BodyValidations, Body(embed=True)]):
+    return {
+        "body_fields": body_fields
+    }
+
+
+# Nested Models
+class ImageModel(BaseModel):
+    url: HttpUrl
+    name: str
+
+class ItemModel(BaseModel):
+    name: str
+    description: str
+    image: ImageModel
+    field: float = Field(example = [35.4])
+    images: list[ImageModel]
+
+@app.put("/items/update/{item_id}")
+async def app_items_update(item_id: int, body: ItemModel):
+    return {
+        "item_id": item_id,
+        "body": body
+    }
+
+
+# Declaring Sample Data in Pydantic Model 
+class SampleData(BaseModel):
+    name: str
+    price: float
+    list: list[str]
+    set: frozenset
+  
+
+    # model_config = {
+    #     "json_schema_extra": {
+    #         "examples": [
+    #             {
+    #                 "name": "Foo",
+    #                 "price": 2.4,
+    #                 "list": [
+    #                     "one",
+    #                     "two"
+    #                 ]
+    #             }
+    #         ]
+    #     }
+    # }
+
+
+@app.put("/testing/sample/data")
+async def testing_sample_data(body: SampleData):
+    return {
+        "body": body
+    }
+
+@app.put("/extradatatypes/{item_id}")
+async def read_items(
+    item_id: UUID,
+    start_datetime: Annotated[datetime, Body()],
+    end_datetime: Annotated[datetime, Body()],
+    process_after: Annotated[timedelta, Body()],
+    repeat_at: Annotated[time | None, Body()] = None,
+):
+    start_process = start_datetime + process_after
+    duration = end_datetime - start_process
+    return {
+        "item_id": item_id,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+        "process_after": process_after,
+        "repeat_at": repeat_at,
+        "start_process": start_process,
+        "duration": duration,
+    }
+
+
+@app.get("/declare_cookie")
+async def declare_cookie(async_id: Annotated[str | None, Cookie()] = None):
+    return {
+        "id": async_id
+    }
+
+
+
+class Cookies(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    session_id: str
+    fatebook_tracker: str | None = None
+    googall_tracker: str | None = None
+
+class CommonHeaders(BaseModel):
+    host: str
+    save_data: bool
+    if_modified_since: str | None = None
+    traceparent: str | None = None
+    x_tag: list[str] = []
+
+@app.get("/get_header")
+async def get_header(user_agent: Annotated[str | None , Header()] = None, cookies: Annotated[Cookies | None, Cookie()] = None, headers: Annotated[CommonHeaders | None, Header()] = None):
+    return { "User-Agent": user_agent , "cookies":cookies }
+
+
+# Response Modal -> Return Type
+class SameReturnType(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: list[str] = []
+
+
+@app.post("/same_payload_as_response")
+async def same_payload_as_response(spar: SameReturnType) -> SameReturnType:
+    return spar
 
 def main():
     import uvicorn # type: ignore
