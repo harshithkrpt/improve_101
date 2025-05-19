@@ -683,3 +683,33 @@ WHERE
   )
   ORDER BY prr.pr_count 
   DESC;
+
+
+SELECT pr.product_id, p.name, AVG(pr.rating) as avg_r  FROM product_reviews pr 
+INNER JOIN products p ON pr.product_id = p.id
+GROUP BY pr.product_id HAVING avg_r = 5;
+
+SELECT 
+    p.id, 
+    p.name
+FROM products p
+WHERE (
+    SELECT AVG(pr.rating)
+    FROM product_reviews pr
+    WHERE pr.product_id = p.id
+) = 5;
+
+
+SELECT * FROM deliveries d WHERE d.order_id IN (SELECT o.id FROM orders o WHERE o.payment_status = 'failed')
+
+-- order_count
+
+SELECT 
+    d.order_id,
+    d.status AS delivery_status,
+    o.payment_status,
+    u.name AS user_name
+FROM deliveries d
+JOIN orders o ON d.order_id = o.id
+JOIN users u ON o.user_id = u.id
+WHERE o.payment_status = 'failed';

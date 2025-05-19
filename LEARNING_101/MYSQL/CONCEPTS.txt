@@ -1,0 +1,54 @@
+1. Inline Scalar ? what is scalar subquery ?
+2. Why do we need derived tables ?
+3. What is alias operator ?
+4. What is the use of HAVING Clause ?
+5. What is the use of Group by ?
+6. What is the use of Like operator ?
+7. What is the use of Where Condition ?
+8. What is the use of * operator ?
+
+
+Advanced Concepts To Master : 
+
+
+1. Advanced Aggregation & Window Functions
+    Move beyond GROUP BY to row-level comparisons and ranking.
+    Learn:
+    ROW_NUMBER(), RANK(), DENSE_RANK()
+    PARTITION BY
+    Running totals, moving averages
+    LEAD(), LAG() for "previous/next row" logic
+
+2. Case Expressions & Conditional Aggregates
+    CASE WHEN logic inside SELECT
+    Conditional SUM, COUNT, AVG
+
+3. Data Modeling Concepts
+    Understand:
+        Normalization vs Denormalization
+        Primary keys, foreign keys, unique constraints
+        Indexing strategy
+        Composite keys
+        Table relationships (1:1, 1:N, M:N)
+
+4. Views, CTEs (WITH Clauses), and Temp Tables
+    Learn:
+        WITH (Common Table Expressions) for query readability
+        When to use a VIEW
+        Temporary tables for complex reports
+
+5. Performance Optimization
+        Index types (BTree, Fulltext)
+        EXPLAIN plans
+        When to avoid SELECT *
+        Query rewriting for speed
+
+
+6. Data Manipulation & Transactions
+    INSERT, UPDATE, DELETE best practices
+    Transactions: BEGIN, COMMIT, ROLLBACK
+    Using ON DUPLICATE KEY UPDATE and REPLACE INTO
+
+7. Stored Procedures & Triggers
+    Create procedures for repeated logic
+    Define triggers to auto-update fields (e.g., audit logs)
