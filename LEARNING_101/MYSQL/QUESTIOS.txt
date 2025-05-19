@@ -1,0 +1,44 @@
+📋 Level 1: Basic SQL Queries
+List all users who have placed at least one order.
+
+Show all products that are currently out of stock.
+
+Retrieve all orders along with the total amount and the name of the user who placed it.
+
+Get all order items for a specific order (e.g., order_id = 5).
+
+List all product reviews with product name and user name.
+
+📋 Level 2: Intermediate Joins & Filters
+List top 10 most expensive products ordered (based on order_items price).
+
+Find total sales (sum of order amounts) made by each user.
+
+Show all orders that were delivered by 'BlueDart'.
+
+List users who gave a rating less than 4.
+
+Get all products that have never been ordered.
+
+📋 Level 3: Aggregates & Grouping
+Find the average rating for each product (with product name).
+
+Count how many orders each delivery status (e.g., shipped, delivered, cancelled) has.
+
+Find users who have placed more than 3 orders.
+
+Get the total quantity sold for each product.
+
+Find top 5 best-selling products by quantity.
+
+📋 Level 4: Subqueries & Advanced Joins
+Find the user(s) who spent the most money.
+
+Get all orders that have at least one item priced over 500.
+
+List the most reviewed products.
+
+Find products that received only 5-star reviews.
+
+List all orders that failed payment but still have delivery records.
+
