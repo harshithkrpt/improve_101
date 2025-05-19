@@ -627,7 +627,12 @@ SELECT u.name, u.id, COUNT(o.id) as order_count FROM users u INNER JOIN orders o
 
 SELECT SUM(oi.quantity) quantity_sold, p.name, p.stock FROM order_items oi INNER JOIN products p ON p.id = oi.product_id GROUP BY oi.product_id;
 
-SELECT SUM(oi.quantity) as quantity_sold, p.name, p.stock FROM order_items oi  INNER JOIN products p ON p.id = oi.product_id GROUP BY oi.product_id ORDER BY quantity_sold DESC LIMIT 5;
+    SELECT SUM(oi.quantity) as quantity_sold, p.name, p.stock 
+    FROM order_items oi  
+    INNER JOIN products p ON p.id = oi.product_id 
+    GROUP BY oi.product_id 
+    ORDER BY quantity_sold 
+    DESC LIMIT 5;
 
 
 
@@ -646,3 +651,35 @@ HAVING total_spent = (
         GROUP BY user_id
     ) AS totals
 );
+
+
+SELECT 
+  prr.product_id, p.name, prr.pr_count
+FROM 
+  (
+    SELECT 
+      product_id, 
+      COUNT(*) as pr_count 
+    FROM 
+      product_reviews 
+    GROUP BY 
+      product_id
+  ) AS prr 
+INNER JOIN products p ON prr.product_id = p.id
+WHERE 
+  prr.pr_count = (
+    SELECT 
+      MAX(product_review_cnt) 
+    FROM 
+      (
+        SELECT 
+          COUNT(pr.product_id) as product_review_cnt, 
+          pr.product_id 
+        FROM 
+          product_reviews pr 
+        GROUP BY 
+          pr.product_id
+      ) as count
+  )
+  ORDER BY prr.pr_count 
+  DESC;
