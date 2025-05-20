@@ -713,3 +713,12 @@ FROM deliveries d
 JOIN orders o ON d.order_id = o.id
 JOIN users u ON o.user_id = u.id
 WHERE o.payment_status = 'failed';
+
+
+SELECT o.id as order_id, u.name FROM orders o INNER JOIN users u ON u.id = o.user_id
+WHERE o.id IN (
+    SELECT DISTINCT oi.order_id FROM order_items oi WHERE oi.price > 500
+);
+
+
+
