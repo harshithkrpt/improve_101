@@ -283,3 +283,112 @@ SELECT
 FROM products p
 JOIN categories c ON p.category_id = c.id;
 ```
+
+
+
+# 🛠️ SQL DML (Data Manipulation Language) Mastery
+
+This document covers both **basic** and **advanced** DML queries in SQL, with practical examples using an e-commerce context.
+
+---
+
+## ✅ Basic DML Queries
+
+### 1. INSERT – Add new rows
+```sql
+INSERT INTO users (name, email)
+VALUES ('Aarav Mehta', 'aarav@example.com');
+```
+
+### 2. UPDATE – Modify existing rows
+```sql
+UPDATE products
+SET stock = stock - 1
+WHERE id = 101;
+```
+
+### 3. DELETE – Remove rows
+```sql
+DELETE FROM orders
+WHERE payment_status = 'failed';
+```
+
+---
+
+## 🔁 Advanced DML Queries
+
+### 4. INSERT INTO ... SELECT
+Insert data from one table into another.
+```sql
+INSERT INTO product_reviews (product_id, user_id, ratings, reviews)
+SELECT id, 1, 5, 'Auto review'
+FROM products
+WHERE stock > 500;
+```
+
+---
+
+### 5. UPSERT (MySQL-specific)
+
+#### a. INSERT with ON DUPLICATE KEY UPDATE
+```sql
+INSERT INTO users (id, name, email)
+VALUES (1, 'Aarav Mehta', 'aarav@example.com')
+ON DUPLICATE KEY UPDATE name = 'Aarav M.';
+```
+
+---
+
+### 6. DELETE with JOIN
+Delete from one table based on conditions in another.
+```sql
+DELETE oi
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.id
+WHERE o.payment_status = 'failed';
+```
+
+---
+
+### 7. UPDATE with JOIN
+```sql
+UPDATE orders o
+JOIN users u ON o.user_id = u.id
+SET o.payment_status = 'refunded'
+WHERE u.name = 'Harshith Kurapati';
+```
+
+---
+
+### 8. INSERT MULTIPLE ROWS
+```sql
+INSERT INTO categories (name)
+VALUES ('Fitness'), ('Gaming'), ('Tools');
+```
+
+---
+
+### 9. TRUNCATE TABLE (Fast delete all rows)
+```sql
+TRUNCATE TABLE order_items;
+```
+
+---
+
+### 10. Transactional DML
+```sql
+START TRANSACTION;
+
+UPDATE products SET stock = stock - 1 WHERE id = 50;
+INSERT INTO order_items (product_id, order_id, quantity, price)
+VALUES (50, 101, 1, 499.99);
+
+COMMIT;
+```
+
+---
+
+## 💡 Tips
+- Always use `WHERE` in `UPDATE`/`DELETE` to avoid affecting all rows.
+- Use transactions when performing multiple dependent changes.
+- Use `LIMIT` with `DELETE` for batch deletions in large tables.
