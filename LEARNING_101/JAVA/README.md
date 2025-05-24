@@ -4,7 +4,7 @@ In Java, **data types** specify the kind of data a variable can hold. They are c
 
 ---
 
-## 1. Primitive Data Types
+### 1. Primitive Data Types
 
 Java has **8 primitive data types** which are predefined by the language and named by a keyword.
 
@@ -21,7 +21,7 @@ Java has **8 primitive data types** which are predefined by the language and nam
 
 ---
 
-## 2. Non-Primitive (Reference/Object) Data Types
+### 2. Non-Primitive (Reference/Object) Data Types
 
 These refer to objects and include:
 
@@ -38,26 +38,26 @@ These refer to objects and include:
 
 ---
 
-## 🧾 Notes
+### 🧾 Notes
 
 - Java is **statically typed**, so every variable must be declared with a type.
 - **Default values** exist for primitives (e.g., `int` → `0`, `boolean` → `false`).
 - Use **wrapper classes** like `Integer`, `Double`, etc., to work with primitives as objects (e.g., in collections).
 
 
-# 🔁 Type Casting in Java (Primitive Data Types)
+## 🔁 Type Casting in Java (Primitive Data Types)
 
 **Type casting** is the process of converting one data type into another. In Java, it applies to **compatible data types only** and is of two types:
 
 ---
 
-## 1. Implicit Type Casting (Widening Conversion)
+### 1. Implicit Type Casting (Widening Conversion)
 
 - Automatically done by Java.
 - Converts a smaller type to a larger type (no data loss).
 - Example: `byte` → `short` → `int` → `long` → `float` → `double`
 
-### ✅ Example:
+#### ✅ Example:
 ```java
 int x = 100;
 double y = x; // int to double (automatic)
@@ -91,13 +91,13 @@ System.out.println(again); // B
 | `int`     | `char`   | Explicit     | `char c = (char) i;`       |
 
 
-# 📈 Type Promotion in Java
+## 📈 Type Promotion in Java
 
 **Type promotion** is a process where smaller data types are automatically promoted to larger types during operations to prevent data loss.
 
 ---
 
-## 🔧 When It Happens
+### 🔧 When It Happens
 
 1. In expressions with different data types.
 2. During arithmetic calculations.
@@ -105,7 +105,7 @@ System.out.println(again); // B
 
 ---
 
-## 🔁 Promotion Rules
+### 🔁 Promotion Rules
 
 - `byte`, `short`, `char` → automatically promoted to `int`
 - If one operand is `long` → result is `long`
@@ -114,9 +114,9 @@ System.out.println(again); // B
 
 ---
 
-## 🧪 Examples
+### 🧪 Examples
 
-### 1. `byte` to `int`
+#### 1. `byte` to `int`
 ```java
 byte a = 10;
 byte b = 20;
@@ -124,7 +124,7 @@ byte b = 20;
 int c = a + b;     // Works because of promotion to int
 ```
 
-# 🔣 Java Operators: Assignment, Relational, Logical
+## 🔣 Java Operators: Assignment, Relational, Logical
 
 Java provides various operators to perform operations on variables and values. Here, we'll focus on:
 
@@ -134,7 +134,7 @@ Java provides various operators to perform operations on variables and values. H
 
 ---
 
-## 🟢 1. Assignment Operators
+### 🟢 1. Assignment Operators
 
 Used to assign values to variables.
 
@@ -147,7 +147,7 @@ Used to assign values to variables.
 | `/=`     | Divide and assign        | `a /= 4` → `a = a / 4` |
 | `%=`     | Modulus and assign       | `a %= 3` → `a = a % 3` |
 
-### ✅ Example:
+#### ✅ Example:
 ```java
 int x = 10;
 x += 5; // x becomes 15
@@ -155,7 +155,7 @@ x += 5; // x becomes 15
 
 ```
 
-## 🔵 Relational Operators
+### 🔵 Relational Operators
 
 | Operator | Description           | Example  | Result     |
 | -------- | --------------------- | -------- | ---------- |
@@ -174,7 +174,7 @@ System.out.println(a == b); // false
 ```
 
 
-## 🟠 3. Logical Operators
+### 🟠 3. Logical Operators
 
 | Operator | Description | Example           | Result            |         |   |         |                     |
 | -------- | ----------- | ----------------- | ----------------- | ------- | - | ------- | ------------------- |
@@ -192,13 +192,13 @@ System.out.println(a == b); // false
 ```
 
 
-# 🔀 Conditional Statements in Java
+## 🔀 Conditional Statements in Java
 
 Conditional statements in Java are used to execute blocks of code based on specific conditions. They control the **flow of execution** in your program.
 
 ---
 
-## 🧱 Types of Conditional Statements
+### 🧱 Types of Conditional Statements
 
 1. `if` statement  
 2. `if-else` statement  
@@ -208,18 +208,18 @@ Conditional statements in Java are used to execute blocks of code based on speci
 
 ---
 
-## ✅ 1. `if` Statement
+### ✅ 1. `if` Statement
 
 Executes a block of code if the condition is `true`.
 
-### Syntax:
+#### Syntax:
 ```java
 if (condition) {
     // code to execute
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int age = 20;
 if (age >= 18) {
@@ -229,11 +229,11 @@ if (age >= 18) {
 
 ---
 
-## ✅ 2. `if-else` Statement
+### ✅ 2. `if-else` Statement
 
 Executes one block if condition is `true`, another if `false`.
 
-### Syntax:
+#### Syntax:
 ```java
 if (condition) {
     // true block
@@ -242,7 +242,7 @@ if (condition) {
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int number = 5;
 if (number % 2 == 0) {
@@ -254,11 +254,11 @@ if (number % 2 == 0) {
 
 ---
 
-## ✅ 3. `if-else-if` Ladder
+### ✅ 3. `if-else-if` Ladder
 
 Multiple conditions can be checked sequentially.
 
-### Syntax:
+#### Syntax:
 ```java
 if (condition1) {
     // block 1
@@ -269,7 +269,7 @@ if (condition1) {
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int marks = 75;
 if (marks >= 90) {
@@ -283,11 +283,11 @@ if (marks >= 90) {
 
 ---
 
-## ✅ 4. `switch` Statement
+### ✅ 4. `switch` Statement
 
 Best for multiple constant value checks.
 
-### Syntax:
+#### Syntax:
 ```java
 switch (expression) {
     case value1:
@@ -301,7 +301,7 @@ switch (expression) {
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int day = 3;
 switch (day) {
@@ -321,16 +321,16 @@ switch (day) {
 
 ---
 
-## ✅ 5. Ternary Operator (`? :`)
+### ✅ 5. Ternary Operator (`? :`)
 
 Shortcut for `if-else` that returns a value.
 
-### Syntax:
+#### Syntax:
 ```java
 variable = (condition) ? value_if_true : value_if_false;
 ```
 
-### Example:
+#### Example:
 ```java
 int a = 10, b = 20;
 int max = (a > b) ? a : b;
@@ -339,7 +339,7 @@ System.out.println("Max: " + max);
 
 ---
 
-## 📌 Use Cases
+### 📌 Use Cases
 
 - Making decisions based on user input.
 - Validating conditions before executing logic.
@@ -347,13 +347,13 @@ System.out.println("Max: " + max);
 
 
 
-# 🔁 Loops in Java
+## 🔁 Loops in Java
 
 Loops in Java are used to execute a block of code repeatedly until a specified condition is met.
 
 ---
 
-## 🧱 Types of Loops
+### 🧱 Types of Loops
 
 1. `for` loop  
 2. `while` loop  
@@ -362,18 +362,18 @@ Loops in Java are used to execute a block of code repeatedly until a specified c
 
 ---
 
-## ✅ 1. `for` Loop
+### ✅ 1. `for` Loop
 
 Used when the number of iterations is known.
 
-### Syntax:
+#### Syntax:
 ```java
 for (initialization; condition; update) {
     // code block
 }
 ```
 
-### Example:
+#### Example:
 ```java
 for (int i = 1; i <= 5; i++) {
     System.out.println(i);
@@ -382,18 +382,18 @@ for (int i = 1; i <= 5; i++) {
 
 ---
 
-## ✅ 2. `while` Loop
+### ✅ 2. `while` Loop
 
 Used when the number of iterations is unknown and depends on a condition.
 
-### Syntax:
+#### Syntax:
 ```java
 while (condition) {
     // code block
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int i = 1;
 while (i <= 5) {
@@ -404,18 +404,18 @@ while (i <= 5) {
 
 ---
 
-## ✅ 3. `do-while` Loop
+### ✅ 3. `do-while` Loop
 
 Similar to `while`, but ensures the loop runs **at least once**.
 
-### Syntax:
+#### Syntax:
 ```java
 do {
     // code block
 } while (condition);
 ```
 
-### Example:
+#### Example:
 ```java
 int i = 1;
 do {
@@ -426,18 +426,18 @@ do {
 
 ---
 
-## ✅ 4. Enhanced `for` Loop (For-Each)
+### ✅ 4. Enhanced `for` Loop (For-Each)
 
 Used for iterating over arrays or collections.
 
-### Syntax:
+#### Syntax:
 ```java
 for (type var : array) {
     // code block
 }
 ```
 
-### Example:
+#### Example:
 ```java
 int[] numbers = {1, 2, 3, 4, 5};
 for (int num : numbers) {
@@ -447,14 +447,14 @@ for (int num : numbers) {
 
 ---
 
-## 🔄 Loop Control Statements
+### 🔄 Loop Control Statements
 
 | Keyword   | Description                                     |
 |-----------|-------------------------------------------------|
 | `break`   | Exits the loop immediately                      |
 | `continue`| Skips the current iteration and continues       |
 
-### Example:
+#### Example:
 ```java
 for (int i = 1; i <= 5; i++) {
     if (i == 3) continue;
@@ -464,8 +464,404 @@ for (int i = 1; i <= 5; i++) {
 
 ---
 
-## 📌 Use Cases
+### 📌 Use Cases
 
 - Automating repetitive tasks
 - Iterating over data structures
 - Validating input until correct
+
+
+
+## Java: `super`, Constructors, and Inheritance
+
+### 🧠 What is `super` in Java?
+
+The `super` keyword in Java is used to:
+
+1. Access **parent class methods** (even if overridden).
+2. Access **parent class constructors**.
+3. Access **parent class variables** (if shadowed by child class variables).
+
+---
+
+### 🧱 Constructors in Java
+
+#### Constructor Basics
+
+- A constructor is a special method used to **initialize objects**.
+- It has the **same name as the class**.
+- It has **no return type** (not even `void`).
+- If no constructor is defined, Java provides a **default constructor**.
+
+#### Types of Constructors
+
+1. **Default Constructor**
+   ```java
+   class Animal {
+       Animal() {
+           System.out.println("Animal created");
+       }
+   }
+   ```
+
+2. **Parameterized Constructor**
+   ```java
+   class Animal {
+       Animal(String name) {
+           System.out.println("Animal name: " + name);
+       }
+   }
+   ```
+
+---
+
+### 🧬 Using `super()` in Constructors
+
+#### Why use `super()`?
+
+- To explicitly **call the parent class constructor**.
+- Must be the **first line** in the child class constructor.
+
+#### Example
+
+```java
+class Animal {
+    Animal() {
+        System.out.println("Animal constructor called");
+    }
+}
+
+class Dog extends Animal {
+    Dog() {
+        super(); // Calls Animal()
+        System.out.println("Dog constructor called");
+    }
+}
+```
+
+**Output:**
+```
+Animal constructor called
+Dog constructor called
+```
+
+#### With Parameters
+
+```java
+class Animal {
+    Animal(String name) {
+        System.out.println("Animal name: " + name);
+    }
+}
+
+class Dog extends Animal {
+    Dog() {
+        super("Buddy"); // Call parent class constructor with parameter
+        System.out.println("Dog is ready");
+    }
+}
+```
+
+---
+
+### 💡 Notes
+
+- If you **don't call `super()`**, Java **implicitly calls the no-arg constructor** of the parent.
+- If the **parent does not have a no-arg constructor**, you **must** explicitly call a parameterized constructor using `super(...)`.
+
+---
+
+### 📌 Accessing Parent Members
+
+```java
+class Animal {
+    int age = 10;
+
+    void show() {
+        System.out.println("Animal age: " + age);
+    }
+}
+
+class Dog extends Animal {
+    int age = 5;
+
+    void display() {
+        System.out.println("Dog age: " + age);
+        System.out.println("Animal age: " + super.age); // Access parent class variable
+        super.show(); // Call parent class method
+    }
+}
+```
+
+---
+
+### ✅ Best Practices
+
+- Use `super()` for **constructor chaining**.
+- Use `super.method()` to **reuse parent class logic**.
+- Avoid overusing `super` in deeply nested inheritance to maintain readability.
+
+
+## Java: `this` Keyword
+
+### 📌 What is `this` in Java?
+
+The `this` keyword is a reference variable in Java that refers to the **current object**.
+
+---
+
+### 🔑 Uses of `this` Keyword
+
+#### 1. To refer current class instance variable
+
+Used when **instance variables** and **parameters** have the same name.
+
+```java
+class Student {
+    int id;
+    String name;
+
+    Student(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+```
+
+---
+
+#### 2. To invoke current class method
+
+```java
+class Test {
+    void show() {
+        System.out.println("Show called");
+    }
+
+    void display() {
+        this.show();  // same as calling show()
+    }
+}
+```
+
+---
+
+#### 3. To invoke current class constructor
+
+Used for **constructor chaining**.
+
+```java
+class Book {
+    int pages;
+    String title;
+
+    Book() {
+        this("Unknown", 100);  // Calls parameterized constructor
+    }
+
+    Book(String title, int pages) {
+        this.title = title;
+        this.pages = pages;
+    }
+}
+```
+
+---
+
+#### 4. To pass as argument in method call
+
+```java
+class A {
+    void methodA(A obj) {
+        System.out.println("Method called");
+    }
+
+    void call() {
+        methodA(this); // Passing current object
+    }
+}
+```
+
+---
+
+#### 5. To return current class instance
+
+```java
+class Demo {
+    Demo getDemo() {
+        return this;
+    }
+}
+```
+
+---
+
+### 💡 Notes
+
+- `this` is **not static** — it cannot be used inside static methods.
+- Mostly used to avoid ambiguity or enable fluent/chained method calls.
+
+---
+
+### ✅ Best Practices
+
+- Use `this` to make code **more readable and maintainable**.
+- Use it **only when necessary** to resolve ambiguity or for chaining.
+
+
+## 🔍 Core OOPs Concepts in Java
+
+Object-Oriented Programming (OOPs) is a programming paradigm based on the concept of "objects". Java is inherently an object-oriented language.
+
+---
+
+## 1. ✅ **Class and Object**
+
+- **Class**: Blueprint for creating objects.
+- **Object**: Instance of a class.
+
+```java
+class Car {
+    String color;
+    void drive() {
+        System.out.println("Driving...");
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Car c1 = new Car();
+        c1.drive();
+    }
+}
+```
+
+---
+
+## 2. 🔒 **Encapsulation**
+
+- Wrapping data (variables) and code (methods) together as a single unit.
+- Achieved using **private variables** and **public getters/setters**.
+
+```java
+class Student {
+    private int age;
+
+    public void setAge(int a) {
+        age = a;
+    }
+
+    public int getAge() {
+        return age;
+    }
+}
+```
+
+---
+
+## 3. 🧬 **Inheritance**
+
+- Mechanism where one class acquires properties of another.
+- Uses `extends` keyword.
+
+```java
+class Animal {
+    void eat() {
+        System.out.println("Eating...");
+    }
+}
+
+class Dog extends Animal {
+    void bark() {
+        System.out.println("Barking...");
+    }
+}
+```
+
+---
+
+## 4. 🎭 **Polymorphism**
+
+Means many forms. Two types:
+
+### a. Compile-Time (Method Overloading)
+
+```java
+class MathUtil {
+    int add(int a, int b) {
+        return a + b;
+    }
+
+    double add(double a, double b) {
+        return a + b;
+    }
+}
+```
+
+### b. Run-Time (Method Overriding)
+
+```java
+class Animal {
+    void sound() {
+        System.out.println("Animal sound");
+    }
+}
+
+class Dog extends Animal {
+    void sound() {
+        System.out.println("Dog barks");
+    }
+}
+```
+
+---
+
+## 5. 🧩 **Abstraction**
+
+- Hiding internal details and showing only essential features.
+- Achieved using **abstract classes** or **interfaces**.
+
+```java
+abstract class Shape {
+    abstract void draw();
+}
+
+class Circle extends Shape {
+    void draw() {
+        System.out.println("Drawing Circle");
+    }
+}
+```
+
+---
+
+## 6. 🧱 **Interface**
+
+- Used to achieve **100% abstraction**.
+- All methods in interface are abstract by default.
+
+```java
+interface Drawable {
+    void draw();
+}
+
+class Rectangle implements Drawable {
+    public void draw() {
+        System.out.println("Drawing Rectangle");
+    }
+}
+```
+
+---
+
+## 💡 Summary Table
+
+| Concept        | Description                                  |
+|----------------|----------------------------------------------|
+| Class          | Blueprint for creating objects               |
+| Object         | Instance of a class                          |
+| Encapsulation  | Binding data & code using access modifiers   |
+| Inheritance    | Acquiring features from parent class         |
+| Polymorphism   | One interface, many implementations          |
+| Abstraction    | Hiding internal details                      |
+| Interface      | Full abstraction using `interface` keyword   |
