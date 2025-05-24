@@ -253,3 +253,60 @@ public class FastString {
 
 **Key Takeaway:**  
 Choose `StringBuilder` for most mutable string operations in single-threaded contexts and prefer `StringBuffer` when thread safety is a requirement.
+
+
+# Thread Safety
+
+In concurrent programming, **thread safety** means that a piece of code (method, class, or data structure) functions correctly when accessed by multiple threads simultaneously, without causing data corruption, unexpected behavior, or race conditions.
+
+---
+
+## 1. Why Thread Safety Matters
+
+- **Concurrency**: Modern applications often perform many tasks in parallel to improve performance.  
+- **Shared Resources**: When threads share mutable data (e.g., collections, counters, buffers), unsynchronized access can lead to inconsistent state.  
+- **Reliability**: Thread-safe code guarantees predictable results regardless of thread scheduling.
+
+---
+
+## 2. Common Concurrency Hazards
+
+1. **Race Conditions**  
+   Two or more threads read and write shared data in an interleaved way, producing incorrect results.
+2. **Visibility Issues**  
+   Changes made by one thread may not be immediately visible to others due to CPU caching and memory reordering.
+3. **Deadlocks**  
+   Two or more threads wait indefinitely for locks held by each other.
+4. **Livelocks and Starvation**  
+   Threads remain active but fail to make progress due to repeated contention.
+
+---
+
+## 3. Techniques for Achieving Thread Safety
+
+| Technique                  | Description                                                                 |
+|----------------------------|-----------------------------------------------------------------------------|
+| **`synchronized` blocks**  | Java keyword that acquires an object’s monitor for exclusive access.        |
+| **Locks (java.util.concurrent.locks)** | More flexible lock implementations (e.g., `ReentrantLock`).       |
+| **Immutable Objects**      | Objects whose state cannot change after creation (e.g., `String`).          |
+| **Atomic Variables**       | Lock-free thread-safe single variables (e.g., `AtomicInteger`, `AtomicReference`). |
+| **Thread-safe Collections**| Collections designed for concurrency (e.g., `ConcurrentHashMap`, `CopyOnWriteArrayList`). |
+| **Volatile Fields**        | Ensures visibility of changes across threads without full locking.          |
+
+---
+
+## 4. Example: Synchronized Counter
+
+```java
+public class SafeCounter {
+    private int count = 0;
+
+    public synchronized void increment() {
+        count++;
+    }
+
+    public synchronized int getCount() {
+        return count;
+    }
+}
+```
