@@ -1355,3 +1355,163 @@ public void printMessage(final String message) {
 | `final` method           | Cannot be overridden                      |
 | `final` class            | Cannot be subclassed                      |
 | `final` parameter        | Parameter reassignment prohibited         |
+
+
+## `java.lang.Object` Class in Java
+
+The `Object` class is the root of the Java class hierarchy. Every class in Java implicitly inherits from `Object` if no other superclass is specified.
+
+---
+
+## 1. Declaration and Constructor
+
+- **Declaration:**
+  ```java
+  public class Object {
+      // ...
+  }
+  ```
+- **Constructor:**
+  ```java
+  protected Object() { }
+  ```
+  - The constructor is `protected` to prevent direct instantiation except by subclasses.
+
+---
+
+## 2. Core Methods
+
+### 2.1 `equals(Object obj)`
+- **Signature:**  
+  ```java
+  public boolean equals(Object obj)
+  ```
+- **Default Behavior:**  
+  Compares object references (i.e., `this == obj`).
+- **Override Recommendation:**  
+  When overriding, ensure consistency with `hashCode()`.
+
+### 2.2 `hashCode()`
+- **Signature:**  
+  ```java
+  public int hashCode()
+  ```
+- **Default Behavior:**  
+  Returns a hash code based on the object’s memory address.
+- **Contract:**  
+  - If `a.equals(b)`, then `a.hashCode() == b.hashCode()`.  
+  - Overriding `equals` should also override `hashCode`.
+
+### 2.3 `toString()`
+- **Signature:**  
+  ```java
+  public String toString()
+  ```
+- **Default Behavior:**  
+  Returns a string in the format `ClassName@HashCodeInHex`.  
+- **Override Recommendation:**  
+  Provide a meaningful string representation of the object.
+
+### 2.4 `getClass()`
+- **Signature:**  
+  ```java
+  public final Class<?> getClass()
+  ```
+- **Behavior:**  
+  Returns the runtime class of the object. The method is `final` and cannot be overridden.
+
+---
+
+## 3. Cloning and Finalization
+
+### 3.1 `clone()`
+- **Signature:**  
+  ```java
+  protected Object clone() throws CloneNotSupportedException
+  ```
+- **Behavior:**  
+  Performs a field-by-field copy of the object.  
+- **Usage:**  
+  - Class must implement `Cloneable` interface.  
+  - Often overridden with public visibility and deeper cloning logic.
+
+### 3.2 `finalize()`
+- **Signature:**  
+  ```java
+  protected void finalize() throws Throwable
+  ```
+- **Behavior:**  
+  Called by the garbage collector before object reclamation.  
+- **Deprecated:**  
+  As of Java 9, `finalize()` is deprecated; use try-with-resources or cleaners instead.
+
+---
+
+## 4. Thread Coordination Methods
+
+### 4.1 `wait()`, `wait(long timeout)`, `wait(long timeout, int nanos)`
+- **Behavior:**  
+  Causes the current thread to wait until notified or timeout expires.  
+- **Usage:**  
+  Must be called within a `synchronized` context on the object.
+
+### 4.2 `notify()` and `notifyAll()`
+- **Behavior:**  
+  Wakes up one (`notify()`) or all (`notifyAll()`) threads waiting on the object’s monitor.  
+- **Usage:**  
+  Must be called within a `synchronized` context on the object.
+
+---
+
+## 5. Native Method Registration
+
+- **`private static native void registerNatives()`**  
+  Used internally to link native methods to JVM implementations.
+
+---
+
+## 6. Summary of Key Methods
+
+| Method Signature                                   | Purpose                                        |
+|----------------------------------------------------|------------------------------------------------|
+| `protected Object()`                               | Constructor for subclasses                     |
+| `public boolean equals(Object obj)`                | Reference equality (can be overridden)          |
+| `public int hashCode()`                            | Hash code for hash-based collections            |
+| `public String toString()`                         | String representation of the object             |
+| `public final Class<?> getClass()`                 | Runtime class information (cannot override)     |
+| `protected Object clone() throws CloneNotSupportedException` | Object cloning (requires `Cloneable`) |
+| `protected void finalize() throws Throwable`        | Cleanup before GC (deprecated)                 |
+| `public final void wait()` / overloads             | Thread waits for notification                   |
+| `public final void notify()` / `notifyAll()`       | Thread notification                             |
+
+---
+
+## 7. Example Usage
+
+```java
+public class Person {
+    private String name;
+
+    public Person(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Person)) return false;
+        Person other = (Person) obj;
+        return name.equals(other.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Person{name='" + name + "'}";
+    }
+}
+```
