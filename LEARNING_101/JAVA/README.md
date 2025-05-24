@@ -1515,3 +1515,555 @@ public class Person {
     }
 }
 ```
+
+
+# Type Casting in Java
+
+Type casting in Java is the process of converting a variable from one data type to another.
+
+---
+
+## 1. Widening Casting (Implicit)
+
+- **Definition:** Automatic conversion from a smaller to a larger primitive type.
+- **Order:**  
+  ```
+  byte -> short -> char -> int -> long -> float -> double
+  ```
+- **Example:**
+  ```java
+  int myInt = 9;
+  double myDouble = myInt; // Widening: int to double
+  System.out.println(myDouble); // Outputs 9.0
+  ```
+
+---
+
+## 2. Narrowing Casting (Explicit)
+
+- **Definition:** Manual conversion from a larger to a smaller primitive type.
+- **Syntax:** Must use parentheses with the target type.
+- **Order:**  
+  ```
+  double -> float -> long -> int -> char -> short -> byte
+  ```
+- **Example:**
+  ```java
+  double myDouble = 9.78;
+  int myInt = (int) myDouble; // Narrowing: double to int
+  System.out.println(myInt); // Outputs 9
+  ```
+
+---
+
+# Wrapper Classes in Java
+
+Wrapper classes provide a way to use primitive data types (`int`, `boolean`, etc.) as objects.
+
+---
+
+## 1. Primitive and Corresponding Wrapper
+
+| Primitive Type | Wrapper Class |
+|----------------|---------------|
+| `byte`         | `Byte`        |
+| `short`        | `Short`       |
+| `int`          | `Integer`     |
+| `long`         | `Long`        |
+| `float`        | `Float`       |
+| `double`       | `Double`      |
+| `char`         | `Character`   |
+| `boolean`      | `Boolean`     |
+
+---
+
+## 2. Boxing and Unboxing
+
+- **Autoboxing:** Automatic conversion from primitive to wrapper object.
+  ```java
+  Integer myIntObj = 5; // Autoboxing
+  ```
+- **Unboxing:** Automatic conversion from wrapper object to primitive.
+  ```java
+  int myInt = myIntObj; // Unboxing
+  ```
+
+---
+
+## 3. Common Methods
+
+- **Parsing Strings:**
+  ```java
+  int num = Integer.parseInt("123");
+  double d = Double.parseDouble("3.14");
+  boolean b = Boolean.parseBoolean("true");
+  ```
+- **ValueOf:**
+  ```java
+  Integer iObj = Integer.valueOf(123);
+  ```
+- **Primitive Value Extraction:**
+  ```java
+  int i = iObj.intValue();
+  double d = dObj.doubleValue();
+  ```
+- **Constants:**
+  ```java
+  int max = Integer.MAX_VALUE;
+  int min = Integer.MIN_VALUE;
+  ```
+
+---
+
+## 4. Usage Example
+
+```java
+public class WrapperDemo {
+    public static void main(String[] args) {
+        // Autoboxing
+        Integer boxedInt = 42;
+        // Unboxing
+        int primitiveInt = boxedInt;
+
+        // Parsing from String
+        String str = "256";
+        int parsed = Integer.parseInt(str);
+
+        // Using constants
+        System.out.println("Max int: " + Integer.MAX_VALUE);
+        System.out.println("Min int: " + Integer.MIN_VALUE);
+    }
+}
+```
+
+
+# The `abstract` Keyword in Java
+
+The `abstract` keyword in Java is used to declare a method or a class that cannot be instantiated directly and may contain unimplemented methods. It is a fundamental feature for defining abstract classes and methods, enabling abstraction and polymorphism.
+
+---
+
+## 1. Abstract Classes
+
+- **Declaration:**  
+  ```java
+  public abstract class Shape {
+      // ...
+  }
+  ```
+- **Characteristics:**  
+  - Cannot be instantiated: `new Shape()` is illegal.  
+  - Can have both abstract and concrete methods.  
+  - May contain fields, constructors, and static methods.  
+
+---
+
+## 2. Abstract Methods
+
+- **Declaration:**  
+  ```java
+  public abstract void draw();
+  ```
+- **Characteristics:**  
+  - No method body (no implementation).  
+  - Must be declared within an abstract class.  
+  - Concrete subclasses must override abstract methods or be declared abstract themselves.
+
+---
+
+## 3. Rules for Abstract Classes and Methods
+
+1. If a class has at least one abstract method, the class must be declared abstract.  
+2. An abstract class can have zero abstract methods.  
+3. Abstract methods cannot be `final`, `static`, or `private`.  
+4. A subclass must implement all inherited abstract methods unless it is abstract.
+
+---
+
+## 4. Example
+
+```java
+// Abstract class with abstract and concrete methods
+public abstract class Shape {
+    protected String color;
+
+    public Shape(String color) {
+        this.color = color;
+    }
+
+    // Abstract method
+    public abstract double area();
+
+    // Concrete method
+    public void display() {
+        System.out.println("Shape color: " + color);
+    }
+}
+
+// Concrete subclass
+public class Circle extends Shape {
+    private double radius;
+
+    public Circle(String color, double radius) {
+        super(color);
+        this.radius = radius;
+    }
+
+    @Override
+    public double area() {
+        return Math.PI * radius * radius;
+    }
+}
+
+// Usage
+public class TestShapes {
+    public static void main(String[] args) {
+        Shape myCircle = new Circle("Red", 5.0);
+        myCircle.display();             // Prints "Shape color: Red"
+        System.out.println("Area: " + myCircle.area());
+    }
+}
+```
+
+---
+
+## 5. Abstract vs Interface
+
+| Feature                    | Abstract Class                                     | Interface                                      |
+|----------------------------|----------------------------------------------------|-----------------------------------------------|
+| Methods                    | Abstract & concrete methods                        | (Java 8+) default, static, and abstract methods |
+| Fields                     | Instance variables allowed                         | `public static final` constants only           |
+| Multiple Inheritance       | Not supported                                      | Supported                                      |
+| Constructors               | Can define constructors                            | Cannot have constructors                       |
+
+---
+
+## 6. Benefits of Using `abstract`
+
+- Enforces a contract for subclasses.  
+- Promotes code reuse through concrete methods and fields.  
+- Supports polymorphic behavior.  
+- Enables defining common behavior while leaving implementation details to subclasses.
+
+
+# Inner Classes in Java
+
+Inner classes in Java are classes defined within another class. They help logically group classes, increase encapsulation, and can access members of the enclosing class.
+
+---
+
+## 1. Types of Inner Classes
+
+1. **Member Inner Class**  
+   - Defined at the member level (like methods or fields).  
+   - Non-static.  
+   - Has access to all members (including private) of the outer class.
+
+2. **Static Nested Class**  
+   - Declared static.  
+   - Behaves like a static member.  
+   - Cannot access non-static members of the outer class directly.
+
+3. **Local Inner Class**  
+   - Defined within a block (e.g., method or loop).  
+   - Scope limited to the block.  
+   - Can access final or effectively final variables from the enclosing scope.
+
+4. **Anonymous Inner Class**  
+   - No class name.  
+   - Defined and instantiated in a single expression.  
+   - Used for quick implementations of interfaces or subclasses.
+
+---
+
+## 2. Member Inner Class
+
+```java
+public class Outer {
+    private String message = "Hello from Outer";
+
+    class MemberInner {
+        public void print() {
+            System.out.println(message);
+        }
+    }
+
+    public static void main(String[] args) {
+        Outer outer = new Outer();
+        Outer.MemberInner inner = outer.new MemberInner();
+        inner.print(); // Outputs "Hello from Outer"
+    }
+}
+```
+
+---
+
+## 3. Static Nested Class
+
+```java
+public class Outer {
+    private static String staticMessage = "Hello from Static";
+
+    static class StaticNested {
+        public void print() {
+            System.out.println(staticMessage);
+        }
+    }
+
+    public static void main(String[] args) {
+        Outer.StaticNested nested = new Outer.StaticNested();
+        nested.print(); // Outputs "Hello from Static"
+    }
+}
+```
+
+---
+
+## 4. Local Inner Class
+
+```java
+public class Outer {
+    public void display() {
+        final String localMsg = "Hello from Local";
+
+        class LocalInner {
+            public void print() {
+                System.out.println(localMsg);
+            }
+        }
+
+        LocalInner li = new LocalInner();
+        li.print(); // Outputs "Hello from Local"
+    }
+
+    public static void main(String[] args) {
+        new Outer().display();
+    }
+}
+```
+
+---
+
+## 5. Anonymous Inner Class
+
+```java
+public class Outer {
+    interface Greeting {
+        void sayHello();
+    }
+
+    public void greet() {
+        Greeting g = new Greeting() {
+            @Override
+            public void sayHello() {
+                System.out.println("Hello from Anonymous");
+            }
+        };
+        g.sayHello();
+    }
+
+    public static void main(String[] args) {
+        new Outer().greet(); // Outputs "Hello from Anonymous"
+    }
+}
+```
+
+---
+
+## 6. Benefits of Inner Classes
+
+- **Encapsulation:** Groups related classes together.  
+- **Namespace Management:** Avoids polluting the outer class namespace.  
+- **Access to Outer Members:** Simplifies code by accessing outer class members directly.  
+- **Event Handling:** Common in GUI code for listeners.
+
+---
+
+## 7. Summary
+
+| Inner Class Type     | Declaration                    | Access                                |
+|----------------------|--------------------------------|---------------------------------------|
+| Member Inner Class   | `class Inner { }`              | Instance members of outer class      |
+| Static Nested Class  | `static class Nested { }`      | Static members of outer class        |
+| Local Inner Class    | Inside method/block            | Final or effectively final locals    |
+| Anonymous Inner Class| `new Interface/Class(){...}`   | Depends on implemented type          |
+
+
+# In-Depth Guide to Interfaces in Java
+
+Interfaces in Java define a contract that classes can implement. They specify methods that the implementing class must provide, and with Java 8+, can contain default and static methods with implementations.
+
+---
+
+## 1. Declaration and Syntax
+
+```java
+public interface Vehicle {
+    // abstract method
+    void start();
+
+    // default method (Java 8+)
+    default void stop() {
+        System.out.println("Vehicle stopped");
+    }
+
+    // static method (Java 8+)
+    static int getMaxSpeed() {
+        return 120;
+    }
+}
+```
+
+- **Modifiers:** `public` (default package-private if omitted).  
+- **Fields:** implicitly `public static final`.
+
+---
+
+## 2. Types of Methods
+
+| Method Type       | Signature Visibility      | Implementation Requirement    |
+|-------------------|---------------------------|-------------------------------|
+| Abstract          | `public` (implicit)       | Must be implemented by class |
+| Default           | `public default`          | Optional override            |
+| Static            | `public static`           | Not overrideable             |
+| Private (Java 9+) | `private` or `private static` | For code reuse inside interface |
+
+---
+
+## 3. Fields in Interfaces
+
+- Declared fields are implicitly:
+  ```java
+  public static final TYPE NAME = value;
+  ```
+- Example:
+  ```java
+  int MAX_CAPACITY = 100; // public static final
+  ```
+
+---
+
+## 4. Implementing Interfaces
+
+- A class can implement multiple interfaces:
+  ```java
+  public class Car implements Vehicle, Serializable {
+      @Override
+      public void start() {
+          System.out.println("Car started");
+      }
+  }
+  ```
+- **Diamond Problem:** If two interfaces provide the same default method, the implementing class must override it:
+  ```java
+  @Override
+  public void stop() {
+      Vehicle.super.stop();
+      Flyable.super.stop();
+  }
+  ```
+
+---
+
+## 5. Functional Interfaces
+
+- An interface with exactly one abstract method.
+- Annotate with `@FunctionalInterface` (optional but recommended).
+- Enables use with lambda expressions and method references.
+  ```java
+  @FunctionalInterface
+  public interface Calculator {
+      int operate(int a, int b);
+  }
+
+  // Usage
+  Calculator add = (a, b) -> a + b;
+  System.out.println(add.operate(5, 3)); // 8
+  ```
+
+---
+
+## 6. Marker Interfaces
+
+- Interfaces with no methods.
+- Used to convey metadata to the JVM or frameworks.
+  - Examples: `Serializable`, `Cloneable`, `Remote`
+
+---
+
+## 7. Interface Evolution and Versioning
+
+- **Java 8:** Introduced default and static methods to evolve interfaces without breaking existing implementations.
+- **Java 9:** Added private methods to share common code between default methods.
+
+  ```java
+  interface Logger {
+      default void info(String msg) {
+          log("INFO", msg);
+      }
+      default void error(String msg) {
+          log("ERROR", msg);
+      }
+      private void log(String level, String msg) {
+          System.out.println("[" + level + "] " + msg);
+      }
+  }
+  ```
+
+---
+
+## 8. Interface vs Abstract Class
+
+| Feature                | Interface                         | Abstract Class                   |
+|------------------------|-----------------------------------|----------------------------------|
+| Multiple inheritance   | Yes                               | No                               |
+| Constructors           | No                                | Yes                              |
+| State (fields)         | `public static final` only        | Any visibility, mutable allowed  |
+| Method Types           | Abstract, default, static, private| Abstract, concrete               |
+| Use case               | Define contract & behavior mixin  | Define partial implementation    |
+
+---
+
+## 9. Best Practices
+
+1. Keep interfaces focused: follow the Interface Segregation Principle.  
+2. Use default methods sparingly; avoid logic-heavy defaults.  
+3. Prefer composition over multiple inheritance of behavior.  
+4. Document semantic contracts clearly (e.g., null handling, thread-safety).  
+5. Leverage functional interfaces for single-method contracts.
+
+---
+
+## 10. Example: Complex Interface Usage
+
+```java
+public interface Shape {
+    double area();
+    double perimeter();
+
+    default void describe() {
+        System.out.println(this.getClass().getSimpleName() +
+            " with area=" + area() + " and perimeter=" + perimeter());
+    }
+}
+
+public class Rectangle implements Shape {
+    private double width, height;
+    public Rectangle(double w, double h) { width = w; height = h; }
+    @Override public double area() { return width * height; }
+    @Override public double perimeter() { return 2 * (width + height); }
+}
+
+public class Demo {
+    public static void main(String[] args) {
+        Shape rect = new Rectangle(4, 5);
+        rect.describe();  // Rectangle with area=20.0 and perimeter=18.0
+    }
+}
+```
+
+---
+
+## 11. Summary
+
+Interfaces are a powerful tool for defining contracts, enabling polymorphism, and supporting multiple inheritance of type. With modern enhancements (default, static, and private methods), they offer flexibility while maintaining backward compatibility.
