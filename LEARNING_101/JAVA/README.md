@@ -2891,3 +2891,111 @@ try {
 - Apply **thread-safe** collections and atomic classes.
 - Handle **interrupts** and **timeouts** properly.
 - Keep concurrent code **simple** and **test** thoroughly.
+
+
+## Thread Safety in Java
+
+Thread safety ensures correct behavior of code when accessed by multiple threads concurrently.
+
+### Key Concepts
+- **Race Condition**: Occurs when two or more threads access shared data and try to change it simultaneously.
+- **Atomicity**: A sequence of operations that completes as a single unit without interference.
+- **Visibility**: Changes made by one thread should be visible to others promptly.
+
+### Strategies for Thread Safety
+
+1. **Immutability**
+   - Immutable objects are inherently thread-safe.
+2. **Synchronization**
+   - `synchronized` methods or blocks:
+     ```java
+     public synchronized void increment() { count++; }
+     ```
+   - Locks (`ReentrantLock`):
+     ```java
+     Lock lock = new ReentrantLock();
+     lock.lock();
+     try {
+         // critical section
+     } finally {
+         lock.unlock();
+     }
+     ```
+3. **Volatile Variables**
+   - Ensures visibility of writes across threads:
+     ```java
+     private volatile boolean running = true;
+     ```
+4. **Atomic Variables**
+   - From `java.util.concurrent.atomic` (e.g., `AtomicInteger`):
+     ```java
+     AtomicInteger counter = new AtomicInteger(0);
+     counter.incrementAndGet();
+     ```
+5. **Thread Confinement**
+   - Restrict object access to a single thread or use `ThreadLocal<T>` for per-thread instances.
+6. **Concurrent Collections**
+   - Use thread-safe collections like `ConcurrentHashMap`, `CopyOnWriteArrayList`.
+
+---
+
+## Immutability in Java
+
+An immutable object’s state cannot change after construction, providing built-in thread safety.
+
+### Designing Immutable Classes
+
+1. Declare class as `final`.
+2. Make all fields `private` and `final`.
+3. Don’t provide setters.
+4. Initialize fields via constructor.
+5. Perform **defensive copies** for mutable inputs/outputs.
+
+### Example
+
+```java
+public final class Person {
+    private final String name;
+    private final int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+}
+```
+
+### Defensive Copy Example
+
+```java
+public final class Team {
+    private final List<String> members;
+
+    public Team(List<String> members) {
+        this.members = new ArrayList<>(members); // copy input
+    }
+
+    public List<String> getMembers() {
+        return Collections.unmodifiableList(members); // safe view
+    }
+}
+```
+
+---
+
+## Best Practices
+
+- Prefer **immutable objects** for shared data.
+- Minimize scope of synchronization.
+- Combine immutability with other strategies for complex scenarios.
+- Follow **Effective Java** guidelines (Item 17: Design and document for inheritance or prohibition).
+
+---
+
+### Summary
+
+- **Thread Safety** is achieved through synchronized blocks, atomic variables, immutability, and concurrent utilities.
+- **Immutability** simplifies concurrency by eliminating shared mutable state.
