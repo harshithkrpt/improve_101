@@ -2745,3 +2745,149 @@ public void execute() {
 - Use `throws` to declare checked exceptions a method can propagate.
 - Use `throw` to actually generate and signal error conditions.
 - Follow best practices to make exception handling clear, maintainable, and robust.
+
+
+## Threads in Java
+
+Threads in Java allow concurrent execution of code within a single process.
+
+```java
+public class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("Running in a thread");
+    }
+}
+```
+
+---
+
+### Creating Threads
+
+1. **By Extending `Thread`**  
+   ```java
+   MyThread t = new MyThread();
+   t.start();  // invokes run() in a new thread
+   ```
+
+2. **By Implementing `Runnable`**  
+   ```java
+   public class MyRunnable implements Runnable {
+       @Override
+       public void run() {
+           System.out.println("Running in Runnable");
+       }
+   }
+   // ...
+   Thread t = new Thread(new MyRunnable());
+   t.start();
+   ```
+
+3. **With Lambda (Java 8+)**  
+   ```java
+   Thread t = new Thread(() -> System.out.println("Lambda thread"));
+   t.start();
+   ```
+
+4. **Using Executor Framework**  
+   ```java
+   ExecutorService executor = Executors.newFixedThreadPool(5);
+   executor.submit(() -> System.out.println("From executor"));
+   executor.shutdown();
+   ```
+
+5. **Callable & Future**  
+   ```java
+   Callable<Integer> task = () -> 123;
+   Future<Integer> future = executor.submit(task);
+   Integer result = future.get();  // blocks until done
+   ```
+
+---
+
+### Thread Lifecycle
+
+```
+NEW -> RUNNABLE -> (RUNNING) -> BLOCKED/WAITING/TIMED_WAITING -> TERMINATED
+```
+
+- **NEW**: Thread object created.
+- **RUNNABLE**: Eligible to run.
+- **RUNNING**: Executing `run()` (not a distinct state).
+- **BLOCKED**: Waiting for monitor lock.
+- **WAITING / TIMED_WAITING**: Invoked `wait()`, `join()`, or `sleep()`.
+- **TERMINATED**: Completed execution or thrown uncaught exception.
+
+---
+
+### Common Thread Methods
+
+| Method                | Description                                  |
+|-----------------------|----------------------------------------------|
+| `start()`             | Launches the thread                          |
+| `run()`               | Entry point; do not call directly to start   |
+| `sleep(long millis)`  | Pauses thread for given time                 |
+| `join()`              | Waits for thread to finish                   |
+| `yield()`             | Suggests scheduler to switch threads         |
+| `interrupt()`         | Interrupts a thread                          |
+| `isAlive()`           | Checks if thread is alive                    |
+| `setDaemon(boolean)`  | Marks thread as daemon                       |
+
+---
+
+## Synchronization
+
+### `synchronized` Keyword
+
+```java
+public synchronized void increment() {
+    count++;
+}
+```
+
+- Locks on `this` or specified object.
+- Prevents race conditions.
+
+### `volatile` Keyword
+
+```java
+private volatile boolean running = true;
+```
+
+- Ensures visibility of changes across threads.
+- Does not provide atomicity.
+
+### Locks and Other Utilities
+
+```java
+Lock lock = new ReentrantLock();
+lock.lock();
+try {
+    // critical section
+} finally {
+    lock.unlock();
+}
+```
+
+- `java.util.concurrent.locks` package provides explicit locks, read/write locks, etc.
+
+---
+
+## High-Level Concurrency Utilities
+
+- **ExecutorService**: Thread pools, task submission.
+- **Semaphore**: Controls access permits.
+- **CountDownLatch** / **CyclicBarrier**: Coordination between threads.
+- **Concurrent Collections**: `ConcurrentHashMap`, `ConcurrentLinkedQueue`.
+- **Atomic Variables**: `AtomicInteger`, `AtomicReference` for lock-free thread-safe operations.
+
+---
+
+### Best Practices
+
+- Prefer **Executors** over manually managing threads.
+- Avoid **`synchronized`** on large scopes.
+- Use **immutable** objects where possible.
+- Apply **thread-safe** collections and atomic classes.
+- Handle **interrupts** and **timeouts** properly.
+- Keep concurrent code **simple** and **test** thoroughly.
