@@ -2999,3 +2999,49 @@ public final class Team {
 
 - **Thread Safety** is achieved through synchronized blocks, atomic variables, immutability, and concurrent utilities.
 - **Immutability** simplifies concurrency by eliminating shared mutable state.
+
+
+## Thread States in Java
+
+Java threads can exist in one of several states during their lifecycle:
+
+```mermaid
+stateDiagram-v2
+    [*] --> NEW
+    NEW --> RUNNABLE : start()
+    RUNNABLE --> RUNNING
+    RUNNING --> BLOCKED : tries to enter synchronized block
+    BLOCKED --> RUNNABLE : lock acquired
+    RUNNING --> WAITING : wait(), join()
+    WAITING --> RUNNABLE : notify(), notifyAll()
+    RUNNING --> TIMED_WAITING : sleep(), wait(timeout), join(timeout)
+    TIMED_WAITING --> RUNNABLE : timeout expires
+    RUNNING --> TERMINATED : run() completes or throws exception
+```
+
+### State Descriptions
+
+| State            | Description                                                                 |
+|------------------|-----------------------------------------------------------------------------|
+| **NEW**          | Thread object created but not yet started (`start()` not called).           |
+| **RUNNABLE**     | Thread is ready to run and waiting for CPU time.                            |
+| **RUNNING**      | Thread scheduler selects the thread, and it is currently executing.         |
+| **BLOCKED**      | Thread is blocked waiting for a monitor lock.                               |
+| **WAITING**      | Thread waits indefinitely for another thread to perform a particular action (`wait()`, `join()`). |
+| **TIMED_WAITING**| Thread waits for another thread for a specified period (`sleep()`, `wait(timeout)`, `join(timeout)`). |
+| **TERMINATED**   | Thread has completed execution or terminated due to an exception.           |
+
+---
+
+### Lifecycle Transitions
+
+- **start()**: NEW → RUNNABLE  
+- **Scheduler**: RUNNABLE ↔ RUNNING  
+- **synchronized block entry contention**: RUNNING → BLOCKED → RUNNABLE  
+- **wait/notify**: RUNNING → WAITING → RUNNABLE  
+- **sleep/join timeout**: RUNNING → TIMED_WAITING → RUNNABLE  
+- **run() completion**: RUNNING → TERMINATED
+
+---
+
+This diagram and table summarize the possible thread states and transitions in the Java threading model.
