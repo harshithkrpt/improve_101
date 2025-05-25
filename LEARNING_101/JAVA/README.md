@@ -2630,3 +2630,118 @@ public class DataProcessingRuntimeException extends RuntimeException {
 ### Summary
 
 Understanding and properly handling exceptions is crucial for building robust Java applications. By classifying errors, using appropriate catch blocks, and following best practices, you can ensure that your application behaves predictably even in error conditions.
+
+
+## n  `throws` Clause and `throw` Statement in Java
+
+In Java, `throws` and `throw` are used for exception handling. They serve different purposes:
+
+- **`throws`**: Declares that a method may pass an exception to its caller.
+- **`throw`**: Actually throws an exception instance from a method or block.
+
+---
+
+### The `throws` Clause
+
+- **Syntax**:
+  ```java
+  returnType methodName(parameters) throws ExceptionType1, ExceptionType2 {
+      // method body
+  }
+  ```
+- **Purpose**: Signals to the compiler and caller that the method can propagate checked exceptions.
+- **Placement**: After the method signature and before the method body.
+
+#### Example
+```java
+public void readFile(String path) throws IOException {
+    FileReader fr = new FileReader(path);
+    // ...
+}
+```
+- Any caller of `readFile` must handle or further declare `IOException`.
+
+---
+
+### The `throw` Statement
+
+- **Syntax**:
+  ```java
+  throw new ExceptionType("error message");
+  ```
+- **Purpose**: Actively creates and throws an exception.
+- **Usage**: Inside methods or blocks to signal error conditions.
+
+#### Example
+```java
+public int divide(int a, int b) {
+    if (b == 0) {
+        throw new IllegalArgumentException("Divider cannot be zero");
+    }
+    return a / b;
+}
+```
+
+---
+
+### `throw` vs. `throws`
+
+| Aspect               | `throws`                              | `throw`                                       |
+|----------------------|---------------------------------------|-----------------------------------------------|
+| Keyword Type         | Clause in method declaration          | Statement within method/block                |
+| Purpose              | Declares possible exceptions thrown   | Throws an actual exception instance           |
+| Used For             | Propagating checked exceptions        | Signaling both checked or unchecked exceptions|
+| Syntax Location      | After method signature                | In method or block body                       |
+
+---
+
+### Propagating Exceptions
+
+Methods can propagate exceptions up the call stack:
+
+```java
+public void processFile(String path) throws IOException {
+    readFile(path);  // may throw IOException
+}
+
+public void execute() {
+    try {
+        processFile("data.txt");
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+---
+
+### Best Practices
+
+- **Declare Specific Exceptions**: Avoid broad declarations like `throws Exception`.
+- **Use `throw` Judiciously**: Only when you need to signal a recoverable error or invalid input.
+- **Wrap Exceptions**: When rethrowing, wrap lower-level exceptions in custom exceptions:
+  ```java
+  try {
+      // some code
+  } catch (SQLException e) {
+      throw new DataAccessException("Failed to query database", e);
+  }
+  ```
+- **Document Behavior**: Use Javadoc `@throws` tags to describe under what conditions exceptions are thrown:
+  ```java
+  /**
+   * Reads data from file.
+   *
+   * @param path file path
+   * @throws IOException if file cannot be read
+   */
+  public void readFile(String path) throws IOException { ... }
+  ```
+
+---
+
+### Summary
+
+- Use `throws` to declare checked exceptions a method can propagate.
+- Use `throw` to actually generate and signal error conditions.
+- Follow best practices to make exception handling clear, maintainable, and robust.
