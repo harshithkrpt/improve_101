@@ -1145,6 +1145,138 @@ class Rectangle implements Drawable {
 | Abstraction    | Hiding internal details                      |
 | Interface      | Full abstraction using `interface` keyword   |
 
+## 📦 Packages in Java
+
+## 🔰 What is a Package?
+
+A **package** in Java is a namespace that organizes a set of related classes and interfaces. Conceptually, it's similar to directories on your computer.
+
+**Benefits of using packages:**
+- Avoids name conflicts
+- Easier access control
+- Makes searching/locating classes/interfaces easier
+- Provides modular structure to programs
+
+---
+
+## 📂 Types of Packages
+
+1. **Built-in Packages** – provided by the Java API  
+   Example:
+   - `java.lang`
+   - `java.util`
+   - `java.io`
+   - `java.net`
+
+2. **User-defined Packages** – created by the programmer to group related classes
+
+---
+
+## ✍️ Creating a Package
+
+### 1. Define a package:
+```java
+package com.example.utilities;
+
+public class MathUtils {
+    public static int square(int n) {
+        return n * n;
+    }
+}
+```
+
+### 2. Use the class from another package:
+```java
+import com.example.utilities.MathUtils;
+
+public class Test {
+    public static void main(String[] args) {
+        System.out.println(MathUtils.square(5));
+    }
+}
+```
+
+> 📁 Folder structure should match the package structure:  
+> `com/example/utilities/MathUtils.java`
+
+---
+
+## 🧭 Access Modifiers and Packages
+
+| Modifier      | Same Class | Same Package | Subclass | Other Packages |
+|---------------|------------|--------------|----------|----------------|
+| `public`      | ✅         | ✅           | ✅       | ✅             |
+| `protected`   | ✅         | ✅           | ✅       | ❌             |
+| (default)     | ✅         | ✅           | ❌       | ❌             |
+| `private`     | ✅         | ❌           | ❌       | ❌             |
+
+---
+
+## 🚀 Sub-Packages
+
+Java doesn't support explicit sub-packages.  
+If `com.example` is a package, `com.example.util` is a completely different package.
+
+---
+
+## 🧪 Compiling and Running with Packages
+
+```sh
+# Compile:
+javac -d . MathUtils.java
+
+# Run:
+java com.example.utilities.MathUtils
+```
+
+`-d .` tells `javac` to create the package directories as per declaration.
+
+---
+
+## 📌 Static Import
+
+Allows you to access static members without the class name.
+
+```java
+import static java.lang.Math.*;
+
+public class Test {
+    public static void main(String[] args) {
+        System.out.println(sqrt(16)); // No need to write Math.sqrt
+    }
+}
+```
+
+---
+
+## 📚 Commonly Used Java Packages
+
+| Package Name    | Description |
+|------------------|-------------|
+| `java.lang`      | Core classes like `String`, `Math`, `Object`, `System` (auto-imported) |
+| `java.util`      | Data structures: `ArrayList`, `HashMap`, etc. |
+| `java.io`        | Input/output handling |
+| `java.net`       | Networking |
+| `java.sql`       | JDBC API for database operations |
+| `java.time`      | Date and time API |
+| `javax.swing`    | GUI development |
+
+---
+
+## ✅ Best Practices
+
+- Use domain-reversed naming for packages: `com.company.project`
+- Keep related classes in the same package
+- Avoid using default package for large projects
+- Separate API and implementation classes into different packages
+
+---
+
+## 📎 Resources
+
+- [Java Docs – Package](https://docs.oracle.com/javase/tutorial/java/package/index.html)
+- [Oracle Java Naming Conventions](https://www.oracle.com/java/technologies/javase/codeconventions-namingconventions.html)
+
 
 ## Method Overloading
 
@@ -3045,3 +3177,503 @@ stateDiagram-v2
 ---
 
 This diagram and table summarize the possible thread states and transitions in the Java threading model.
+
+# Java Versions and Features
+
+| Version     | Release Year | Major Features                                                                 |
+|-------------|--------------|----------------------------------------------------------------------------------|
+| Java SE 1.0 | 1996         | Initial version, basic features like AWT, applets, JVM                         |
+| Java SE 1.1 | 1997         | Inner classes, JDBC, RMI, JavaBeans                                            |
+| Java SE 1.2 | 1998         | "Java 2", Collections Framework, JIT compiler, Swing                          |
+| Java SE 1.3 | 2000         | HotSpot JVM, RMI over IIOP, JavaSound                                          |
+| Java SE 1.4 | 2002         | assert keyword, Exception chaining, NIO, Logging API                          |
+| Java SE 5.0 | 2004         | Generics, Enhanced for loop, Autoboxing, Annotations, Enum                    |
+| Java SE 6   | 2006         | Scripting API, Web Services, Compiler API                                     |
+| Java SE 7   | 2011         | try-with-resources, Diamond Operator, NIO.2, Switch on Strings                |
+| Java SE 8   | 2014         | Lambda Expressions, Stream API, Optional, Date/Time API, Default methods      |
+| Java SE 9   | 2017         | Project Jigsaw (Modules), JShell                                              |
+| Java SE 10  | 2018         | Local-variable type inference (`var`)                                         |
+| Java SE 11  | 2018 (LTS)   | HttpClient API, String methods (isBlank, lines), var in lambda params         |
+| Java SE 12  | 2019         | Switch Expressions (preview), Compact Number Format                          |
+| Java SE 13  | 2019         | Text Blocks (preview), Reimplement legacy socket API                          |
+| Java SE 14  | 2020         | Records (preview), Switch Expressions (standard), Helpful NullPointerExceptions |
+| Java SE 15  | 2020         | Text Blocks, Sealed Classes (preview), Hidden Classes                        |
+| Java SE 16  | 2021         | Records (final), Pattern Matching for instanceof                              |
+| Java SE 17  | 2021 (LTS)   | Sealed Classes, Pattern Matching, New macOS rendering pipeline                |
+| Java SE 18  | 2022         | Simple Web Server, UTF-8 by default                                           |
+| Java SE 19  | 2022         | Virtual Threads (preview), Structured Concurrency (preview)                   |
+| Java SE 20  | 2023         | Record Patterns (preview), Scoped Values (preview)                           |
+| Java SE 21  | 2023 (LTS)   | Virtual Threads (final), Pattern Matching enhancements                        |
+
+> **LTS = Long Term Support**
+
+
+# Java Collections Overview
+
+Java Collections Framework (JCF) is a **unified architecture** for storing and manipulating groups of objects.
+
+---
+
+## 1. Collection API Hierarchy
+
+```
+           Iterable
+               |
+          Collection
+         /    |     \
+      List   Set   Queue
+        |      |      |
+  ArrayList HashSet  PriorityQueue
+  LinkedList LinkedHashSet ArrayDeque
+  Vector     TreeSet
+```
+
+---
+
+## 2. Key Interfaces in Collections API
+
+### 🔹 `Iterable<E>`
+- Root interface.
+- Has only one method: `iterator()`.
+
+---
+
+### 🔹 `Collection<E>`
+- Base interface for all collection types.
+- Common methods: `add()`, `remove()`, `size()`, `clear()`, `isEmpty()`.
+
+---
+
+### 🔹 `List<E>` – Ordered Collection
+- Allows duplicates.
+- Maintains insertion order.
+- Allows index-based access.
+
+#### Implementations:
+- **ArrayList** – Resizable array.
+- **LinkedList** – Doubly-linked list.
+- **Vector** – Thread-safe (legacy).
+- **Stack** – LIFO (extends Vector).
+
+---
+
+### 🔹 `Set<E>` – Unique Elements
+- Does not allow duplicates.
+
+#### Implementations:
+- **HashSet** – No order, backed by HashMap.
+- **LinkedHashSet** – Insertion order.
+- **TreeSet** – Sorted, backed by TreeMap.
+
+---
+
+### 🔹 `Queue<E>` – FIFO Collection
+- Used for holding elements prior to processing.
+
+#### Implementations:
+- **PriorityQueue** – Elements ordered by priority.
+- **ArrayDeque** – Resizable, faster than Stack/LinkedList.
+
+---
+
+### 🔹 `Map<K, V>` – Not part of Collection Interface
+- Stores key-value pairs.
+- Unique keys, each maps to a single value.
+
+#### Implementations:
+- **HashMap**
+- **LinkedHashMap**
+- **TreeMap**
+- **Hashtable** (legacy)
+- **ConcurrentHashMap**
+
+---
+
+## 3. Collections Class (java.util.Collections)
+
+- Utility class with **static methods** for operating on collections.
+
+### Key Methods:
+| Method                  | Description                               |
+|-------------------------|-------------------------------------------|
+| `sort(List<T>)`         | Sorts the list in natural order           |
+| `reverse(List<T>)`      | Reverses the order                        |
+| `shuffle(List<T>)`      | Randomly permutes the list                |
+| `min(Collection<T>)`    | Returns min element                       |
+| `max(Collection<T>)`    | Returns max element                       |
+| `frequency(Collection<T>, Object)` | Counts occurrences            |
+| `binarySearch(List<T>, key)` | Performs binary search on sorted list |
+| `synchronizedList(List<T>)` | Thread-safe version of list         |
+| `unmodifiableList(List<T>)` | Returns immutable list               |
+
+---
+
+## 4. Differences
+
+| Feature     | Collection Interface | Collections Class             |
+|-------------|----------------------|-------------------------------|
+| Type        | Interface            | Final Utility Class           |
+| Purpose     | Defines data structure | Utility operations           |
+| Extends     | `Iterable`           | Extends nothing               |
+| Located in  | `java.util`          | `java.util`                   |
+
+---
+
+## 5. Common Use Cases
+
+```java
+List<String> names = new ArrayList<>();
+Collections.sort(names);
+Collections.reverse(names);
+Collections.shuffle(names);
+```
+
+---
+
+## 6. Thread-Safety with Collections
+
+```java
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());
+```
+
+---
+
+## 7. Immutability
+
+```java
+List<String> immutable = Collections.unmodifiableList(Arrays.asList("A", "B"));
+```
+
+---
+
+## 📚 References
+- [Oracle Docs - Collections Framework](https://docs.oracle.com/javase/8/docs/technotes/guides/collections/index.html)
+
+
+# Java Collections Framework (Mermaid Diagram)
+
+```mermaid
+classDiagram
+    class Iterable~E~ {
+        +iterator()
+    }
+
+    class Collection~E~ {
+        +add(E e)
+        +remove(Object o)
+        +size()
+        +isEmpty()
+        +clear()
+    }
+
+    class List~E~ {
+        +get(int index)
+        +set(int index, E element)
+        +add(int index, E element)
+    }
+
+    class Set~E~
+    class SortedSet~E~
+    class NavigableSet~E~
+
+    class Queue~E~
+    class Deque~E~
+
+    class Map~K,V~ {
+        +put(K key, V value)
+        +get(Object key)
+        +remove(Object key)
+        +containsKey(Object key)
+    }
+
+    class SortedMap~K,V~
+    class NavigableMap~K,V~
+
+    %% Implementations
+    class ArrayList~E~
+    class LinkedList~E~
+    class Vector~E~
+    class Stack~E~
+    class HashSet~E~
+    class LinkedHashSet~E~
+    class TreeSet~E~
+    class PriorityQueue~E~
+    class ArrayDeque~E~
+    class HashMap~K,V~
+    class LinkedHashMap~K,V~
+    class TreeMap~K,V~
+    class Hashtable~K,V~
+    class ConcurrentHashMap~K,V~
+    class Properties
+
+    %% Relationships
+    Iterable~E~ <|-- Collection~E~
+    Collection~E~ <|-- List~E~
+    Collection~E~ <|-- Set~E~
+    Collection~E~ <|-- Queue~E~
+    List~E~ <|-- ArrayList~E~
+    List~E~ <|-- LinkedList~E~
+    List~E~ <|-- Vector~E~
+    Vector~E~ <|-- Stack~E~
+    Set~E~ <|-- HashSet~E~
+    Set~E~ <|-- LinkedHashSet~E~
+    Set~E~ <|-- SortedSet~E~
+    SortedSet~E~ <|-- NavigableSet~E~
+    NavigableSet~E~ <|-- TreeSet~E~
+    Queue~E~ <|-- PriorityQueue~E~
+    Queue~E~ <|-- Deque~E~
+    Deque~E~ <|-- ArrayDeque~E~
+    Map~K,V~ <|-- SortedMap~K,V~
+    SortedMap~K,V~ <|-- NavigableMap~K,V~
+    NavigableMap~K,V~ <|-- TreeMap~K,V~
+    Map~K,V~ <|-- HashMap~K,V~
+    Map~K,V~ <|-- LinkedHashMap~K,V~
+    Map~K,V~ <|-- Hashtable~K,V~
+    Map~K,V~ <|-- ConcurrentHashMap~K,V~
+    Hashtable~K,V~ <|-- Properties
+```
+
+
+# Comparable vs Comparator in Java
+
+Java provides two interfaces to **compare objects**:
+
+---
+
+## 1. Comparable Interface (java.lang.Comparable)
+
+- Used to define the **natural ordering** of objects.
+- Contains the method:  
+  ```java
+  int compareTo(T o);
+  ```
+- The class itself **implements** this interface.
+
+### 🔸 Example:
+```java
+public class Student implements Comparable<Student> {
+    int marks;
+
+    public Student(int marks) {
+        this.marks = marks;
+    }
+
+    @Override
+    public int compareTo(Student other) {
+        return this.marks - other.marks; // Ascending order
+    }
+}
+```
+
+---
+
+## 2. Comparator Interface (java.util.Comparator)
+
+- Used to define **custom orderings** of objects.
+- Contains the method:
+  ```java
+  int compare(T o1, T o2);
+  ```
+- Passed as an argument to sorting utilities.
+
+### 🔸 Example:
+```java
+public class Student {
+    int marks;
+    String name;
+
+    public Student(String name, int marks) {
+        this.name = name;
+        this.marks = marks;
+    }
+}
+
+Comparator<Student> nameComparator = new Comparator<Student>() {
+    @Override
+    public int compare(Student s1, Student s2) {
+        return s1.name.compareTo(s2.name); // Alphabetical order
+    }
+};
+```
+
+---
+
+## 3. Key Differences
+
+| Feature            | Comparable                  | Comparator                        |
+|--------------------|------------------------------|------------------------------------|
+| Package            | java.lang                    | java.util                          |
+| Method             | `compareTo(T o)`             | `compare(T o1, T o2)`              |
+| Implementation     | In the class itself          | External to the class              |
+| Usage              | One natural sorting order    | Multiple custom sorting orders     |
+| Functional Interface | ❌ (not used as Lambda)     | ✅ Can be used as Lambda           |
+
+---
+
+## 4. Java 8 Enhancements
+
+### Lambda with Comparator:
+```java
+List<Student> list = new ArrayList<>();
+Collections.sort(list, (a, b) -> a.marks - b.marks);
+```
+
+### Comparator Utility Methods:
+- `Comparator.comparing()`
+- `thenComparing()`
+- `reversed()`
+
+```java
+list.sort(Comparator.comparing(Student::getName).thenComparing(Student::getMarks));
+```
+
+---
+
+## 5. When to Use?
+
+- **Comparable** → If there is a single natural order.
+- **Comparator** → If you want **multiple sorting criteria** or the class can’t implement Comparable.
+
+---
+
+## 📌 Tip:
+You can override `compareTo()` and still pass custom `Comparator` as needed.
+
+
+
+# Java Stream API
+
+Introduced in **Java 8**, the Stream API provides a **functional-style** approach to process collections of objects.
+
+---
+
+## 1. What is a Stream?
+
+- A **stream** is a sequence of elements supporting **sequential** and **parallel** aggregate operations.
+- Streams **do not store** elements. They **convey** elements from a source through a pipeline of computational operations.
+
+---
+
+## 2. Stream Pipeline
+
+A Stream pipeline consists of:
+
+1. **Source** – Collection, Arrays, I/O channels, etc.
+2. **Intermediate Operations** – map, filter, sorted (return Stream)
+3. **Terminal Operations** – forEach, collect, reduce (return non-stream)
+
+---
+
+## 3. Creating Streams
+
+```java
+List<String> list = Arrays.asList("a", "b", "c");
+
+// From Collection
+Stream<String> stream1 = list.stream();
+
+// From Array
+Stream<Integer> stream2 = Stream.of(1, 2, 3);
+
+// Infinite Stream
+Stream<Double> randoms = Stream.generate(Math::random).limit(5);
+```
+
+---
+
+## 4. Intermediate Operations
+
+| Operation   | Description                          |
+|-------------|--------------------------------------|
+| `filter()`  | Filters elements based on condition  |
+| `map()`     | Transforms elements                  |
+| `sorted()`  | Sorts elements                       |
+| `distinct()`| Removes duplicates                   |
+| `limit()`   | Limits the size of the stream        |
+| `skip()`    | Skips the first N elements           |
+
+```java
+list.stream().filter(s -> s.startsWith("a")).map(String::toUpperCase);
+```
+
+---
+
+## 5. Terminal Operations
+
+| Operation     | Description                                 |
+|---------------|---------------------------------------------|
+| `forEach()`   | Iterates over elements                      |
+| `collect()`   | Converts Stream to List, Set, Map etc.      |
+| `reduce()`    | Aggregates elements into a single result    |
+| `count()`     | Counts number of elements                   |
+| `anyMatch()`  | Checks if any match predicate               |
+| `allMatch()`  | Checks if all match predicate               |
+| `noneMatch()` | Checks if none match predicate              |
+
+```java
+List<String> result = list.stream()
+                          .filter(s -> s.length() > 3)
+                          .collect(Collectors.toList());
+```
+
+---
+
+## 6. Collectors Utility
+
+```java
+import java.util.stream.Collectors;
+
+Map<String, Integer> map = list.stream()
+    .collect(Collectors.toMap(
+        s -> s,         // key
+        s -> s.length() // value
+    ));
+```
+
+---
+
+## 7. Stream vs Collection
+
+| Aspect         | Stream                           | Collection                        |
+|----------------|-----------------------------------|-----------------------------------|
+| Memory         | No storage                        | Stores elements                   |
+| Evaluation     | Lazy                              | Eager                             |
+| Mutability     | Immutable                         | Mutable                           |
+| Operations     | Functional-style, pipelined       | Iterative                         |
+| Reusability    | Not reusable                      | Reusable                          |
+
+---
+
+## 8. Parallel Streams
+
+For better performance on multi-core processors:
+
+```java
+list.parallelStream().forEach(System.out::println);
+```
+
+---
+
+## 9. Optional with Stream
+
+Use `findFirst()`, `findAny()` with Optional:
+
+```java
+Optional<String> opt = list.stream()
+                           .filter(s -> s.startsWith("x"))
+                           .findFirst();
+```
+
+---
+
+## 📌 Tips
+
+- Stream can be **consumed only once**.
+- Always end with a **terminal operation**.
+- Use `peek()` for debugging (not for side-effects).
+
+---
+
+## 📚 Reference
+
+- [Oracle Docs - Stream API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
