@@ -2067,3 +2067,566 @@ public class Demo {
 ## 11. Summary
 
 Interfaces are a powerful tool for defining contracts, enabling polymorphism, and supporting multiple inheritance of type. With modern enhancements (default, static, and private methods), they offer flexibility while maintaining backward compatibility.
+
+
+# Enums in Java
+
+Enums (short for *enumerations*) are a special type in Java used to define collections of constants with type safety and additional behavior.
+
+---
+
+## 1. Basic Declaration
+
+```java
+public enum Day {
+    SUNDAY,
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY
+}
+```
+
+- Implicitly extends `java.lang.Enum`.  
+- Cannot extend other classes.
+
+---
+
+## 2. Enum Methods
+
+All enums implicitly have the following methods:
+
+- **`values()`**  
+  Returns an array of all enum constants in declaration order.
+  ```java
+  for (Day d : Day.values()) {
+      System.out.println(d);
+  }
+  ```
+
+- **`valueOf(String name)`**  
+  Returns the enum constant with the specified name.
+  ```java
+  Day d = Day.valueOf("MONDAY");
+  ```
+
+- **`name()`**  
+  Returns the name of the enum constant, exactly as declared.
+
+- **`ordinal()`**  
+  Returns the zero-based position of the constant in the enum declaration.
+
+---
+
+## 3. Adding Fields, Constructors, and Methods
+
+Enums can have fields, constructors, and methods:
+
+```java
+public enum Severity {
+    LOW(1),
+    MEDIUM(5),
+    HIGH(10);
+
+    private final int level;
+
+    private Severity(int level) {
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    @Override
+    public String toString() {
+        return name() + "(" + level + ")";
+    }
+}
+```
+
+- **Constructor** is always `private` (or package-private).  
+- Fields are typically `final`.  
+- Methods can be added like any class.
+
+---
+
+## 4. Using Enums in `switch`
+
+```java
+Day today = Day.WEDNESDAY;
+switch (today) {
+    case MONDAY:
+        System.out.println("Start of week");
+        break;
+    case FRIDAY:
+        System.out.println("End of workweek");
+        break;
+    default:
+        System.out.println("Midweek");
+}
+```
+
+---
+
+## 5. Implementing Interfaces and Abstract Methods
+
+Enums can implement interfaces and even contain abstract methods overridden by each constant:
+
+```java
+public interface Operation {
+    double apply(double x, double y);
+}
+
+public enum Calculator implements Operation {
+    ADD {
+        public double apply(double x, double y) { return x + y; }
+    },
+    SUBTRACT {
+        public double apply(double x, double y) { return x - y; }
+    },
+    MULTIPLY {
+        public double apply(double x, double y) { return x * y; }
+    },
+    DIVIDE {
+        public double apply(double x, double y) { return x / y; }
+    };
+}
+```
+
+- Each constant provides its own implementation of the abstract method.
+
+---
+
+## 6. Specialized Enum Collections
+
+- **`EnumSet`**: High-performance `Set` for enum types.
+  ```java
+  EnumSet<Day> weekend = EnumSet.of(Day.SATURDAY, Day.SUNDAY);
+  ```
+- **`EnumMap`**: Map with enum keys.
+  ```java
+  EnumMap<Day, String> map = new EnumMap<>(Day.class);
+  map.put(Day.MONDAY, "Start work");
+  ```
+
+---
+
+## 7. Benefits of Enums
+
+- **Type Safety**: Prevent invalid values.  
+- **Namespace**: Group related constants.  
+- **Functionality**: Enums can have behavior (methods, fields).  
+- **Singleton Guarantee**: One instance per constant.
+
+---
+
+## 8. Summary
+
+| Feature                       | Description                                    |
+|-------------------------------|------------------------------------------------|
+| Basic Constants               | Named instances of the enum type               |
+| `values()`, `valueOf()`       | Built-in static methods                        |
+| Fields & Constructors         | Custom data per constant                       |
+| Methods & Override            | Add behavior; override `toString()`, etc.      |
+| `switch` Support              | Use enums directly in `switch` statements      |
+| Implementing Interfaces       | Polymorphic behavior per constant              |
+| `EnumSet`, `EnumMap`            | Specialized collections for enum types         |
+
+
+## Annotations in Java
+
+Annotations provide metadata about the code and can be processed by the compiler or at runtime via reflection. They do not directly affect program semantics but can be used by tools and frameworks.
+
+```java
+@interface MyAnnotation {
+    String value();
+    int count() default 1;
+}
+```
+
+- Introduced in Java 5.
+- Annotations can be applied to classes, methods, fields, parameters, local variables, and more.
+
+---
+
+### Built-in Annotations
+
+| Annotation           | Description                                                      |
+|----------------------|------------------------------------------------------------------|
+| `@Override`          | Indicates that a method overrides a superclass method.          |
+| `@Deprecated`        | Marks an element as deprecated; generates a warning if used.    |
+| `@SuppressWarnings`  | Instructs the compiler to suppress specified warnings.          |
+| `@SafeVarargs`       | Suppresses unchecked warnings for varargs methods.              |
+| `@FunctionalInterface` | Indicates a functional interface for lambda compatibility.   |
+| `@Retention`         | Meta-annotation: specifies retention policy of an annotation.   |
+| `@Target`            | Meta-annotation: specifies applicable element types.            |
+
+---
+
+### Meta-Annotations
+
+- **@Retention**  
+  ```java
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface MyAnnotation { ... }
+  ```
+  - `SOURCE`: Discarded by compiler.
+  - `CLASS`: Included in class file, not available at runtime.
+  - `RUNTIME`: Available at runtime via reflection.
+
+- **@Target**  
+  ```java
+  @Target({ElementType.METHOD, ElementType.TYPE})
+  public @interface MyAnnotation { ... }
+  ```
+  - Common ElementType constants: TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, ANNOTATION_TYPE, PACKAGE.
+
+- **@Documented**  
+  ```java
+  @Documented
+  public @interface MyAnnotation { ... }
+  ```
+  - Indicates that elements using the annotation should be documented by javadoc.
+
+- **@Inherited**  
+  ```java
+  @Inherited
+  public @interface MyAnnotation { ... }
+  ```
+  - Annotation on superclass is inherited by subclasses.
+
+- **@Repeatable**  
+  ```java
+  @Repeatable(Authors.class)
+  public @interface Author { String name(); }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  public @interface Authors { Author[] value(); }
+  ```
+  - Allows multiple annotations of the same type on a single element.
+
+---
+
+### Defining a Custom Annotation
+
+```java
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface JsonField {
+    String name();
+    boolean required() default false;
+}
+```
+
+- Elements in an annotation behave like methods.
+- Default values are provided with `default`.
+
+---
+
+### Using Annotations
+
+```java
+public class User {
+
+    @JsonField(name = "user_id", required = true)
+    private int id;
+
+    @JsonField(name = "username")
+    private String name;
+
+    @Deprecated(since="2.0", forRemoval=true)
+    public void oldMethod() {
+        // ...
+    }
+
+    @SuppressWarnings("unchecked")
+    public void legacyCode() {
+        // ...
+    }
+}
+```
+
+---
+
+### Processing Annotations
+
+1. **Compile-time**: via annotation processors (JSR 269)  
+   - Create a class extending `javax.annotation.processing.AbstractProcessor`.
+   - Use `@SupportedAnnotationTypes` and `@SupportedSourceVersion`.
+
+2. **Runtime**: via reflection  
+   ```java
+   Class<User> clazz = User.class;
+   for (Field field : clazz.getDeclaredFields()) {
+       if (field.isAnnotationPresent(JsonField.class)) {
+           JsonField jf = field.getAnnotation(JsonField.class);
+           System.out.println(jf.name() + ", required: " + jf.required());
+       }
+   }
+   ```
+
+---
+
+### Best Practices
+
+- Use standard built-in annotations whenever possible.
+- Keep custom annotations simple and focused.
+- Define clear retention and target policies.
+- Document annotations with Javadoc.
+- Avoid overusing annotations, which can clutter code.
+
+---
+
+### Summary
+
+Annotations are a powerful feature for adding metadata and enabling framework-driven behaviors, such as dependency injection, serialization, and code generation.
+
+
+
+## Functional Interfaces
+
+A **functional interface** in Java is an interface that has exactly one abstract method (a _Single Abstract Method_, or SAM). They serve as the target types for lambda expressions and method references.
+
+```java
+@FunctionalInterface
+public interface Converter<F, T> {
+    T convert(F from);
+}
+```
+
+- The `@FunctionalInterface` annotation is optional but helps the compiler enforce the single-abstract-method rule.
+- Besides your own, Java provides many in `java.util.function` (e.g., `Function`, `Predicate`, `Consumer`, `Supplier`, `UnaryOperator`, `BiFunction`).
+
+### Common Built-in Functional Interfaces
+
+| Interface           | Method Signature            | Use Case                       |
+|---------------------|-----------------------------|--------------------------------|
+| `Function<T,R>`     | `R apply(T t)`              | Transform `T` to `R`           |
+| `Predicate<T>`      | `boolean test(T t)`         | Boolean-valued condition       |
+| `Consumer<T>`       | `void accept(T t)`          | Perform action on `T`          |
+| `Supplier<T>`       | `T get()`                   | Provide `T` without input      |
+| `BiFunction<T,U,R>` | `R apply(T t, U u)`         | Two-arg transform to `R`       |
+
+---
+
+## Lambda Expressions
+
+A **lambda expression** is a concise way to implement a functional interface:
+
+```java
+parameters -> expression
+// or
+(parameters) -> { statements; }
+```
+
+### Examples
+
+1. **Runnable**  
+   ```java
+   // Before (anonymous class)
+   Runnable r1 = new Runnable() {
+       @Override
+       public void run() {
+           System.out.println("Hello from Runnable");
+       }
+   };
+   // With lambda
+   Runnable r2 = () -> System.out.println("Hello from Runnable");
+   ```
+
+2. **Comparator<String>**  
+   ```java
+   // Anonymous class
+   Comparator<String> cmp1 = new Comparator<>() {
+       @Override
+       public int compare(String a, String b) {
+           return a.length() - b.length();
+       }
+   };
+   // Lambda
+   Comparator<String> cmp2 = (a, b) -> a.length() - b.length();
+   ```
+
+3. **Custom Converter**  
+   ```java
+   Converter<String, Integer> stringToInt = s -> Integer.parseInt(s);
+   Integer result = stringToInt.convert("123");  // 123
+   ```
+
+4. **Using java.util.function**  
+   ```java
+   Function<String, Integer> parse = Integer::parseInt;
+   Predicate<Integer> isEven = x -> x % 2 == 0;
+   Consumer<String> printer = System.out::println;
+   Supplier<Double> randomSupplier = Math::random;
+   ```
+
+---
+
+## Method References
+
+Method references are shorthand for lambdas that call a method:
+
+```java
+// Static method
+Function<String, Integer> parseInt = Integer::parseInt;
+
+// Instance method of a particular object
+List<String> list = List.of("a", "bb", "ccc");
+list.forEach(System.out::println);
+
+// Instance method of an arbitrary object of a type
+BiFunction<String, String, Integer> cmpLen = String::compareToIgnoreCase;
+```
+
+---
+
+## Why Use Functional Interfaces & Lambdas?
+
+- **Conciseness**: Less boilerplate than anonymous classes.
+- **Readability**: Code expresses “what” more than “how.”
+- **Functional Programming**: Enables use of streams, filters, maps, and higher-order functions.
+
+---
+
+### Tips
+
+- Use **target typing**: the compiler infers the functional interface from the assignment context.
+- Keep lambdas **short**—if logic grows complex, revert to a named method or class.
+- Leverage the **Streams API**:
+  ```java
+  List<String> names = List.of("Alice", "Bob", "Charlie");
+  List<String> upper = names.stream()
+                            .filter(s -> s.length() > 3)
+                            .map(String::toUpperCase)
+                            .collect(Collectors.toList());
+  ```
+
+## Exceptions in Java
+
+Exceptions in Java are events that disrupt the normal flow of a program's instructions. They provide a way to handle runtime anomalies gracefully.
+
+```java
+try {
+    // code that may throw an exception
+} catch (ExceptionType name) {
+    // handler
+} finally {
+    // optional cleanup
+}
+```
+
+---
+
+### Exception Hierarchy
+
+```
+java.lang.Throwable
+├── java.lang.Error
+└── java.lang.Exception
+    ├── java.lang.RuntimeException   (unchecked)
+    └── other Checked Exceptions
+```
+
+- **Error**: Serious problems a reasonable application should not try to catch (e.g., `OutOfMemoryError`).
+- **Exception**: Conditions an application might want to catch.
+  - **Checked Exceptions**: Must be declared or handled (e.g., `IOException`, `SQLException`).
+  - **Unchecked Exceptions**: Subclasses of `RuntimeException` (e.g., `NullPointerException`, `IndexOutOfBoundsException`).
+
+---
+
+### Checked vs Unchecked
+
+| Category          | Declaration Required | Examples                          |
+|-------------------|----------------------|-----------------------------------|
+| Checked           | Yes (throws)         | `IOException`, `ClassNotFoundException` |
+| Unchecked         | No                   | `NullPointerException`, `IllegalArgumentException` |
+
+---
+
+## Handling Exceptions
+
+### try-catch-finally
+
+```java
+try {
+    FileReader fr = new FileReader("input.txt");
+} catch (FileNotFoundException e) {
+    System.err.println("File not found: " + e.getMessage());
+} finally {
+    // cleanup resources
+    if (fr != null) fr.close();
+}
+```
+
+### try-with-resources (Java 7+)
+
+Automatically closes resources implementing `AutoCloseable`.
+
+```java
+try (BufferedReader br = new BufferedReader(new FileReader("input.txt"))) {
+    String line = br.readLine();
+    System.out.println(line);
+} catch (IOException e) {
+    e.printStackTrace();
+}
+```
+
+---
+
+## Creating Custom Exceptions
+
+```java
+public class InvalidUserInputException extends Exception {
+    public InvalidUserInputException(String message) {
+        super(message);
+    }
+}
+
+public class DataProcessingRuntimeException extends RuntimeException {
+    public DataProcessingRuntimeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+- Extend `Exception` for checked custom exceptions.
+- Extend `RuntimeException` for unchecked custom exceptions.
+- Always provide meaningful messages and constructors.
+
+---
+
+## Common Exception Classes
+
+| Exception                    | When Thrown                                      |
+|------------------------------|---------------------------------------------------|
+| `NullPointerException`       | Dereferencing a null object                       |
+| `ArrayIndexOutOfBoundsException` | Invalid array index                         |
+| `IllegalArgumentException`   | Invalid method argument                           |
+| `NumberFormatException`      | Parsing invalid number format                     |
+| `SQLException`               | Database access error                             |
+| `IOException`                | I/O failures                                      |
+
+---
+
+## Best Practices
+
+- **Catch Specific Exceptions**: Avoid catching `Exception` or `Throwable` unless necessary.
+- **Clean Up Resources**: Use try-with-resources where possible.
+- **Meaningful Messages**: Provide context in exception messages.
+- **Logging**: Log exceptions with stack traces for debugging.
+- **Fail Fast**: Validate arguments early and throw exceptions as soon as an error is detected.
+
+---
+
+### Summary
+
+Understanding and properly handling exceptions is crucial for building robust Java applications. By classifying errors, using appropriate catch blocks, and following best practices, you can ensure that your application behaves predictably even in error conditions.
