@@ -3677,3 +3677,90 @@ Optional<String> opt = list.stream()
 ## 📚 Reference
 
 - [Oracle Docs - Stream API](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)
+
+
+
+# 📘 Java Local Variable Type Inference (`var`)
+
+Introduced in **Java 10**, local variable type inference allows you to use `var` in place of explicit types when declaring local variables. The compiler infers the type based on the initializer.
+
+---
+
+## ✅ Syntax
+
+```java
+var name = "Harshith"; // Inferred as String
+var number = 42;       // Inferred as int
+```
+
+> ⚠️ `var` **is not** a keyword, it’s a reserved type name used for inference.
+
+---
+
+## 📌 Rules and Restrictions
+
+| Rule | Description |
+|------|-------------|
+| 🟢 **Must be initialized** | `var x;` ❌ Invalid. Must assign a value immediately. |
+| 🟢 **Only for local variables** | Cannot be used for fields, method parameters, or return types. |
+| 🟢 **Readability matters** | Use only when type is obvious or enhances clarity. |
+| 🔴 **Cannot be null without cast** | `var x = null;` ❌, but `var x = (String) null;` ✅ |
+| 🔴 **Not allowed in lambda params** | `var x -> x + 1` ❌ |
+
+---
+
+## 🔍 Examples
+
+```java
+public class InferenceExample {
+    public static void main(String[] args) {
+        var message = "Hello";      // String
+        var count = 10;             // int
+        var price = 99.99;          // double
+        var list = new ArrayList<String>(); // ArrayList<String>
+
+        for (var item : list) {
+            System.out.println(item);
+        }
+
+        try (var stream = Files.lines(Path.of("file.txt"))) {
+            stream.forEach(System.out::println);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+---
+
+## 🚫 Bad Practices
+
+```java
+var result = getSomething(); // Type not obvious
+```
+
+Use meaningful variable names and clear initializer expressions.
+
+---
+
+## ✅ Good Use Cases
+
+- For iterating collections
+- For complex generic types
+- In `try-with-resources`
+- When the type is obvious from context
+
+---
+
+## 💡 Notes
+
+- Improves **readability** and **reduces verbosity**
+- Does **not make Java dynamically typed**
+- Type is still statically known at compile-time
+
+---
+
+## 📚 Reference
+
+- [JEP 286: Local-Variable Type Inference](https://openjdk.org/jeps/286)
