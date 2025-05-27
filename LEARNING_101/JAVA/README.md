@@ -4400,3 +4400,444 @@ public class JdbcExample {
 
 - [JDBC Tutorial - Oracle Docs](https://docs.oracle.com/javase/tutorial/jdbc/)
 - [MySQL JDBC Driver](https://dev.mysql.com/downloads/connector/j/)
+
+
+# 📘 Servlet Concepts in Java
+
+Servlets are Java programs that run on a web server and handle requests/responses in a web application.
+
+---
+
+## 🚀 What is a Servlet?
+
+A **Servlet** is a Java class that extends the capabilities of servers that host applications accessed via a request-response programming model (usually HTTP).
+
+---
+
+## 🧱 Servlet Lifecycle
+
+| Phase       | Method           | Description |
+|-------------|------------------|-------------|
+| Initialization | `init()`         | Called once when the servlet is first created |
+| Request Handling | `service()`      | Called each time the servlet is requested |
+| Destruction | `destroy()`      | Called once when the servlet is being removed |
+
+---
+
+## 🧪 Example Servlet
+
+```java
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HelloServlet extends HttpServlet {
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        out.println("<h1>Hello from Servlet</h1>");
+    }
+}
+```
+
+---
+
+## ⚙️ Web Deployment Descriptor (`web.xml`)
+
+```xml
+<servlet>
+    <servlet-name>hello</servlet-name>
+    <servlet-class>HelloServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>hello</servlet-name>
+    <url-pattern>/hello</url-pattern>
+</servlet-mapping>
+```
+
+---
+
+## 🧰 HttpServletRequest & HttpServletResponse
+
+| Method | Purpose |
+|--------|---------|
+| `getParameter()` | Read form values |
+| `getSession()` | Access session data |
+| `getAttribute()/setAttribute()` | Pass data between servlets |
+| `sendRedirect()` | Redirect client to another resource |
+
+---
+
+## 🧠 Servlet Features
+
+- Platform-independent
+- Scalable and secure
+- Supports **session management**
+- Works with **filters**, **listeners**, **annotations**
+
+---
+
+## 🛡 Filters and Listeners
+
+- **Filters**: Intercept requests/responses (used for logging, authentication, etc.)
+- **Listeners**: Listen to lifecycle events (e.g., context initialized, session created)
+
+---
+
+## 🔒 Sessions and Cookies
+
+- `HttpSession` for storing user data across multiple requests
+- `Cookie` for client-side state tracking
+
+---
+
+## 📌 Key Interfaces and Classes
+
+| Interface/Class | Description |
+|-----------------|-------------|
+| `Servlet` | Core interface every servlet implements |
+| `GenericServlet` | Simplifies writing protocol-independent servlets |
+| `HttpServlet` | Provides HTTP-specific methods like `doGet()`, `doPost()` |
+| `ServletContext` | Provides information about the web application |
+| `ServletConfig` | Provides configuration info to a servlet |
+
+---
+
+## 📚 References
+
+- [Oracle Servlet Tutorial](https://docs.oracle.com/javaee/7/tutorial/servlets.htm)
+- [Servlet API Javadoc](https://docs.oracle.com/javaee/7/api/javax/servlet/package-summary.html)
+
+
+# 🔄 Servlet Methods: `doGet`, `doPost`, and `service`
+
+In Java Servlets, HTTP requests are handled through the `service` method, which delegates to `doGet`, `doPost`, etc., based on the request type.
+
+---
+
+## 🔧 `service()` Method
+
+### 🔹 Description:
+The `service()` method is called by the servlet container for **every incoming request**. It determines the HTTP method (GET, POST, etc.) and calls the corresponding method like `doGet()` or `doPost()`.
+
+### 🔹 Signature:
+```java
+protected void service(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException
+```
+
+### 🔹 When to Override:
+- Only override `service()` if you want to **handle all HTTP methods manually**.
+- Normally, you override `doGet()` or `doPost()` instead.
+
+---
+
+## 📥 `doGet()` Method
+
+### 🔹 Description:
+Handles **HTTP GET** requests — usually when the user requests a page or submits a form with method="GET".
+
+### 🔹 Signature:
+```java
+protected void doGet(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException
+```
+
+### 🔹 Typical Use:
+- Fetch data from the server
+- Return HTML or JSON responses
+
+### 🔹 Example:
+```java
+protected void doGet(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException {
+    res.setContentType("text/html");
+    PrintWriter out = res.getWriter();
+    out.println("<h1>Hello from GET!</h1>");
+}
+```
+
+---
+
+## 📤 `doPost()` Method
+
+### 🔹 Description:
+Handles **HTTP POST** requests — typically when submitting form data that needs to be processed or stored.
+
+### 🔹 Signature:
+```java
+protected void doPost(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException
+```
+
+### 🔹 Typical Use:
+- Process form submissions
+- Perform updates or insert data into a database
+
+### 🔹 Example:
+```java
+protected void doPost(HttpServletRequest req, HttpServletResponse res)
+        throws ServletException, IOException {
+    String name = req.getParameter("name");
+    res.setContentType("text/html");
+    PrintWriter out = res.getWriter();
+    out.println("<h1>Welcome, " + name + "!</h1>");
+}
+```
+
+---
+
+## 🔁 Lifecycle Flow
+
+```text
+Client Request → service() → doGet() or doPost() → Response
+```
+
+---
+
+## 📌 Summary
+
+| Method     | Purpose                 | Called For        |
+|------------|-------------------------|-------------------|
+| `service()`| Routes requests         | All requests      |
+| `doGet()`  | Read/display data       | HTTP GET          |
+| `doPost()` | Process/submit data     | HTTP POST         |
+
+---
+
+## 📚 References
+
+- [Oracle Servlet Docs](https://docs.oracle.com/javaee/7/api/javax/servlet/http/HttpServlet.html)
+
+
+
+# 🔁 RequestDispatcher in Java Servlet
+
+The **RequestDispatcher** in Java Servlet is used to **forward** or **include** content from another resource (like another servlet, JSP, or HTML) **within the same server**.
+
+---
+
+## 📦 Package
+
+```java
+import javax.servlet.RequestDispatcher;
+```
+
+---
+
+## 🧰 Use Cases
+
+| Use Case       | Method       | Description                          |
+|----------------|--------------|--------------------------------------|
+| Forwarding     | `forward()`  | Passes control to another resource without returning to the caller |
+| Including      | `include()`  | Includes content of another resource in the response |
+
+---
+
+## 🔧 How to Get a RequestDispatcher
+
+```java
+RequestDispatcher rd = request.getRequestDispatcher("target.jsp");
+```
+
+> 🔹 Path can be relative (to current path) or absolute (`/path` from app root).
+
+---
+
+## 🚚 forward()
+
+### 🔹 Description:
+Forwards request to another servlet or JSP. The original request is **not returned** to the caller.
+
+### 🔹 Example:
+```java
+RequestDispatcher rd = request.getRequestDispatcher("success.jsp");
+rd.forward(request, response);
+```
+
+### 🔹 Notes:
+- Response must not be committed yet (i.e., no output before `forward()`)
+- URL in browser remains unchanged
+
+---
+
+## 🔗 include()
+
+### 🔹 Description:
+Includes the output of another resource in the current response.
+
+### 🔹 Example:
+```java
+RequestDispatcher rd = request.getRequestDispatcher("header.jsp");
+rd.include(request, response);
+```
+
+### 🔹 Notes:
+- Useful for including headers, footers, sidebars, etc.
+- Unlike `forward()`, execution continues after `include()`
+
+---
+
+## 🧠 Key Differences
+
+| Feature      | `forward()`                       | `include()`                    |
+|--------------|-----------------------------------|--------------------------------|
+| Browser URL  | Does not change                   | Does not change                |
+| Output Flow  | Transfers control                 | Appends output                 |
+| Execution    | Stops calling servlet             | Continues after include        |
+
+---
+
+## ⚠️ Common Mistakes
+
+- Calling `forward()` after output is already written (will throw `IllegalStateException`)
+- Wrong path in `getRequestDispatcher()` — always test with both relative and absolute paths
+
+---
+
+## 📚 Reference
+
+- [Oracle Servlet Tutorial](https://docs.oracle.com/javaee/7/tutorial/servlets.htm)
+
+
+
+# 🛠️ Hibernate ORM - Java Persistence Framework
+
+**Hibernate** is a powerful, high-performance **Object-Relational Mapping (ORM)** framework for Java. It provides a bridge between the object-oriented world of Java and the relational world of databases.
+
+---
+
+## 🔍 Core Concepts
+
+### 1. **ORM (Object Relational Mapping)**
+Maps Java objects to database tables using metadata (XML or annotations).
+
+---
+
+### 2. **Hibernate Configuration**
+Defines DB connection details and Hibernate properties via:
+- `hibernate.cfg.xml`
+- `hibernate.properties`
+- Java-based configuration
+
+---
+
+### 3. **Hibernate SessionFactory**
+
+- Created once per application.
+- Responsible for creating `Session` objects.
+```java
+SessionFactory factory = new Configuration().configure().buildSessionFactory();
+```
+
+---
+
+### 4. **Session**
+
+- Represents a single-threaded unit of work.
+- Used to perform CRUD operations.
+```java
+Session session = factory.openSession();
+```
+
+---
+
+### 5. **Transaction**
+
+- Atomic unit of work.
+- Used to wrap a group of operations into a single transaction.
+```java
+Transaction tx = session.beginTransaction();
+```
+
+---
+
+### 6. **Entity Class**
+
+- A POJO mapped to a DB table using `@Entity`.
+```java
+@Entity
+@Table(name = "students")
+public class Student {
+    @Id
+    @GeneratedValue
+    private int id;
+
+    @Column(name = "name")
+    private String name;
+}
+```
+
+---
+
+## ⚙️ Hibernate Annotations
+
+| Annotation        | Description                     |
+|------------------|---------------------------------|
+| `@Entity`        | Marks a class as a Hibernate entity |
+| `@Table`         | Maps to a database table        |
+| `@Id`            | Primary key                     |
+| `@GeneratedValue`| Auto-generates PK values        |
+| `@Column`        | Maps a field to a column        |
+| `@OneToOne`      | One-to-one relationship         |
+| `@OneToMany`     | One-to-many relationship        |
+| `@ManyToOne`     | Many-to-one relationship        |
+
+---
+
+## 🔁 Hibernate Lifecycle
+
+```
+Transient → Persistent → Detached → Removed
+```
+
+---
+
+## 🔧 Configuration Example (`hibernate.cfg.xml`)
+
+```xml
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/hibernatedb</property>
+    <property name="hibernate.connection.username">root</property>
+    <property name="hibernate.connection.password">root</property>
+    <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+    <property name="hibernate.hbm2ddl.auto">update</property>
+    <property name="show_sql">true</property>
+
+    <mapping class="com.example.Student"/>
+  </session-factory>
+</hibernate-configuration>
+```
+
+---
+
+## 🧠 Benefits of Hibernate
+
+- Simplifies DB interaction
+- Eliminates boilerplate JDBC code
+- Caching support
+- Supports inheritance and relationships
+- Database independence
+
+---
+
+## ❗ Common APIs
+
+| API               | Description |
+|------------------|-------------|
+| `Configuration`  | Loads Hibernate config |
+| `SessionFactory` | Creates `Session` |
+| `Session`        | Manages DB connection |
+| `Transaction`    | Manages transaction boundaries |
+
+---
+
+## 📚 References
+
+- [Hibernate Official Documentation](https://hibernate.org/orm/documentation/)
+- [JPA vs Hibernate](https://www.baeldung.com/hibernate-jpa)
+
