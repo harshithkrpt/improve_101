@@ -4841,3 +4841,526 @@ Transient → Persistent → Detached → Removed
 - [Hibernate Official Documentation](https://hibernate.org/orm/documentation/)
 - [JPA vs Hibernate](https://www.baeldung.com/hibernate-jpa)
 
+
+
+# 📘 Hibernate Concepts & Usage in Java
+
+---
+
+## 1️⃣ Transient State
+
+### 🔹 Definition
+A **transient** object is one that is **not associated with any Hibernate session** and **not persisted** in the database yet.
+
+```java
+Student student = new Student();  // Transient
+student.setName("Harshith");
+```
+
+The object only exists in memory and will be garbage collected unless saved.
+
+---
+
+## 2️⃣ Hibernate Annotations
+
+### 🔹 `@Entity`
+
+Marks a class as a Hibernate-managed entity.
+
+```java
+@Entity
+public class Student { ... }
+```
+
+### 🔹 `@Table`
+
+Specifies the table name in the database.
+
+```java
+@Entity
+@Table(name = "students")
+public class Student { ... }
+```
+
+### 🔹 `@Column`
+
+Defines the column mapping for a field.
+
+```java
+@Column(name = "student_name", nullable = false)
+private String name;
+```
+
+---
+
+## 3️⃣ Show SQL & Auto Table Creation
+
+### 🔹 Show SQL queries
+
+```xml
+<property name="show_sql">true</property>
+<property name="format_sql">true</property>
+```
+
+### 🔹 Auto create/update table schema
+
+```xml
+<property name="hibernate.hbm2ddl.auto">update</property>
+```
+
+Other options:
+- `create`: Drops and re-creates tables
+- `update`: Updates schema without deleting data
+- `validate`: Validates schema matches entities
+- `none`: Disables DDL management
+
+---
+
+## 4️⃣ Getting Data from Table
+
+### 🔹 `session.get()`
+
+```java
+Student student = session.get(Student.class, 1);
+```
+
+### 🔹 `session.createQuery()`
+
+```java
+List<Student> list = session.createQuery("from Student", Student.class).list();
+```
+
+---
+
+## 5️⃣ Inserting Data into Table
+
+```java
+Student student = new Student("Harshith");
+
+Session session = factory.openSession();
+Transaction tx = session.beginTransaction();
+
+session.save(student);
+
+tx.commit();
+session.close();
+```
+
+---
+
+## 6️⃣ Embeddable Fields with `@Embeddable`
+
+Use when one class contains reusable value objects.
+
+### 🔹 Example
+
+```java
+@Embeddable
+public class Address {
+    private String city;
+    private String state;
+}
+
+@Entity
+public class Student {
+    @Id
+    @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @Embedded
+    private Address address;
+}
+```
+
+The fields of `Address` will be embedded in the `Student` table.
+
+---
+
+## 📚 References
+
+- [Hibernate ORM Docs](https://hibernate.org/orm/documentation/)
+- [Baeldung Hibernate](https://www.baeldung.com/hibernate-5)
+
+
+
+# 🔗 Hibernate Relationships & Annotations
+
+Hibernate supports mapping **entity relationships** using annotations. These include one-to-one, one-to-many, many-to-one, and many-to-many associations between tables/entities.
+
+---
+
+## 1️⃣ One-to-One (`@OneToOne`)
+
+### 📌 Use Case
+Each record in table A is linked to exactly one record in table B.
+
+### 🧪 Example
+```java
+@Entity
+public class Person {
+    @Id @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @OneToOne
+    @JoinColumn(name = "passport_id")
+    private Passport passport;
+}
+
+@Entity
+public class Passport {
+    @Id @GeneratedValue
+    private int id;
+
+    private String number;
+}
+```
+
+---
+
+## 2️⃣ One-to-Many (`@OneToMany`) and Many-to-One (`@ManyToOne`)
+
+### 📌 Use Case
+One entity relates to many (e.g., one department has many employees).
+
+### 🧪 Example
+
+```java
+@Entity
+public class Department {
+    @Id @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "department")
+    private List<Employee> employees;
+}
+
+@Entity
+public class Employee {
+    @Id @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "dept_id")
+    private Department department;
+}
+```
+
+---
+
+## 3️⃣ Many-to-Many (`@ManyToMany`)
+
+### 📌 Use Case
+Entities have multiple relations on both sides (e.g., students and courses).
+
+### 🧪 Example
+
+```java
+@Entity
+public class Student {
+    @Id @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @ManyToMany
+    @JoinTable(
+        name = "student_course",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
+    private List<Course> courses;
+}
+
+@Entity
+public class Course {
+    @Id @GeneratedValue
+    private int id;
+
+    private String title;
+
+    @ManyToMany(mappedBy = "courses")
+    private List<Student> students;
+}
+```
+
+---
+
+## 🔖 Annotations Summary
+
+| Annotation       | Purpose |
+|------------------|---------|
+| `@OneToOne`      | Maps one-to-one relationship |
+| `@OneToMany`     | Maps one-to-many relationship |
+| `@ManyToOne`     | Maps many-to-one relationship |
+| `@ManyToMany`    | Maps many-to-many relationship |
+| `@JoinColumn`    | Defines foreign key column |
+| `@JoinTable`     | Intermediate join table (for many-to-many) |
+| `mappedBy`       | Inverse side of bidirectional relation |
+
+---
+
+## 🧠 Best Practices
+
+- Always specify ownership using `mappedBy`
+- Use `CascadeType` and `FetchType` where needed:
+  ```java
+  @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  ```
+- Avoid unidirectional `@OneToMany` — use bidirectional for performance
+
+---
+
+## 📚 References
+
+- [Hibernate ORM Docs](https://hibernate.org/orm/documentation/)
+- [Baeldung - Hibernate Relationships](https://www.baeldung.com/hibernate-one-to-many)
+
+
+
+
+# ⚡ Hibernate Fetching Strategies: EAGER vs LAZY
+
+Hibernate allows you to control how related entities are fetched from the database using **fetch types**.
+
+---
+
+## 🧠 What is Fetching?
+
+Fetching is the process of retrieving related entities when accessing an entity object from the database.
+
+---
+
+## 🎯 Fetch Types
+
+| Fetch Type | Description |
+|------------|-------------|
+| `EAGER`    | Loads the related entity **immediately** with the parent entity |
+| `LAZY`     | Loads the related entity **on demand** (only when accessed) |
+
+---
+
+## 📌 Default Fetch Types
+
+| Annotation    | Default Fetch |
+|---------------|----------------|
+| `@OneToOne`   | EAGER          |
+| `@ManyToOne`  | EAGER          |
+| `@OneToMany`  | LAZY           |
+| `@ManyToMany` | LAZY           |
+
+---
+
+## 🧪 Example: LAZY vs EAGER
+
+### 🔹 Entity Example
+
+```java
+@Entity
+public class Department {
+    @Id
+    @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+    private List<Employee> employees;
+}
+
+@Entity
+public class Employee {
+    @Id
+    @GeneratedValue
+    private int id;
+
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "dept_id")
+    private Department department;
+}
+```
+
+---
+
+## 🚀 Lazy Loading Behavior
+
+```java
+Department dept = session.get(Department.class, 1);
+System.out.println(dept.getName()); // ok
+System.out.println(dept.getEmployees()); // triggers SELECT from employee
+```
+
+> ⚠️ Lazy loading can throw **LazyInitializationException** if accessed outside session scope.
+
+---
+
+## 🚀 Eager Loading Behavior
+
+```java
+@OneToMany(mappedBy = "department", fetch = FetchType.EAGER)
+private List<Employee> employees;
+```
+
+```java
+Department dept = session.get(Department.class, 1);
+System.out.println(dept.getEmployees()); // already loaded
+```
+
+---
+
+## ✅ When to Use What?
+
+| Use Case                        | Strategy |
+|---------------------------------|----------|
+| Large datasets or collections   | LAZY     |
+| Always needed data              | EAGER    |
+| DTO-based projections           | LAZY     |
+| Preventing `N+1` select problem | Use `JOIN FETCH` or batch fetching |
+
+---
+
+## 🧰 How to Override with HQL
+
+```java
+String hql = "FROM Department d JOIN FETCH d.employees WHERE d.id = :id";
+Department dept = session.createQuery(hql, Department.class)
+                         .setParameter("id", 1)
+                         .uniqueResult();
+```
+
+---
+
+## 📚 References
+
+- [Hibernate Fetching Strategies](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#fetching)
+- [Baeldung - Lazy vs Eager](https://www.baeldung.com/hibernate-lazy-eager-loading)
+
+
+
+# 🧠 Hibernate Caching: First-Level & Second-Level
+
+Caching in Hibernate improves performance by reducing the number of database hits during entity retrieval and transactions.
+
+---
+
+## 1️⃣ First-Level Cache (Session Cache)
+
+### 🔹 Description
+- Enabled by default
+- Lives within the **Hibernate `Session`** scope
+- Caches entities only during the session lifetime
+
+### 🔹 Example
+```java
+Session session = sessionFactory.openSession();
+
+Student s1 = session.get(Student.class, 1); // DB hit
+Student s2 = session.get(Student.class, 1); // Fetched from cache
+
+session.close();
+```
+
+> ✅ No need to configure — always on  
+> ❌ Cleared when the session is closed
+
+---
+
+## 2️⃣ Second-Level Cache (SessionFactory Cache)
+
+### 🔹 Description
+- Optional
+- Shared across multiple sessions
+- Must be explicitly enabled
+- Stores objects in a global cache (e.g., EhCache, Infinispan)
+
+---
+
+## ✅ How to Enable Second-Level Cache
+
+### 1. Add dependencies (e.g., EhCache)
+
+```xml
+<dependency>
+  <groupId>org.hibernate.orm</groupId>
+  <artifactId>hibernate-ehcache</artifactId>
+  <version>5.6.15.Final</version>
+</dependency>
+```
+
+### 2. Update `hibernate.cfg.xml`
+
+```xml
+<property name="hibernate.cache.use_second_level_cache">true</property>
+<property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
+<property name="net.sf.ehcache.configurationResourceName">ehcache.xml</property>
+```
+
+### 3. Annotate Entities
+
+```java
+@Entity
+@Cacheable
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class Student {
+    @Id
+    private int id;
+
+    private String name;
+}
+```
+
+---
+
+## 3️⃣ Query Cache (Optional)
+
+### 🔹 Enable via:
+
+```xml
+<property name="hibernate.cache.use_query_cache">true</property>
+```
+
+### 🔹 Example:
+
+```java
+Query<Student> query = session.createQuery("from Student where name = :name", Student.class);
+query.setParameter("name", "Harshith");
+query.setCacheable(true);
+```
+
+---
+
+## 🧠 Cache Strategies
+
+| Strategy           | Description                        |
+|--------------------|------------------------------------|
+| `READ_ONLY`        | Good for reference/read-only data  |
+| `NONSTRICT_READ_WRITE` | Caching with less consistency   |
+| `READ_WRITE`       | Strong consistency via timestamps  |
+| `TRANSACTIONAL`    | Full ACID caching (requires JTA)   |
+
+---
+
+## 🚫 Cache Eviction
+
+You can clear caches when needed:
+
+```java
+sessionFactory.getCache().evict(Student.class);
+```
+
+---
+
+## 📚 References
+
+- [Hibernate Caching Guide](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#caching)
+- [Baeldung - Hibernate Caching](https://www.baeldung.com/hibernate-second-level-cache)
+
