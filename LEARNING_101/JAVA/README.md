@@ -3764,3 +3764,639 @@ Use meaningful variable names and clear initializer expressions.
 ## 📚 Reference
 
 - [JEP 286: Local-Variable Type Inference](https://openjdk.org/jeps/286)
+
+
+
+
+# 📘 SOLID Principles in Java
+
+The **SOLID** principles are five design principles intended to make software designs more understandable, flexible, and maintainable. They are commonly used in **Object-Oriented Programming** and especially relevant in Java development.
+
+---
+
+## 1. ✅ **S - Single Responsibility Principle (SRP)**
+
+> A class should have **only one reason to change**.
+
+**💡 Meaning:** One class = One job.
+
+```java
+// ❌ Violates SRP
+class User {
+    void saveToDatabase() { ... }
+    void validate() { ... }
+}
+
+// ✅ SRP
+class User {
+    // fields, getters, setters
+}
+
+class UserValidator {
+    void validate(User user) { ... }
+}
+
+class UserRepository {
+    void save(User user) { ... }
+}
+```
+
+---
+
+## 2. ✅ **O - Open/Closed Principle (OCP)**
+
+> Software entities should be **open for extension, but closed for modification**.
+
+**💡 Meaning:** Add new behavior via inheritance or composition, without modifying existing code.
+
+```java
+// ❌ Violates OCP
+class Invoice {
+    double calculateTotal(String type) {
+        if ("Grocery".equals(type)) return ...;
+        if ("Electronics".equals(type)) return ...;
+        return 0;
+    }
+}
+
+// ✅ OCP
+interface Invoice {
+    double calculateTotal();
+}
+
+class GroceryInvoice implements Invoice {
+    public double calculateTotal() { return ...; }
+}
+
+class ElectronicsInvoice implements Invoice {
+    public double calculateTotal() { return ...; }
+}
+```
+
+---
+
+## 3. ✅ **L - Liskov Substitution Principle (LSP)**
+
+> Objects of a superclass should be replaceable with objects of a subclass without affecting the correctness of the program.
+
+**💡 Meaning:** Subtypes must be usable in place of their base types.
+
+```java
+class Bird {
+    void fly() { ... }
+}
+
+class Sparrow extends Bird { ... }
+
+// ❌ Violates LSP
+class Ostrich extends Bird {
+    void fly() {
+        throw new UnsupportedOperationException();
+    }
+}
+
+// ✅ LSP with better design
+interface Bird { }
+interface Flyable extends Bird {
+    void fly();
+}
+
+class Sparrow implements Flyable {
+    public void fly() { ... }
+}
+
+class Ostrich implements Bird {
+    // doesn't fly
+}
+```
+
+---
+
+## 4. ✅ **I - Interface Segregation Principle (ISP)**
+
+> Clients should not be forced to depend on interfaces they do not use.
+
+**💡 Meaning:** Prefer multiple small interfaces over a large one.
+
+```java
+// ❌ Violates ISP
+interface Worker {
+    void work();
+    void eat();
+}
+
+// ✅ ISP
+interface Workable {
+    void work();
+}
+
+interface Eatable {
+    void eat();
+}
+
+class Robot implements Workable {
+    public void work() { ... }
+}
+```
+
+---
+
+## 5. ✅ **D - Dependency Inversion Principle (DIP)**
+
+> High-level modules should not depend on low-level modules. Both should depend on **abstractions**.
+
+**💡 Meaning:** Depend on interfaces, not concrete classes.
+
+```java
+// ❌ Violates DIP
+class Keyboard {
+    ...
+}
+
+class Computer {
+    private Keyboard keyboard = new Keyboard();
+}
+
+// ✅ DIP
+interface Keyboard { }
+
+class WiredKeyboard implements Keyboard { }
+class WirelessKeyboard implements Keyboard { }
+
+class Computer {
+    private Keyboard keyboard;
+
+    public Computer(Keyboard keyboard) {
+        this.keyboard = keyboard;
+    }
+}
+```
+
+---
+
+## 📌 Summary
+
+| Principle | Description |
+|----------|-------------|
+| SRP | One class, one reason to change |
+| OCP | Open for extension, closed for modification |
+| LSP | Subtypes must be substitutable |
+| ISP | Use small, specific interfaces |
+| DIP | Rely on abstractions, not concretions |
+
+---
+
+## 📚 Resources
+
+- [Clean Code by Robert C. Martin](https://www.oreilly.com/library/view/clean-code/9780136083238/)
+- [SOLID Principles JEP](https://openjdk.org/)
+
+
+# 📘 Records in Java
+
+**Records** were introduced in **Java 14 (Preview)** and became a **standard feature in Java 16**.
+
+They are a special kind of class designed to hold **immutable data** in a concise and transparent way.
+
+---
+
+## ✅ Purpose
+
+To reduce boilerplate code for **plain data carriers** like DTOs (Data Transfer Objects), where you usually need:
+
+- fields
+- constructors
+- getters
+- `equals()`, `hashCode()`, `toString()` methods
+
+---
+
+## 🔍 Syntax
+
+```java
+public record User(String name, int age) {}
+```
+
+This single line generates:
+
+- `private final String name;`
+- `private final int age;`
+- Constructor
+- Getters `name()` and `age()`
+- `equals()`, `hashCode()`, `toString()`
+
+---
+
+## 🧱 Key Characteristics
+
+| Feature | Description |
+|--------|-------------|
+| ✅ Immutable | Fields are `final` and cannot be changed |
+| ✅ Concise | Less boilerplate code |
+| ✅ Transparent | Clear intention of storing data |
+| ❌ Cannot extend other classes | Records implicitly extend `java.lang.Record` |
+| ✅ Can implement interfaces | Including sealed interfaces |
+
+---
+
+## 🧪 Example Usage
+
+```java
+public record Product(String name, double price) {}
+
+class Main {
+    public static void main(String[] args) {
+        Product p = new Product("Book", 299.99);
+        System.out.println(p.name());  // Book
+        System.out.println(p);         // Product[name=Book, price=299.99]
+    }
+}
+```
+
+---
+
+## ⚙️ Customization
+
+You can define additional methods or override default methods:
+
+```java
+public record Product(String name, double price) {
+    public Product {
+        if (price < 0) throw new IllegalArgumentException("Price cannot be negative");
+    }
+
+    public String display() {
+        return name + " - ₹" + price;
+    }
+}
+```
+
+---
+
+## 🛑 Limitations
+
+- Cannot extend other classes
+- All fields must be declared in the header
+- All fields are `private final`
+- No `setters`
+
+---
+
+## 🧠 Common Use Cases
+
+- DTOs
+- Immutable configuration objects
+- Event objects (in event-driven systems)
+- Value types (when modeling algebraic data)
+
+---
+
+## 💡 Difference from Normal Class
+
+| Feature        | Regular Class        | Record              |
+|----------------|----------------------|---------------------|
+| Boilerplate    | Needs manual creation| Auto-generated      |
+| Mutability     | Mutable by default   | Immutable by default|
+| Inheritance    | Can extend classes   | Cannot extend       |
+
+---
+
+## 📚 References
+
+- [JEP 395: Records](https://openjdk.org/jeps/395)
+
+
+
+# 🔒 Sealed Classes in Java
+
+Introduced in **Java 15 (Preview)** and stabilized in **Java 17**, **sealed classes** restrict which other classes or interfaces may extend or implement them.
+
+---
+
+## ✅ Purpose
+
+Sealed classes allow **controlled inheritance**. You can specify a limited set of subclasses for a class or interface.
+
+---
+
+## 🧪 Syntax
+
+```java
+public sealed class Shape permits Circle, Square {
+    // common behavior
+}
+
+final class Circle extends Shape {
+    // specific behavior
+}
+
+non-sealed class Square extends Shape {
+    // allows further extension
+}
+```
+
+---
+
+## 🧱 Keywords
+
+| Keyword | Description |
+|---------|-------------|
+| `sealed` | Restricts which classes can extend or implement it |
+| `non-sealed` | A subclass that removes sealing and allows open extension |
+| `final` | A subclass that cannot be extended further |
+| `permits` | Lists allowed subclasses explicitly |
+
+---
+
+## 🛡️ Rules
+
+1. **Explicit `permits`** clause is required (or use classes in the same file).
+2. Permitted classes must be:
+   - In the same package/module
+   - Declared `final`, `sealed`, or `non-sealed`
+3. All permitted classes must **directly extend** the sealed class.
+
+---
+
+## 📦 Example with Interface
+
+```java
+public sealed interface Vehicle permits Car, Bike { }
+
+final class Car implements Vehicle {
+    // ...
+}
+
+non-sealed class Bike implements Vehicle {
+    // can be extended further
+}
+```
+
+---
+
+## 🧠 Why Use Sealed Classes?
+
+- Enforce **domain modeling constraints**
+- Provide **exhaustiveness checking** (great with `switch` expressions)
+- Safer alternative to traditional inheritance
+
+---
+
+## 🧪 `switch` Example
+
+```java
+public sealed interface Result permits Success, Failure { }
+
+record Success(String data) implements Result { }
+record Failure(String error) implements Result { }
+
+public String handle(Result result) {
+    return switch (result) {
+        case Success s -> "Success: " + s.data();
+        case Failure f -> "Failure: " + f.error();
+    };
+}
+```
+
+---
+
+## ⚖️ Sealed vs Final vs Abstract
+
+| Modifier | Can be extended? | Allows controlled extension? |
+|----------|------------------|------------------------------|
+| `final` | ❌ No | ❌ No |
+| `abstract` | ✅ Yes | ❌ No |
+| `sealed` | ✅ Yes | ✅ Yes (restricted via `permits`) |
+
+---
+
+## 📚 References
+
+- [JEP 360: Sealed Classes (Preview)](https://openjdk.org/jeps/360)
+- [JEP 409: Sealed Classes (Final)](https://openjdk.org/jeps/409)
+
+
+# ✅ JUnit Testing Framework (Java)
+
+**JUnit** is a widely used testing framework in the Java ecosystem, designed for unit testing Java applications. It provides annotations, assertions, and test runners for writing and executing tests.
+
+---
+
+## 🚀 JUnit Versions
+
+- **JUnit 4** – Annotation-based, widely adopted.
+- **JUnit 5 (Jupiter)** – Modular architecture, includes:
+  - `junit-jupiter-api`: Test APIs
+  - `junit-jupiter-engine`: Test engine
+  - `junit-platform-launcher`: Running tests
+
+---
+
+## 📌 Core Annotations (JUnit 5)
+
+| Annotation       | Description                                 |
+|------------------|---------------------------------------------|
+| `@Test`          | Marks a test method                         |
+| `@BeforeEach`    | Runs before each test method                |
+| `@AfterEach`     | Runs after each test method                 |
+| `@BeforeAll`     | Runs once before all test methods (static)  |
+| `@AfterAll`      | Runs once after all test methods (static)   |
+| `@Disabled`      | Skips the test                              |
+| `@Nested`        | Groups related test classes                 |
+| `@DisplayName`   | Sets a custom name for tests                |
+
+---
+
+## 🧪 Sample Test Case
+
+```java
+import org.junit.jupiter.api.*;
+
+class CalculatorTest {
+
+    Calculator calculator;
+
+    @BeforeEach
+    void init() {
+        calculator = new Calculator();
+    }
+
+    @Test
+    void testAdd() {
+        Assertions.assertEquals(4, calculator.add(2, 2));
+    }
+
+    @Test
+    void testSubtract() {
+        Assertions.assertEquals(0, calculator.subtract(2, 2));
+    }
+
+    @AfterEach
+    void cleanup() {
+        calculator = null;
+    }
+}
+```
+
+---
+
+## ✅ Assertions in JUnit
+
+| Method                  | Description                    |
+|-------------------------|--------------------------------|
+| `assertEquals(a, b)`    | Asserts a == b                 |
+| `assertTrue(cond)`      | Asserts condition is true      |
+| `assertFalse(cond)`     | Asserts condition is false     |
+| `assertNull(obj)`       | Asserts object is null         |
+| `assertNotNull(obj)`    | Asserts object is not null     |
+| `assertThrows()`        | Checks if exception is thrown  |
+
+---
+
+## ⚙️ Maven Dependency (JUnit 5)
+
+```xml
+<dependency>
+  <groupId>org.junit.jupiter</groupId>
+  <artifactId>junit-jupiter</artifactId>
+  <version>5.10.0</version>
+  <scope>test</scope>
+</dependency>
+```
+
+---
+
+## 📦 Test Lifecycle
+
+```txt
+@BeforeAll    → once before all tests
+@BeforeEach   → before every test
+@Test         → actual test method
+@AfterEach    → after every test
+@AfterAll     → once after all tests
+```
+
+---
+
+## 🧠 Best Practices
+
+- Use descriptive method names
+- Isolate unit tests (no external dependencies)
+- Follow Arrange-Act-Assert pattern
+- Keep tests fast and independent
+
+---
+
+## 🔧 Advanced Features
+
+- Parameterized Tests with `@ParameterizedTest`
+- Custom Display Names
+- Dynamic Tests via `@TestFactory`
+- Integration with Mockito for mocking
+
+---
+
+## 📚 References
+
+- [JUnit 5 Official Docs](https://junit.org/junit5/)
+- [Mockito Framework](https://site.mockito.org/)
+
+
+
+# 🔗 JDBC Connection in Java
+
+**JDBC (Java Database Connectivity)** is a standard API for connecting and executing queries with databases in Java.
+
+---
+
+## ✅ Basic Steps for JDBC Connection
+
+1. **Import JDBC packages**
+2. **Register JDBC driver**
+3. **Open a connection**
+4. **Execute SQL statements**
+5. **Process the results**
+6. **Close resources**
+
+---
+
+## 🧪 Sample Code
+
+```java
+import java.sql.*;
+
+public class JdbcExample {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/testdb";
+        String username = "root";
+        String password = "root";
+
+        try {
+            // Step 1: Load and register JDBC driver (optional for modern JDBC)
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // Step 2: Open a connection
+            Connection conn = DriverManager.getConnection(url, username, password);
+
+            // Step 3: Create a statement
+            Statement stmt = conn.createStatement();
+
+            // Step 4: Execute a query
+            ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+
+            // Step 5: Process the result set
+            while (rs.next()) {
+                System.out.println("ID: " + rs.getInt("id") +
+                                   ", Name: " + rs.getString("name"));
+            }
+
+            // Step 6: Clean-up environment
+            rs.close();
+            stmt.close();
+            conn.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+---
+
+## 🧰 Common JDBC Interfaces
+
+| Interface     | Description                       |
+|---------------|-----------------------------------|
+| `Driver`      | Interface for database drivers    |
+| `Connection`  | Connection to the database        |
+| `Statement`   | Used to execute SQL queries       |
+| `PreparedStatement` | Precompiled SQL statement |
+| `ResultSet`   | Holds data from a SELECT query    |
+
+---
+
+## ⚠️ Important Tips
+
+- Always close `Connection`, `Statement`, and `ResultSet`
+- Use **`PreparedStatement`** for parameterized queries and preventing SQL injection
+- Prefer **try-with-resources** for automatic resource management
+
+---
+
+## 🛠 Maven Dependency for MySQL
+
+```xml
+<dependency>
+  <groupId>mysql</groupId>
+  <artifactId>mysql-connector-java</artifactId>
+  <version>8.0.33</version>
+</dependency>
+```
+
+---
+
+## 📚 References
+
+- [JDBC Tutorial - Oracle Docs](https://docs.oracle.com/javase/tutorial/jdbc/)
+- [MySQL JDBC Driver](https://dev.mysql.com/downloads/connector/j/)
