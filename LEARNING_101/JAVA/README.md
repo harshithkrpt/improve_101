@@ -5364,3 +5364,214 @@ sessionFactory.getCache().evict(Student.class);
 - [Hibernate Caching Guide](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#caching)
 - [Baeldung - Hibernate Caching](https://www.baeldung.com/hibernate-second-level-cache)
 
+
+
+# 🔍 Hibernate Query Language (HQL)
+
+**HQL** is an **object-oriented query language** similar to SQL but operates on entity objects instead of database tables.
+
+---
+
+## 🧠 Key Features
+
+- Case-insensitive (except for Java class and property names)
+- Uses class names and property names
+- Supports joins, aggregations, subqueries, etc.
+- Works with `Session.createQuery()`
+
+---
+
+## 🧾 Basic Syntax
+
+```java
+from EntityName
+select alias.property from EntityName alias
+where alias.property = :value
+```
+
+---
+
+## 🧪 Example: Simple Queries
+
+```java
+// Get all students
+List<Student> list = session.createQuery("from Student", Student.class).list();
+
+// Get student by ID
+Student student = session.createQuery("from Student s where s.id = :id", Student.class)
+                         .setParameter("id", 1)
+                         .uniqueResult();
+```
+
+---
+
+## 🎯 SELECT Queries
+
+```java
+select s.name from Student s
+select s from Student s where s.name like '%Harshith%'
+```
+
+---
+
+## 🔄 UPDATE & DELETE Queries
+
+```java
+// Update
+Query q1 = session.createQuery("update Student set name = :name where id = :id");
+q1.setParameter("name", "Updated Name");
+q1.setParameter("id", 1);
+q1.executeUpdate();
+
+// Delete
+Query q2 = session.createQuery("delete from Student where id = :id");
+q2.setParameter("id", 1);
+q2.executeUpdate();
+```
+
+> ⚠️ Requires transaction and `executeUpdate()` to apply changes.
+
+---
+
+## 🔗 Joins in HQL
+
+```java
+// Inner Join
+select e.name, d.name from Employee e join e.department d
+
+// Left Join
+select e.name, d.name from Employee e left join e.department d
+```
+
+---
+
+## 🧰 Named Parameters
+
+```java
+Query<Student> query = session.createQuery("from Student where name = :name", Student.class);
+query.setParameter("name", "Harshith");
+```
+
+---
+
+## 📦 Aggregation Functions
+
+```java
+select count(*) from Student
+select avg(s.score) from Student s
+```
+
+---
+
+## 🔂 Pagination
+
+```java
+query.setFirstResult(0);
+query.setMaxResults(10);
+```
+
+---
+
+## 🚫 Native SQL (Alternative to HQL)
+
+```java
+Query<Student> query = session.createNativeQuery("SELECT * FROM students", Student.class);
+```
+
+---
+
+## 📚 References
+
+- [Hibernate HQL Documentation](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#hql)
+- [Baeldung - HQL](https://www.baeldung.com/hibernate-query)
+
+
+
+
+# 🧾 Native SQL in Hibernate
+
+Hibernate allows the use of **native SQL queries** when HQL is not flexible enough or when you want to use database-specific SQL.
+
+---
+
+## ✅ When to Use Native SQL
+
+- Complex SQL queries
+- Stored procedures
+- Performance optimization
+- Vendor-specific SQL features
+
+---
+
+## 📌 Syntax
+
+```java
+Query query = session.createNativeQuery("SELECT * FROM students");
+```
+
+---
+
+## 🧪 Example: Native SQL without Entity Mapping
+
+```java
+List<Object[]> results = session.createNativeQuery("SELECT id, name FROM students").list();
+
+for (Object[] row : results) {
+    System.out.println("ID: " + row[0] + ", Name: " + row[1]);
+}
+```
+
+---
+
+## 🔄 Mapping to Entity
+
+```java
+Query<Student> query = session.createNativeQuery("SELECT * FROM students", Student.class);
+List<Student> students = query.getResultList();
+```
+
+> Make sure entity and table are mapped correctly with `@Entity` and `@Table(name="students")`.
+
+---
+
+## 🔧 Using Parameters
+
+```java
+Query query = session.createNativeQuery("SELECT * FROM students WHERE name = :name", Student.class);
+query.setParameter("name", "Harshith");
+
+List<Student> list = query.getResultList();
+```
+
+---
+
+## 📋 INSERT, UPDATE, DELETE
+
+```java
+Query query = session.createNativeQuery("UPDATE students SET name = :name WHERE id = :id");
+query.setParameter("name", "Updated Name");
+query.setParameter("id", 1);
+query.executeUpdate();
+```
+
+---
+
+## 🧠 Notes
+
+- Native SQL bypasses Hibernate’s query translation.
+- Still uses Hibernate's connection/session and transactions.
+- Results must match the selected columns or entity fields.
+
+---
+
+## 🛑 Limitations
+
+- No automatic mapping unless you specify entity class.
+- Less portable across databases.
+- You must handle column aliases manually for custom mappings.
+
+---
+
+## 📚 References
+
+- [Hibernate Native SQL Queries](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#sql)
