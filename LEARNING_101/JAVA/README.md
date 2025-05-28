@@ -5575,3 +5575,107 @@ query.executeUpdate();
 ## 📚 References
 
 - [Hibernate Native SQL Queries](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#sql)
+
+
+
+# 🔄 Hibernate Object States
+
+In Hibernate, an entity object can exist in one of **four main states** during its lifecycle. Understanding these is crucial for efficient session and transaction management.
+
+---
+
+## 1️⃣ Transient State
+
+- Object is **just created** using `new`
+- Not associated with any Hibernate `Session`
+- Not mapped to any database row
+
+```java
+Student student = new Student(); // Transient
+student.setName("Harshith");
+```
+
+> ✅ No DB record exists  
+> ❌ Not managed by Hibernate
+
+---
+
+## 2️⃣ Persistent State
+
+- Object is associated with an **open Hibernate session**
+- Any change is automatically synchronized to the database (during flush or commit)
+
+```java
+Session session = factory.openSession();
+Transaction tx = session.beginTransaction();
+
+Student student = new Student("Harshith");
+session.save(student); // Persistent
+
+tx.commit();
+```
+
+> ✅ Changes auto-saved  
+> ❗ Valid only during an active session
+
+---
+
+## 3️⃣ Detached State
+
+- Object was once persistent, but the session is now **closed**
+- Hibernate no longer tracks changes
+
+```java
+session.close(); // Student is now Detached
+
+student.setName("Updated"); // change not saved unless re-attached
+```
+
+To reattach:
+
+```java
+Session newSession = factory.openSession();
+newSession.update(student);
+```
+
+---
+
+## 4️⃣ Removed State
+
+- Object is **marked for deletion** using `session.delete()`
+- Deleted upon committing the transaction
+
+```java
+session.delete(student); // Removed state
+```
+
+---
+
+## 🔁 State Lifecycle Summary
+
+```text
+new -> Transient
+session.save() -> Persistent
+session.close() -> Detached
+session.delete() -> Removed
+```
+
+---
+
+## 🔍 Visual Flow
+
+```text
+[Transient] --save()--> [Persistent] --close()--> [Detached]
+                            |
+                        delete()
+                            ↓
+                        [Removed]
+```
+
+---
+
+## 📚 References
+
+- [Hibernate Docs: Object States](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#pc-object-states)
+- [Baeldung - Hibernate States](https://www.baeldung.com/hibernate-object-states)
+
