@@ -5679,3 +5679,243 @@ session.delete() -> Removed
 - [Hibernate Docs: Object States](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#pc-object-states)
 - [Baeldung - Hibernate States](https://www.baeldung.com/hibernate-object-states)
 
+
+
+# 🔍 Hibernate `get()` vs `load()` Methods
+
+In Hibernate, both `get()` and `load()` are used to **retrieve data** from the database, but they behave differently in terms of loading strategy and exception handling.
+
+---
+
+## 📌 Common Syntax
+
+```java
+Student s1 = session.get(Student.class, 1);
+Student s2 = session.load(Student.class, 1);
+```
+
+---
+
+## 🧠 Differences
+
+| Feature              | `get()`                            | `load()`                             |
+|----------------------|------------------------------------|--------------------------------------|
+| **Loading strategy** | Eager loading (hits DB immediately) | Lazy loading (returns proxy)         |
+| **Return value**     | Returns `null` if not found        | Throws `ObjectNotFoundException` if not found |
+| **Proxy returned**   | No                                 | Yes (returns proxy until accessed)   |
+| **When to use**      | When you want to check nullability | When you are sure the object exists  |
+
+---
+
+## 🧪 `get()` Example
+
+```java
+Student student = session.get(Student.class, 1);
+if (student != null) {
+    System.out.println(student.getName());
+}
+```
+
+- Immediately hits the DB
+- Safe if you're unsure whether the object exists
+
+---
+
+## 🧪 `load()` Example
+
+```java
+Student student = session.load(Student.class, 1);
+System.out.println(student.getName()); // DB hit only now
+```
+
+- Returns a proxy initially
+- Only hits DB when the object is actually used
+- Will throw `ObjectNotFoundException` if the object doesn’t exist
+
+---
+
+## ⚠️ Caution with `load()`
+
+If you try to access any property of a non-existing object loaded via `load()`, you’ll get:
+
+```text
+org.hibernate.ObjectNotFoundException
+```
+
+---
+
+## ✅ Use Cases
+
+- Use `get()` when:
+  - You want immediate data
+  - You want to perform null checks
+
+- Use `load()` when:
+  - You are certain the object exists
+  - You want performance optimization with lazy proxies
+
+---
+
+## 📚 References
+
+- [Hibernate Docs - get vs load](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#fetching-by-identifier)
+- [Baeldung - Hibernate get/load](https://www.baeldung.com/hibernate-get-vs-load)
+
+
+
+# Java Persistence API (JPA) – Notes
+
+## 🧠 What is JPA?
+
+- JPA stands for **Java Persistence API**.
+- It is a **specification** (not an implementation) for managing **relational data** in Java applications using **ORM (Object Relational Mapping)**.
+- It allows developers to work with databases using Java objects, eliminating the need for boilerplate SQL code.
+
+---
+
+## 📦 Core Concepts
+
+| Concept | Description |
+|--------|-------------|
+| `Entity` | A Java class mapped to a database table |
+| `Persistence Unit` | A set of all classes and settings related to persistence |
+| `EntityManager` | Interface used to interact with persistence context |
+| `Persistence Context` | Cache of managed entities within a transaction |
+| `Transaction` | Unit of work for database operations |
+
+---
+
+## 🏷️ Important Annotations
+
+### Entity Mapping
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
+}
+```
+
+| Annotation | Purpose |
+|------------|---------|
+| `@Entity` | Marks class as a persistent entity |
+| `@Table` | Maps class to specific table |
+| `@Id` | Marks primary key |
+| `@GeneratedValue` | Specifies generation strategy |
+| `@Column` | Maps field to a column with constraints |
+
+---
+
+## 🔁 Relationships
+
+### OneToOne
+```java
+@OneToOne
+@JoinColumn(name = "profile_id")
+private Profile profile;
+```
+
+### OneToMany / ManyToOne
+```java
+@OneToMany(mappedBy = "user")
+private List<Order> orders;
+
+@ManyToOne
+@JoinColumn(name = "user_id")
+private User user;
+```
+
+### ManyToMany
+```java
+@ManyToMany
+@JoinTable(
+    name = "student_course",
+    joinColumns = @JoinColumn(name = "student_id"),
+    inverseJoinColumns = @JoinColumn(name = "course_id"))
+private List<Course> courses;
+```
+
+---
+
+## 🛠️ EntityManager Operations
+
+```java
+EntityManager em = emf.createEntityManager();
+em.getTransaction().begin();
+
+User user = new User();
+em.persist(user);          // Insert
+user.setUsername("John");
+em.merge(user);            // Update
+em.remove(user);           // Delete
+User found = em.find(User.class, 1L); // Retrieve
+
+em.getTransaction().commit();
+em.close();
+```
+
+---
+
+## 📜 JPQL (Java Persistence Query Language)
+
+- Object-oriented query language similar to SQL but operates on **entities**, not tables.
+
+```java
+TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class);
+query.setParameter("username", "john");
+List<User> users = query.getResultList();
+```
+
+---
+
+## 📦 Persistence Unit (persistence.xml)
+
+```xml
+<persistence xmlns="http://jakarta.ee/xml/ns/persistence" version="3.0">
+  <persistence-unit name="myJpaUnit">
+    <class>com.example.User</class>
+    <properties>
+      <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+      <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/mydb"/>
+      <property name="jakarta.persistence.jdbc.user" value="root"/>
+      <property name="jakarta.persistence.jdbc.password" value="root"/>
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+      <property name="hibernate.show_sql" value="true"/>
+    </properties>
+  </persistence-unit>
+</persistence>
+```
+
+---
+
+## 🔄 JPA vs Hibernate
+
+| Feature        | JPA              | Hibernate               |
+|----------------|------------------|--------------------------|
+| Type           | Specification    | Implementation (JPA Provider) |
+| Portability    | High             | Limited to Hibernate     |
+| Vendor Neutral | Yes              | No                       |
+
+---
+
+## ✅ Advantages of JPA
+
+- Reduces boilerplate SQL code
+- Works across multiple databases
+- Enables complex relationships via annotations
+- Integrated with Java EE and Spring ecosystem
+
+---
+
+## ❌ Limitations
+
+- Limited control over native queries
+- Some learning curve for beginners
+- Performance tuning sometimes requires low-level access
+
+---
