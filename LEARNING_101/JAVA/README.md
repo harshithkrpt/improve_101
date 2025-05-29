@@ -5919,3 +5919,461 @@ List<User> users = query.getResultList();
 - Performance tuning sometimes requires low-level access
 
 ---
+
+
+# Jersey in Java - Comprehensive Notes
+
+## What is Jersey?
+
+Jersey is the reference implementation of JAX-RS (Java API for RESTful Web Services). It simplifies the development of RESTful web services in Java.
+
+- **JAX-RS**: A Java API for creating RESTful web services.
+- **Jersey**: A framework that implements JAX-RS and provides tools to develop REST endpoints.
+
+---
+
+## Key Features
+
+- Easy POJO to JSON/XML binding
+- Dependency injection support
+- Exception handling
+- Filters and interceptors
+- Integration with containers (Tomcat, Jetty, Grizzly)
+- Client API for consuming REST services
+
+---
+
+## Maven Dependency
+
+```xml
+<dependency>
+    <groupId>org.glassfish.jersey.containers</groupId>
+    <artifactId>jersey-container-servlet</artifactId>
+    <version>3.1.3</version>
+</dependency>
+```
+
+---
+
+## Project Structure Example
+
+```
+src/
+  main/
+    java/
+      com/example/resource/
+        MyResource.java
+    webapp/
+      WEB-INF/
+        web.xml
+```
+
+---
+
+## Example: Hello World Resource
+
+```java
+package com.example.resource;
+
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("/hello")
+public class MyResource {
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello() {
+        return "Hello, Jersey!";
+    }
+}
+```
+
+---
+
+## Configuring web.xml
+
+```xml
+<web-app>
+    <servlet>
+        <servlet-name>jersey-servlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>com.example.resource</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>jersey-servlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+</web-app>
+```
+
+---
+
+## Annotations
+
+| Annotation      | Description                                     |
+|----------------|-------------------------------------------------|
+| @Path          | Defines the relative URI path                   |
+| @GET, @POST    | HTTP methods supported                          |
+| @Produces      | MIME types returned (JSON, XML, TEXT)           |
+| @Consumes      | MIME types accepted                             |
+| @PathParam     | Binds URI path parameters to method parameters  |
+| @QueryParam    | Binds query parameters to method parameters     |
+| @FormParam     | Binds form parameters                           |
+
+---
+
+## Example: PathParam & QueryParam
+
+```java
+@Path("/users")
+public class UserResource {
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public User getUser(@PathParam("id") int id) {
+        return new User(id, "User" + id);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<User> getUsers(@QueryParam("limit") int limit) {
+        return getAllUsers().stream().limit(limit).collect(Collectors.toList());
+    }
+}
+```
+
+---
+
+## Exception Handling
+
+```java
+@Provider
+public class CustomExceptionMapper implements ExceptionMapper<Throwable> {
+    @Override
+    public Response toResponse(Throwable e) {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                       .entity("Something went wrong: " + e.getMessage())
+                       .build();
+    }
+}
+```
+
+---
+
+## Jersey Client API
+
+```java
+Client client = ClientBuilder.newClient();
+WebTarget target = client.target("http://localhost:8080/api/hello");
+String response = target.request(MediaType.TEXT_PLAIN).get(String.class);
+```
+
+---
+
+## Use Cases
+
+- Building REST APIs for web/mobile clients
+- Microservices with Jersey and Docker
+- Backend services for Angular/React apps
+- Secure APIs using OAuth/JWT
+
+---
+
+## Tips
+
+- Use `Response` class for flexible return types
+- Integrate with frameworks like Spring using `jersey-spring`
+- Add logging using Jersey filters/interceptors
+
+---
+
+## References
+
+- [Jersey GitHub Repo](https://github.com/eclipse-ee4j/jersey)
+- [Jersey Documentation](https://eclipse-ee4j.github.io/jersey/)
+- [Jakarta EE - JAX-RS](https://jakarta.ee/specifications/restful-ws/)
+- [Baeldung - Jersey](https://www.baeldung.com/jersey-rest)
+- [Mkyong - Jersey](https://mkyong.com/tutorials/jersey/)
+
+---
+
+## Summary
+
+Jersey is a powerful, production-ready framework for creating REST APIs in Java. With its simple annotation-based programming model and robust ecosystem, it's widely used for developing scalable backend services.
+
+# Jersey in Java - Comprehensive Notes
+
+## What is Jersey?
+
+Jersey is the reference implementation of JAX-RS (Java API for RESTful Web Services). It simplifies the development of RESTful web services in Java.
+
+- **JAX-RS**: A Java API for creating RESTful web services.
+- **Jersey**: A framework that implements JAX-RS and provides tools to develop REST endpoints.
+
+---
+
+## Key Features
+
+- Easy POJO to JSON/XML binding
+- Dependency injection support
+- Exception handling
+- Filters and interceptors
+- Integration with containers (Tomcat, Jetty, Grizzly)
+- Client API for consuming REST services
+
+---
+
+## Maven Dependency
+
+```xml
+<dependency>
+    <groupId>org.glassfish.jersey.containers</groupId>
+    <artifactId>jersey-container-servlet</artifactId>
+    <version>3.1.3</version>
+</dependency>
+```
+
+---
+
+## Project Structure Example
+
+```
+src/
+  main/
+    java/
+      com/example/resource/
+        MyResource.java
+    webapp/
+      WEB-INF/
+        web.xml
+```
+
+---
+
+## Example: Hello World Resource
+
+```java
+package com.example.resource;
+
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+
+@Path("/hello")
+public class MyResource {
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String hello() {
+        return "Hello, Jersey!";
+    }
+}
+```
+
+---
+
+## Configuring web.xml
+
+```xml
+<web-app>
+    <servlet>
+        <servlet-name>jersey-servlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>com.example.resource</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>jersey-servlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+</web-app>
+```
+
+---
+
+## Annotations
+
+| Annotation      | Description                                     |
+|----------------|-------------------------------------------------|
+| @Path          | Defines the relative URI path                   |
+| @GET, @POST    | HTTP methods supported                          |
+| @Produces      | MIME types returned (JSON, XML, TEXT)           |
+| @Consumes      | MIME types accepted                             |
+| @PathParam     | Binds URI path parameters to method parameters  |
+| @QueryParam    | Binds query parameters to method parameters     |
+| @FormParam     | Binds form parameters                           |
+
+---
+
+## Example: PathParam & QueryParam
+
+```java
+@Path("/users")
+public class UserResource {
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public User getUser(@PathParam("id") int id) {
+        return new User(id, "User" + id);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<User> getUsers(@QueryParam("limit") int limit) {
+        return getAllUsers().stream().limit(limit).collect(Collectors.toList());
+    }
+}
+```
+
+---
+
+## CRUD Operations Example
+
+### User POJO
+```java
+public class User {
+    private int id;
+    private String name;
+
+    // Constructor, Getters, Setters
+    public User() {}
+    public User(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+}
+```
+
+### Resource Class
+```java
+@Path("/users")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class UserResource {
+
+    private static List<User> users = new ArrayList<>();
+
+    @POST
+    public Response createUser(User user) {
+        users.add(user);
+        return Response.status(Response.Status.CREATED).entity(user).build();
+    }
+
+    @GET
+    public List<User> getAllUsers() {
+        return users;
+    }
+
+    @GET
+    @Path("/{id}")
+    public Response getUser(@PathParam("id") int id) {
+        for (User user : users) {
+            if (user.getId() == id) return Response.ok(user).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateUser(@PathParam("id") int id, User updatedUser) {
+        for (User user : users) {
+            if (user.getId() == id) {
+                user.setName(updatedUser.getName());
+                return Response.ok(user).build();
+            }
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteUser(@PathParam("id") int id) {
+        Iterator<User> iterator = users.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getId() == id) {
+                iterator.remove();
+                return Response.noContent().build();
+            }
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+}
+```
+
+---
+
+## Exception Handling
+
+```java
+@Provider
+public class CustomExceptionMapper implements ExceptionMapper<Throwable> {
+    @Override
+    public Response toResponse(Throwable e) {
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                       .entity("Something went wrong: " + e.getMessage())
+                       .build();
+    }
+}
+```
+
+---
+
+## Jersey Client API
+
+```java
+Client client = ClientBuilder.newClient();
+WebTarget target = client.target("http://localhost:8080/api/hello");
+String response = target.request(MediaType.TEXT_PLAIN).get(String.class);
+```
+
+---
+
+## Use Cases
+
+- Building REST APIs for web/mobile clients
+- Microservices with Jersey and Docker
+- Backend services for Angular/React apps
+- Secure APIs using OAuth/JWT
+
+---
+
+## Tips
+
+- Use `Response` class for flexible return types
+- Integrate with frameworks like Spring using `jersey-spring`
+- Add logging using Jersey filters/interceptors
+
+---
+
+## References
+
+- [Jersey GitHub Repo](https://github.com/eclipse-ee4j/jersey)
+- [Jersey Documentation](https://eclipse-ee4j.github.io/jersey/)
+- [Jakarta EE - JAX-RS](https://jakarta.ee/specifications/restful-ws/)
+- [Baeldung - Jersey](https://www.baeldung.com/jersey-rest)
+- [Mkyong - Jersey](https://mkyong.com/tutorials/jersey/)
+
+---
+
+## Summary
+
+Jersey is a powerful, production-ready framework for creating REST APIs in Java. With its simple annotation-based programming model and robust ecosystem, it's widely used for developing scalable backend services.
