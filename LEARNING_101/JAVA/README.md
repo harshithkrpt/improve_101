@@ -6377,3 +6377,195 @@ String response = target.request(MediaType.TEXT_PLAIN).get(String.class);
 ## Summary
 
 Jersey is a powerful, production-ready framework for creating REST APIs in Java. With its simple annotation-based programming model and robust ecosystem, it's widely used for developing scalable backend services.
+
+
+# Spring Core Comprehensive Notes
+
+## Spring Framework Overview
+
+Spring Core provides essential functionalities like Dependency Injection (DI), Aspect-Oriented Programming (AOP), and Transaction Management.
+
+## Dependency Injection (DI)
+
+DI is a design pattern used to implement IoC, allowing objects to be injected at runtime.
+
+### Types of DI:
+
+1. **Constructor-based DI:**
+
+```java
+@Component
+public class UserService {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+}
+```
+
+2. **Setter-based DI:**
+
+```java
+@Component
+public class UserService {
+    private UserRepository userRepository;
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+}
+```
+
+3. **Field-based DI:**
+
+```java
+@Component
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+}
+```
+
+## Common Annotations in Spring Core
+
+### @Component
+
+Used to mark a class as a Spring-managed component.
+
+```java
+@Component
+public class MyComponent {}
+```
+
+### @Autowired
+
+Used for automatic dependency injection.
+
+```java
+@Autowired
+private UserRepository userRepository;
+```
+
+### @Qualifier
+
+Resolves ambiguity when multiple beans of the same type exist.
+
+```java
+@Autowired
+@Qualifier("userRepoImpl")
+private UserRepository userRepository;
+```
+
+### @Service, @Repository, @Controller
+
+Specializations of @Component.
+
+```java
+@Service
+public class UserService {}
+
+@Repository
+public class UserRepository {}
+
+@Controller
+public class UserController {}
+```
+
+### @Bean
+
+Used in configuration classes to define a bean explicitly.
+
+```java
+@Configuration
+public class AppConfig {
+    @Bean
+    public UserRepository userRepository() {
+        return new UserRepositoryImpl();
+    }
+}
+```
+
+### @Configuration
+
+Defines one or more @Bean methods.
+
+```java
+@Configuration
+public class AppConfig {}
+```
+
+### @Scope
+
+Defines bean scope (singleton, prototype, etc.).
+
+```java
+@Component
+@Scope("prototype")
+public class MyBean {}
+```
+
+### @Value
+
+Injects property values.
+
+```java
+@Value("${user.name}")
+private String username;
+```
+
+## Bean Scopes
+
+* **singleton (default)**: One instance per Spring IoC container.
+* **prototype**: New instance every time requested.
+* **request**: One instance per HTTP request.
+* **session**: One instance per HTTP session.
+* **application**: One instance per ServletContext.
+
+## Important Spring Core Topics
+
+### Inversion of Control (IoC)
+
+Objects don't create or manage dependencies themselves, Spring handles this responsibility.
+
+### Bean Lifecycle
+
+* Bean instantiation
+* Populate properties
+* Bean initialization (custom init-method)
+* Bean ready to use
+* Container shutdown (custom destroy-method)
+
+```java
+@Component
+public class MyBean implements InitializingBean, DisposableBean {
+
+    @Override
+    public void afterPropertiesSet() {
+        System.out.println("Initializing bean");
+    }
+
+    @Override
+    public void destroy() {
+        System.out.println("Destroying bean");
+    }
+}
+```
+
+### Aspect-Oriented Programming (AOP)
+
+Cross-cutting concerns (logging, security, transactions).
+
+```java
+@Aspect
+@Component
+public class LoggingAspect {
+
+    @Before("execution(* com.example..*(..))")
+    public void logBefore(JoinPoint joinPoint) {
+        System.out.println("Before method: " + joinPoint.getSignature().getName());
+    }
+}
+```
