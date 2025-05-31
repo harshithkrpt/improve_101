@@ -6571,22 +6571,3 @@ public class LoggingAspect {
 ```
 
 
-Spring Framework
-        spring - core
-                - beans
-                - context (ApplicationContext) 
-                - annotations
-        spring - jdbc Bean RowMapper POJO
-        spring - jpa (ORM) Hibernate
-        spring - web
-        spring - security
-        spring - aop
-Spring Boot
-        - Spring Cloud
-        - Spring Microservices
-        - Spring Messaging (kafka, RabbitMQ)
-        - Redis (Cache, Messaging)
-
-Build Tool - Maven
-
-https://spring.academy/courses
