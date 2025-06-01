@@ -6,9 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.GenerationType;
 
-@Entity(name="categories")
+@Entity(name = "categories")
 public class Categories {
-    
 
     public Categories() {
     }
@@ -41,5 +40,4 @@ public class Categories {
         return "Categoies [id=" + id + ", name=" + name + "]";
     }
 
-    
 }

@@ -7,15 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
-
-
 @Entity
 public class Products {
-    
+
     public Products() {
     }
 
-    @Id  
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
@@ -47,7 +45,6 @@ public class Products {
         this.name = name;
     }
 
-
     public double getPrice() {
         return price;
     }
@@ -72,5 +69,4 @@ public class Products {
         this.categories = categories;
     }
 
-    
 }

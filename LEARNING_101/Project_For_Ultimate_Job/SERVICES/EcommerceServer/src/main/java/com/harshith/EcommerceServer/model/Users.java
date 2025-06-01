@@ -8,18 +8,16 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-
 @Entity(name = "users")
 public class Users {
-    
+
     public Users() {
     }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    
-    
+
     @Column(name = "name", nullable = false)
     private String name;
 
