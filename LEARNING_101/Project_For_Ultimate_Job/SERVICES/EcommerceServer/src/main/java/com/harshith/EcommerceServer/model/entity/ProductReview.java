@@ -1,4 +1,4 @@
-package com.harshith.EcommerceServer.model;
+package com.harshith.EcommerceServer.model.entity;
 
 import java.sql.Date;
 
@@ -32,7 +32,7 @@ public class ProductReview {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    private User users;
 
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -75,11 +75,11 @@ public class ProductReview {
         this.id = id;
     }
 
-    public Users getUsers() {
+    public User getUsers() {
         return users;
     }
 
-    public void setUsers(Users users) {
+    public void setUsers(User users) {
         this.users = users;
     }
 

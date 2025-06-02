@@ -1,4 +1,4 @@
-package com.harshith.EcommerceServer.model;
+package com.harshith.EcommerceServer.model.entity;
 
 import java.sql.Date;
 

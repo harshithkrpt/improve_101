@@ -2,8 +2,8 @@ package com.harshith.EcommerceServer.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.harshith.EcommerceServer.model.Users;
-import com.harshith.EcommerceServer.repository.UserRepo;
+import com.harshith.EcommerceServer.model.entity.User;
+import com.harshith.EcommerceServer.repository.UserRepository;
 
 import java.util.List;
 
@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
 
     @Autowired
-    UserRepo userRepo;
+    UserRepository userRepo;
 
     @GetMapping("/getAllUsers")
-    public List<Users> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepo.findAll();
     }
 

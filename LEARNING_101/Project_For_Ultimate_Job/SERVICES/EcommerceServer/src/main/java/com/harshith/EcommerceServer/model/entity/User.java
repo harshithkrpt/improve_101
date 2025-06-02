@@ -1,4 +1,4 @@
-package com.harshith.EcommerceServer.model;
+package com.harshith.EcommerceServer.model.entity;
 
 import java.sql.Date;
 
@@ -9,9 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity(name = "users")
-public class Users {
+public class User {
 
-    public Users() {
+    public User() {
     }
 
     @Id
@@ -61,7 +61,7 @@ public class Users {
 
     @Override
     public String toString() {
-        return "Users [id=" + id + ", name=" + name + ", email=" + email + ", registrationDate=" + registrationDate
+        return "User [id=" + id + ", name=" + name + ", email=" + email + ", registrationDate=" + registrationDate
                 + "]";
     }
 
