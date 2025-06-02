@@ -11,10 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@Entity
-public class Deliveries {
+@Entity(name = "deliveries")
+public class Delivery {
 
-    public Deliveries() {
+    public Delivery() {
     }
 
     @Id
@@ -23,7 +23,7 @@ public class Deliveries {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
-    private Orders orders;
+    private Order orders;
 
     private String status;
 
@@ -36,8 +36,7 @@ public class Deliveries {
     @Column(name = "landmark")
     private String landmark;
 
-    // TODO: In Future we can create one more table forn delivery management wrt
-    // couriers as a seperate table
+   
     @Column(name = "courier_name")
     private String courierName;
 
@@ -55,11 +54,11 @@ public class Deliveries {
         this.id = id;
     }
 
-    public Orders getOrders() {
+    public Order getOrders() {
         return orders;
     }
 
-    public void setOrders(Orders orders) {
+    public void setOrders(Order orders) {
         this.orders = orders;
     }
 
@@ -119,4 +118,13 @@ public class Deliveries {
         this.deliveredAt = deliveredAt;
     }
 
+    @Override
+    public String toString() {
+        return "Delivery [id=" + id + ", orders=" + orders + ", status=" + status + ", zipcode=" + zipcode
+                + ", address=" + address + ", landmark=" + landmark + ", courierName=" + courierName
+                + ", expectedDelivery=" + expectedDelivery + ", deliveredAt=" + deliveredAt + "]";
+    }
+
+
+    
 }

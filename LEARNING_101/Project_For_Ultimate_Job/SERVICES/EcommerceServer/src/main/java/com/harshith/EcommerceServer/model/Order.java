@@ -11,10 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@Entity
-public class Orders {
+@Entity(name = "orders")
+public class Order {
 
-    public Orders() {
+    public Order() {
     }
 
     @Id
@@ -74,4 +74,11 @@ public class Orders {
         this.totalAmount = totalAmount;
     }
 
+    @Override
+    public String toString() {
+        return "Order [id=" + id + ", users=" + users + ", orderedAt=" + orderedAt + ", totalAmount=" + totalAmount
+                + ", paymentStatus=" + paymentStatus + "]";
+    }
+    
+    
 }

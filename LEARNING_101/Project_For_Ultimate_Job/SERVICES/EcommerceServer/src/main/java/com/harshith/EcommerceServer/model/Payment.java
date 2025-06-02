@@ -11,10 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-@Entity
-public class Payments {
+@Entity(name = "payments")
+public class Payment {
 
-    public Payments() {
+    public Payment() {
     }
 
     @Id
@@ -23,7 +23,7 @@ public class Payments {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "order_id", nullable = false)
-    private Orders orders;
+    private Order orders;
 
     @Column(nullable = false)
     private String method;
@@ -42,11 +42,11 @@ public class Payments {
         this.id = id;
     }
 
-    public Orders getOrders() {
+    public Order getOrders() {
         return orders;
     }
 
-    public void setOrders(Orders orders) {
+    public void setOrders(Order orders) {
         this.orders = orders;
     }
 
@@ -74,4 +74,10 @@ public class Payments {
         this.paidAt = paidAt;
     }
 
+    @Override
+    public String toString() {
+        return "Payment [id=" + id + ", orders=" + orders + ", method=" + method + ", status=" + status + ", paidAt="
+                + paidAt + "]";
+    }
+    
 }

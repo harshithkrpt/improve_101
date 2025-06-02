@@ -12,10 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 
-@Entity
-public class ProductReviews {
+@Entity(name = "product_reviews")
+public class ProductReview {
     
-    public ProductReviews() {
+    public ProductReview() {
     }
 
     @Id
@@ -37,7 +37,7 @@ public class ProductReviews {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    private Products products;
+    private Product products;
 
 
     public int getRating() {
@@ -82,5 +82,11 @@ public class ProductReviews {
     public void setUsers(Users users) {
         this.users = users;
     }
-   
+
+    @Override
+    public String toString() {
+        return "ProductReview [id=" + id + ", rating=" + rating + ", review=" + review + ", users=" + users
+                + ", products=" + products + ", reviewedAt=" + reviewedAt + "]";
+    }
+       
 }

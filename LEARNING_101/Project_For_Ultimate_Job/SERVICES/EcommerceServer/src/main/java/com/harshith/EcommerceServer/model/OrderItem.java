@@ -10,10 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 
-@Entity
-public class OrderItems {
+@Entity(name = "order_items")
+public class OrderItem {
 
-    public OrderItems() {
+    public OrderItem() {
     }
 
     @Id
@@ -22,11 +22,11 @@ public class OrderItems {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    private Products products;
+    private Product products;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private Orders orders;
+    private Order orders;
 
     @Column(nullable = false)
     private double price;
@@ -42,19 +42,19 @@ public class OrderItems {
         this.id = id;
     }
 
-    public Products getProducts() {
+    public Product getProducts() {
         return products;
     }
 
-    public void setProducts(Products products) {
+    public void setProducts(Product products) {
         this.products = products;
     }
 
-    public Orders getOrders() {
+    public Order getOrders() {
         return orders;
     }
 
-    public void setOrders(Orders orders) {
+    public void setOrders(Order orders) {
         this.orders = orders;
     }
 
@@ -76,7 +76,7 @@ public class OrderItems {
 
     @Override
     public String toString() {
-        return "OrderItems [id=" + id + ", products=" + products + ", orders=" + orders + ", price=" + price
+        return "OrderItem [id=" + id + ", products=" + products + ", orders=" + orders + ", price=" + price
                 + ", quantity=" + quantity + "]";
     }
 }

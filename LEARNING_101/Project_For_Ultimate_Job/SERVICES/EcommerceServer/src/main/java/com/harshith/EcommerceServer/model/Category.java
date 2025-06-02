@@ -7,9 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GenerationType;
 
 @Entity(name = "categories")
-public class Categories {
+public class Category {
 
-    public Categories() {
+    public Category() {
     }
 
     @Id
@@ -37,7 +37,7 @@ public class Categories {
 
     @Override
     public String toString() {
-        return "Categoies [id=" + id + ", name=" + name + "]";
+        return "Category [id=" + id + ", name=" + name + "]";
     }
 
 }
