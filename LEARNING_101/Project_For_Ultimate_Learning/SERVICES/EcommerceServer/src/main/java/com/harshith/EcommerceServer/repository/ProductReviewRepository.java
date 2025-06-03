@@ -2,5 +2,7 @@ package com.harshith.EcommerceServer.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProductReviewRepository extends JpaRepository<ProductRepository, Integer> {
+import com.harshith.EcommerceServer.model.entity.ProductReview;
+
+public interface ProductReviewRepository extends JpaRepository<ProductReview, Integer> {
 }
