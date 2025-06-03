@@ -3,7 +3,7 @@ package com.harshith.EcommerceServer.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.harshith.EcommerceServer.model.entity.User;
-import com.harshith.EcommerceServer.repository.UserRepository;
+import com.harshith.EcommerceServer.service.UserService;
 
 import java.util.List;
 
@@ -14,13 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RestController()
 @RequestMapping("/users")
 public class UserController {
-
     @Autowired
-    UserRepository userRepo;
+    private UserService userService;
 
     @GetMapping("/getAllUsers")
     public List<User> getAllUsers() {
-        return userRepo.findAll();
+        return userService.getAllUsers();
     }
 
 }
