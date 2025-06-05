@@ -24,4 +24,6 @@
 
 
 - Removed Unit Tests for Now 
-- Need to add /registration , /login , /protected_route with jwt
+- Need to add /registration , /login , /protected_route with Basic Auth
+- Add Support for JWT Auth
+- Add Anotation Based Routes which specifies that are protected
