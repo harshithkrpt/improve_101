@@ -22,7 +22,7 @@ public class JwtUtil {
     }
 
     @SuppressWarnings("deprecation")
-    private String generateToken(String username) {
+    public String generateToken(String username) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jetExpirationMs);
 

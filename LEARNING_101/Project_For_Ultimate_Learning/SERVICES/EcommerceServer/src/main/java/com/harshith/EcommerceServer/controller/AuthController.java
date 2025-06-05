@@ -1,20 +1,26 @@
 package com.harshith.EcommerceServer.controller;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.harshith.EcommerceServer.dto.AuthRequest;
 import com.harshith.EcommerceServer.dto.AuthResponse;
+import com.harshith.EcommerceServer.dto.JwtAuthResponse;
 import com.harshith.EcommerceServer.model.entity.Role;
 import com.harshith.EcommerceServer.model.entity.User;
 import com.harshith.EcommerceServer.repository.RoleRepository;
 import com.harshith.EcommerceServer.repository.UserRepository;
+import com.harshith.EcommerceServer.security.JwtUtil;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -25,13 +31,15 @@ public class AuthController {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository,
-            RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+            RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/register")
@@ -65,15 +73,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                 authRequest.getUsername(), authRequest.getPassword());
 
         try {
-            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+            Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new AuthResponse("login successful", authRequest.getUsername()));
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            String token = jwtUtil.generateToken(userDetails.getUsername());
+
+            JwtAuthResponse jwtAuthResponse = new JwtAuthResponse(token, userDetails.getUsername());
+
+            return ResponseEntity.ok(jwtAuthResponse);
+
         } catch (BadCredentialsException exception) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new AuthResponse("credentials are invalid", authRequest.getUsername()));
