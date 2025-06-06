@@ -25,11 +25,11 @@ export default function LoginPage() {
                 throw new Error(data.message || 'Login failed');
             }
 
-            const {token, resUsername}:  { token: string, resUsername: string } = await res.json();
-            localStorage.setItem("token", token);
-            localStorage.setItem("username", resUsername);
+            const {token}:  { token: string } = await res.json();
+           
+            document.cookie = `token=${token}; path=/;`;
 
-            router.push("/home");
+            router.push("/");
         }
         catch(err) {
             setError(err.message);
