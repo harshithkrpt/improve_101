@@ -15,7 +15,7 @@
 
 - Learn more about streams + collections library
 - Collectors , :: Syntax in streams
-- ? in Generics learn next topics in generics
+- ? in Generics learn next topics in generics ->  I think response if unknown we can add it , need to know if it is good practice
 
 - In Chatgpt I am seeing jakarta validation what is it ?
 - can we use it to add validations in a simple way ?
@@ -27,3 +27,12 @@
 - Need to add /registration , /login , /protected_route with Basic Auth
 - Add Support for JWT Auth
 - Add Anotation Based Routes which specifies that are protected
+
+<!-- Adding Admin Roles -->
+<!-- Create a  User Interface where Admin Can Create Roles -->
+<!-- Admin will have ROLE_ADMIN -->
+
+
+<!-- Create UI Login Screen -->
+<!-- CREATE UI FOR Admin Screen -->
+<!-- ADD REMIX JS -->
