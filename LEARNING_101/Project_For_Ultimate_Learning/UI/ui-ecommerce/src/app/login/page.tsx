@@ -16,8 +16,6 @@ export default function LoginPage() {
         try {
             const res = await fetch("http://localhost:8081/auth/user/login", {
                 method: "POST",
-                mode: 'cors',            
-                credentials: 'include',
                 headers: { "content-type": "application/json" },
                 body: JSON.stringify({ username, password })
             });

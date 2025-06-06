@@ -25,8 +25,6 @@ export default function RegisterPage() {
     try {
       const res = await fetch('http://localhost:8081/auth/user/register', {
         method: 'POST',
-        mode: 'cors',            
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
