@@ -59,7 +59,7 @@ export default function RegisterPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="Your full name"
+            placeholder="Enter new username"
           />
         </div>
 
@@ -76,7 +76,7 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="••••••••"
+            placeholder="Enter password"
           />
         </div>
 

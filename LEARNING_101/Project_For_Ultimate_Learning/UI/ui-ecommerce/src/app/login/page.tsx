@@ -30,7 +30,8 @@ export default function LoginPage() {
             document.cookie = `token=${accessToken}; path=/;`;
 
             router.push("/browse");
-        }
+            router.refresh()
+          }
         catch(err) {
             setError(err.message);
         }
@@ -54,7 +55,7 @@ export default function LoginPage() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="someuniqueId"
+            placeholder="Enter Username"
           />
         </div>
 
@@ -70,7 +71,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="••••••••"
+            placeholder="Enter Password"
           />
         </div>
 
