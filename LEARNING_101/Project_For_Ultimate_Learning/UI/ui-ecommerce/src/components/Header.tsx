@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { LogoutButton } from "./LogoutButton"
 import { LoggedInButtons }  from "./LoginButton"
 import { usePathname } from "next/navigation"
-
+import Image from "next/image"
 export function Header() {
   const [loggedIn, setLoggedIn] = useState(false)
   const pathname = usePathname()
@@ -15,8 +15,8 @@ export function Header() {
 
   return (
     <header className="p-4 bg-gray-100 flex justify-between items-center">
-      <h1 className="text-xl font-bold w-12 h-12">
-        <img src={"./ecommerce.png"}/>
+      <h1 className="text-xl font-bold">
+        <Image src={"/ecommerce.png"} priority width={48} height={48}  alt={"ecommerce.png"}/>
       </h1>
       {loggedIn ? <LogoutButton/> : <LoggedInButtons/>}
     </header>
