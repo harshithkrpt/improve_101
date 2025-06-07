@@ -29,8 +29,8 @@
 28. what are design patterns
 29. what are prototypes
 30. what is __proto__ used for keyword and difference between prototype keyword and __proto__
+31. what is rem , em, % and other css units.
 
 
 <!-- Feedback -->
 <!-- Go deep in understanding the concepts and inner workings of every concept of ui -> html , css & js -->
-

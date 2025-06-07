@@ -5,9 +5,9 @@ public class JwtAuthResponse {
     private String tokenType = "Bearer";
     private String username;
 
-    public JwtAuthResponse(String accessToken, String tokenType) {
+    public JwtAuthResponse(String accessToken, String username) {
         this.accessToken = accessToken;
-        this.tokenType = tokenType;
+        this.username = username;
     }
 
     public String getAccessToken() {

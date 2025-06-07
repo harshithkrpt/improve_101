@@ -20,16 +20,16 @@ export default function LoginPage() {
                 body: JSON.stringify({ username, password })
             });
 
+            
+            const data = await res.json();
+            const {accessToken}:  { accessToken: string } =  data;
             if(!res.ok) {
-                const data = await res.json();
                 throw new Error(data.message || 'Login failed');
             }
+            
+            document.cookie = `token=${accessToken}; path=/;`;
 
-            const {token}:  { token: string } = await res.json();
-           
-            document.cookie = `token=${token}; path=/;`;
-
-            router.push("/");
+            router.push("/browse");
         }
         catch(err) {
             setError(err.message);
