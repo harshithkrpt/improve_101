@@ -7,7 +7,6 @@ package com.harshith.EcommerceServer.model.dto;
  */
 public class CategoryDto {
 
-    // TODO: Adding Validations annotations
     private String name;
 
     public CategoryDto() { }

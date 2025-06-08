@@ -36,6 +36,9 @@ public class Product {
         return id;
     }
 
+    @Column(nullable = false, name = "product_image")
+    private String productImage;
+
     public void setId(int id) {
         this.id = id;
     }
@@ -72,10 +75,21 @@ public class Product {
         this.categories = categories;
     }
 
+    public String getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(String productImage) {
+        this.productImage = productImage;
+    }
+
+    
+
     @Override
     public String toString() {
         return "Product [id=" + id + ", name=" + name + ", categories=" + categories + ", price=" + price + ", stock="
                 + stock + "]";
     }
+
 
 }
