@@ -1,95 +1,89 @@
-"use client"
-import { useState } from "react";
+// src/app/login/page.tsx (or wherever your LoginPage lives)
+"use client";
+
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
-    const router = useRouter();
+  const router = useRouter();
 
-    const [username, setUsername] = useState('');
-    const [password, setPassword] =  useState('');
-    const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-        try {
-            const res = await fetch("http://localhost:8081/auth/user/login", {
-                method: "POST",
-                headers: { "content-type": "application/json" },
-                body: JSON.stringify({ username, password })
-            });
+    try {
+      const res = await fetch("http://localhost:8081/auth/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-            
-            const data = await res.json();
-            const {accessToken}:  { accessToken: string } =  data;
-            if(!res.ok) {
-                throw new Error(data.message || 'Login failed');
-            }
-            
-            document.cookie = `token=${accessToken}; path=/;`;
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
+      }
 
-            router.push("/browse");
-            router.refresh()
-          }
-        catch(err) {
-            setError(err.message);
-        }
+      const { accessToken }: { accessToken: string } = data;
+      document.cookie = `token=${accessToken}; path=/;`;
+      router.push("/browse");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
     }
+  };
 
-    return (
-       <div className="max-w-md mx-auto mt-16 p-6 border rounded-lg shadow-sm">
-      <h1 className="text-2xl font-semibold mb-4">Login</h1>
-      {error && <p className="mb-4 text-red-600">{error}</p>}
+  return (
+    <div className="max-w-md mx-auto mt-16 p-6 bg-background border border-border rounded-lg shadow-sm">
+      <h1 className="text-2xl font-semibold mb-6 text-foreground">Login</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Email Field */}
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium">
-            Username
-          </label>
-          <input
+      {error && (
+        <p className="mb-4 text-sm font-medium text-destructive">
+          {error}
+        </p>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
             id="username"
-            type="username"
-            required
+            type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="Enter Username"
+            placeholder="Enter username"
           />
         </div>
 
-        {/* Password Field */}
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium">
-            Password
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
             id="password"
             type="password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring"
-            placeholder="Enter Password"
+            placeholder="Enter password"
           />
         </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <Button type="submit" className="w-full">
           Log In
-        </button>
+        </Button>
       </form>
 
-      <p className="mt-4 text-center text-sm">
-        Don’t have an account?{' '}
-        <a href="/register" className="text-blue-600 hover:underline">
-          Register
-        </a>
+      <p className="mt-6 text-center text-sm text-foreground">
+        Don’t have an account?{" "}
+        <Link href="/register" passHref>
+          <Button variant="link">Register</Button>
+        </Link>
       </p>
-    </div> 
-    );
-} 
+    </div>
+  );
+}

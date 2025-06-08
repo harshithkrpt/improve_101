@@ -1,25 +1,29 @@
 // src/app/layout.tsx
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
+import './globals.css';
 
-import { Header } from "@/components/Header";
+import { Header } from '@/components/Header';
 
 export const metadata: Metadata = {
-  title: "Ecommerce App",
-  description: "description for adding description api",
+  title: 'Ecommerce App',
+  description: 'description for adding description api',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
   return (
     <html lang="en">
-      <body>
-      <Header />
-        {children}
+      <body className="bg-background text-foreground">
+        <ThemeProvider attribute="class" defaultTheme="system">
+          <Header/>
+          <main className="p-4">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );
