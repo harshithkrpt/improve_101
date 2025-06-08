@@ -1,7 +1,10 @@
 package com.harshith.EcommerceServer.service;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.harshith.EcommerceServer.dto.ProductDto;
@@ -17,7 +20,6 @@ public class ProductService {
 
     @Autowired
     CategoryRepository categoryRepository;
-
 
     // TODO: How & Where to Add Validations
     public Product addProduct(ProductDto productDto) {
@@ -35,5 +37,13 @@ public class ProductService {
         Product sProduct = productRepository.save(product);
 
         return sProduct;
+    }
+
+    // sort -> id,asc | id,desc
+    public Page<Product> getProducts(
+        int size, int page, String [] sort) {
+        Sort.Order order = Sort.Order.by(sort[0]).with(Sort.Direction.fromString(sort[1]));
+        Pageable pageable = PageRequest.of(page,size, Sort.by(order));
+        return productRepository.findAll(pageable);
     }
 }
