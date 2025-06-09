@@ -80,6 +80,16 @@
 			<optional>true</optional>
 		</dependency>
 
+
+
+		<dependency>
+		<groupId>org.liquibase</groupId>
+		<artifactId>liquibase-core</artifactId>
+		<version>4.21.1</version>
+		</dependency>
+
+
+
 		<!-- Testing Dependencies -->
 
 		<dependency>

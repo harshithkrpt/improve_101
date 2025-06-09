@@ -1,0 +1,404 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: harshith
+      changes:
+
+        # ─── Categories ────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+        # based on Category.java :contentReference[oaicite:0]{index=0}
+
+        # ─── Roles ─────────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+        # based on Role.java :contentReference[oaicite:1]{index=1}
+
+        # ─── Users ─────────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: registration_date
+                  type: DATE
+              - column:
+                  name: username
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+        # based on User.java :contentReference[oaicite:2]{index=2}
+
+        # ─── User-Roles Join Table ─────────────────────────────────────────────────
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: INT
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_roles
+            columnNames: user_id,role_id
+            constraintName: pk_user_roles
+        # join based on @ManyToMany in User.java :contentReference[oaicite:3]{index=3}
+
+        # ─── Products ──────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: products
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: category_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stock
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_image
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+        # based on Product.java :contentReference[oaicite:4]{index=4}
+
+        # ─── Orders ────────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ordered_at
+                  type: DATE
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_amount
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payment_status
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+        # based on Order.java :contentReference[oaicite:5]{index=5}
+
+        # ─── Order Items ───────────────────────────────────────────────────────────
+        - createTable:
+            tableName: order_items
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: quantity
+                  type: INT
+                  constraints:
+                    nullable: false
+        # based on OrderItem.java :contentReference[oaicite:6]{index=6}
+
+        # ─── Product Reviews ────────────────────────────────────────────────────────
+        - createTable:
+            tableName: product_reviews
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: rating
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: review
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: product_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reviewed_at
+                  type: DATE
+                  constraints:
+                    nullable: false
+        # based on ProductReview.java :contentReference[oaicite:7]{index=7}
+
+        # ─── Payments ──────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: method
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: paid_at
+                  type: DATE
+                  constraints:
+                    nullable: false
+        # based on Payment.java :contentReference[oaicite:8]{index=8}
+
+        # ─── Deliveries ────────────────────────────────────────────────────────────
+        - createTable:
+            tableName: deliveries
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+              - column:
+                  name: zipcode
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: landmark
+                  type: VARCHAR(255)
+              - column:
+                  name: courier_name
+                  type: VARCHAR(255)
+              - column:
+                  name: expected_delivery
+                  type: DATE
+              - column:
+                  name: delivered_at
+                  type: DATE
+        # based on Delivery.java :contentReference[oaicite:9]{index=9}
+
+        # ─── Foreign Key Constraints ────────────────────────────────────────────────
+        - addForeignKeyConstraint:
+            baseTableName: products
+            baseColumnNames: category_id
+            constraintName: fk_products_categories
+            referencedTableName: categories
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            constraintName: fk_user_roles_user
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            constraintName: fk_user_roles_role
+            referencedTableName: roles
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: orders
+            baseColumnNames: user_id
+            constraintName: fk_orders_users
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: product_id
+            constraintName: fk_order_items_product
+            referencedTableName: products
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: order_items
+            baseColumnNames: order_id
+            constraintName: fk_order_items_order
+            referencedTableName: orders
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: product_reviews
+            baseColumnNames: user_id
+            constraintName: fk_product_reviews_user
+            referencedTableName: users
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: product_reviews
+            baseColumnNames: product_id
+            constraintName: fk_product_reviews_product
+            referencedTableName: products
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: payments
+            baseColumnNames: order_id
+            constraintName: fk_payments_order
+            referencedTableName: orders
+            referencedColumnNames: id
+
+        - addForeignKeyConstraint:
+            baseTableName: deliveries
+            baseColumnNames: order_id
+            constraintName: fk_deliveries_order
+            referencedTableName: orders
+            referencedColumnNames: id
