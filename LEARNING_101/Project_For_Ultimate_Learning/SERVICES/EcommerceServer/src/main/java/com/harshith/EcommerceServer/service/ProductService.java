@@ -21,7 +21,7 @@ public class ProductService {
     @Autowired
     CategoryRepository categoryRepository;
 
-    // TODO: How & Where to Add Validations
+
     public Product addProduct(ProductDto productDto) {
         Category category = null;
         if(productDto.getCategoryId() != 0 || productDto.getCategoryName() != "") {
@@ -47,19 +47,53 @@ public class ProductService {
         return productRepository.findAllByIsActiveTrue(pageable);
     }
 
+    private Product getProductById(Integer id) {
+        return productRepository.findById(id).orElseGet(null);
+    }
+
     public Boolean deleleProduct(Integer productId) {
         if(productId <= 0) return false;
 
-        Product product = productRepository.findById(productId).orElseGet(null);
+        Product product = this.getProductById(productId);
 
         if(product == null) {
             return false;
-            
         }   
         
-        product.setIsActive(false);
-        productRepository.save(product);
-
-        return true;
+        try {
+             product.setIsActive(false);
+             productRepository.save(product);
+             return true;
+        }
+        catch(Exception err) {
+            return false;
+        }
     }
+
+    public Boolean updateProduct(Integer id, String productName, Integer stock, Double price) {
+        Product product = this.getProductById(id);
+        if(product == null) {
+            return false;
+        }
+        if(productName != "") {
+            product.setName(productName);
+        }
+        if(stock > 0) 
+        {
+            product.setStock(stock);
+        }
+        if(price > 0) {
+            product.setPrice(price);
+        }
+        try {
+            productRepository.save(product);
+            return true;
+        }
+        catch(Exception exception) {
+            return false;
+        }
+    }
+
+
+    
 }
