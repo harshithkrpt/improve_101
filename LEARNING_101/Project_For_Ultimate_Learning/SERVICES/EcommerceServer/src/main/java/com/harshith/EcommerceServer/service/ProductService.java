@@ -44,6 +44,22 @@ public class ProductService {
         int size, int page, String [] sort) {
         Sort.Order order = Sort.Order.by(sort[0]).with(Sort.Direction.fromString(sort[1]));
         Pageable pageable = PageRequest.of(page,size, Sort.by(order));
-        return productRepository.findAll(pageable);
+        return productRepository.findAllByIsActiveTrue(pageable);
+    }
+
+    public Boolean deleleProduct(Integer productId) {
+        if(productId <= 0) return false;
+
+        Product product = productRepository.findById(productId).orElseGet(null);
+
+        if(product == null) {
+            return false;
+            
+        }   
+        
+        product.setIsActive(false);
+        productRepository.save(product);
+
+        return true;
     }
 }

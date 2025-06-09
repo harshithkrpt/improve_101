@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 
@@ -41,6 +44,18 @@ public class ProductController {
         @RequestParam(defaultValue = "10") int size, 
         @RequestParam(defaultValue = "id,asc") String [] sort) {
         return productService.getProducts(size, page, sort);
+    }
+
+    @PutMapping("delete-product/{id}")
+    public ResponseEntity<Boolean> deleteProduct(@PathVariable Integer id) {
+        Boolean isDeleted =  productService.deleleProduct(id);
+        if(isDeleted) 
+        {
+            return ResponseEntity.ok().body(true);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+        }
     }
     
 }

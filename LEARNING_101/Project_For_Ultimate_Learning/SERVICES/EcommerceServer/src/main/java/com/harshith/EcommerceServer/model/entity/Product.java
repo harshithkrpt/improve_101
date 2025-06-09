@@ -35,6 +35,9 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    @Column(nullable = false, name = "is_active")
+    private Boolean isActive = true;
+
     public int getId() {
         return id;
     }
@@ -86,13 +89,21 @@ public class Product {
         this.productImage = productImage;
     }
 
-    
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
     @Override
     public String toString() {
         return "Product [id=" + id + ", name=" + name + ", categories=" + categories + ", price=" + price + ", stock="
                 + stock + "]";
     }
+
+
 
 
 }
