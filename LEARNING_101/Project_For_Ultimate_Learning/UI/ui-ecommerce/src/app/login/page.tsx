@@ -1,4 +1,4 @@
-// src/app/login/page.tsx (or wherever your LoginPage lives)
+// src/app/login/page.tsx
 "use client";
 
 import { useState, FormEvent } from "react";
@@ -41,11 +41,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-6 bg-background border border-border rounded-lg shadow-sm">
-      <h1 className="text-2xl font-semibold mb-6 text-foreground">Login</h1>
+    <div
+      className="
+        max-w-md mx-auto mt-16 p-6
+        bg-background-light dark:bg-background-dark
+        border border-border-light dark:border-border-dark
+        rounded-lg shadow-sm
+      "
+    >
+      <h1 className="text-2xl font-semibold mb-6 text-text-light dark:text-text-dark">
+        Login
+      </h1>
 
       {error && (
-        <p className="mb-4 text-sm font-medium text-destructive">
+        <p className="mb-4 text-sm font-medium text-secondary-light dark:text-secondary-dark">
           {error}
         </p>
       )}
@@ -78,7 +87,7 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-foreground">
+      <p className="mt-6 text-center text-sm text-text-light dark:text-text-dark">
         Don’t have an account?{" "}
         <Link href="/register" passHref>
           <Button variant="link">Register</Button>
