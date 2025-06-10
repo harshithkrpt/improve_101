@@ -11,7 +11,7 @@
              relativeToChangelogFile="true"/>
 
     <!-- insert initial roles -->
-    <include file="db.changelog-1.1-insert-roles.xml"
+    <include file="db.changelog-1.1-insert-data.xml"
              relativeToChangelogFile="true"/>
 
     <!-- future changesets… -->
