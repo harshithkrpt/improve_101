@@ -27,7 +27,7 @@ public class LiquibaseConfig {
         };
         lb.setDataSource(dataSource);
         // <-- remove "classpath:/"
-        lb.setChangeLog("db/changelog/db.changelog-master.yaml");
+        lb.setChangeLog("db/changelog/db.changelog-master.xml");
         lb.setContexts("development,production");
         lb.setDefaultSchema("ecommercespring");
         lb.setShouldRun(true);
