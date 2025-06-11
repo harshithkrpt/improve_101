@@ -18,7 +18,5 @@ export async function authFetch(
   return fetch(input, {
     ...init,
     headers,
-    // include cookies on cross-site calls if you ever need them:
-    credentials: "include",
   });
 }

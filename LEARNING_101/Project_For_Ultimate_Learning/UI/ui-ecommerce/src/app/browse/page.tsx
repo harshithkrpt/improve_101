@@ -1,7 +1,7 @@
 
 // pages/admin.tsx
 import React from "react";
-import { AddProductIcon, DeleteProductIcon, UpdateProductIcon } from "@/components/icons/ProductIcons";
+import { AddProductIcon, DeleteProductIcon, UpdateProductIcon, ViewProductIcon } from "@/components/icons/ProductIcons";
 import { AdminOptionCard } from "@/components/AdminOptionCard";
 
 export default function AdminPage() {
@@ -9,6 +9,7 @@ export default function AdminPage() {
     { title: "Add Product", Icon: AddProductIcon, href: "/browse/add-product" },
     { title: "Delete Product", Icon: DeleteProductIcon, href: "/browse/delete-product" },
     { title: "Update Product", Icon: UpdateProductIcon, href: "/browse/update-product" },
+    { title: "View Products", Icon: ViewProductIcon, href: "/browse/view-product" }
   ];
 
 

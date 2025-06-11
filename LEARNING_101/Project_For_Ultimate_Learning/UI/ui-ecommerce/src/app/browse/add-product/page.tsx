@@ -48,7 +48,7 @@ export default function AddProductPage() {
 
   useEffect(() => {
     (async () => {
-      const res = await authFetch("http://localhost:8081/categories");
+      const res = await authFetch("http://localhost:8081/category/get");
       const cats = await res.json();
       setCategories(cats);
     })();
@@ -62,7 +62,7 @@ export default function AddProductPage() {
       categoryName: cat ? cat.name : "",
     };
 
-    const res = await authFetch("http://localhost:8081/products", {
+    const res = await authFetch("http://localhost:8081/product/add-product", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

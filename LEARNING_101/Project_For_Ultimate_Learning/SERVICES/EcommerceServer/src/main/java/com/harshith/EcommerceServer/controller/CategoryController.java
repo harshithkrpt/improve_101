@@ -40,7 +40,7 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("/")
+    @GetMapping("/get")
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok().body(categoryService.getCategories());
     }

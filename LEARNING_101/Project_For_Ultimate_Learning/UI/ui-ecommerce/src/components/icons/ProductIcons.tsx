@@ -151,3 +151,21 @@ export function UpdateProductIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ViewProductIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (<svg
+    viewBox="0 0 64 64"
+    fill="none"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    {/* product box */}
+    <rect x="2" y="4" width="48" height="48" rx="2" ry="2" />
+    {/* magnifier lens */}
+    <circle cx="17" cy="7" r="20" />
+    {/* magnifier handle */}
+    <line x1="19.2" y1="9.2" x2="22" y2="12" />
+  </svg>)
+}
