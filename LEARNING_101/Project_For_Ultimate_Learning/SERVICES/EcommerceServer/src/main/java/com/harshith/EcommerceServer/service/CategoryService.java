@@ -31,4 +31,5 @@ public class CategoryService {
         
         return new CategoryResponseDto(sCategory.getId(), sCategory.getName());
     }
+
 }
