@@ -1,0 +1,12 @@
+1. Every time I ask a question ending with "md" always create a downloadable markdown file
+2. Keywords : HTML, CSS, JAVASCRIPT, REACT, VITE, TYPESCRIPT, ACCESSIBILITY, DOM, UI PERFORMANCE, LIGHTHOUSE, RENDER BLOCKING
+3.  Resources: 
+https://developer.mozilla.org/en-US/
+https://javascript.info/
+https://github.com/Devinterview-io/html5-interview-questions
+https://github.com/Devinterview-io/css-interview-questions
+https://github.com/sudheerj/javascript-interview-questions
+https://github.com/sudheerj/reactjs-interview-questions
+https://github.com/scottaohara/accessibility_interview_questions
+https://github.com/Devinterview-io/typescript-interview-questions
+https://github.com/Devinterview-io/redux-interview-questions

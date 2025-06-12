@@ -30,7 +30,9 @@
 29. what are prototypes
 30. what is __proto__ used for keyword and difference between prototype keyword and __proto__
 31. what is rem , em, % and other css units.
-
-
+32. what is the difference between domcontent loaded & onload event ?
+33. what is the difference between target & currentTarget ?
 <!-- Feedback -->
 <!-- Go deep in understanding the concepts and inner workings of every concept of ui -> html , css & js -->
+
+
