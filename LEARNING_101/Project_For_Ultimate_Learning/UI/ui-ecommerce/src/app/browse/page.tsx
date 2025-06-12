@@ -7,9 +7,7 @@ import { AdminOptionCard } from "@/components/AdminOptionCard";
 export default function AdminPage() {
   const cards = [
     { title: "Add Product", Icon: AddProductIcon, href: "/browse/add-product" },
-    { title: "Delete Product", Icon: DeleteProductIcon, href: "/browse/delete-product" },
-    { title: "Update Product", Icon: UpdateProductIcon, href: "/browse/update-product" },
-    { title: "View Products", Icon: ViewProductIcon, href: "/browse/view-product" }
+    { title: "View Products", Icon: ViewProductIcon, href: "/browse/view-products" }
   ];
 
 
