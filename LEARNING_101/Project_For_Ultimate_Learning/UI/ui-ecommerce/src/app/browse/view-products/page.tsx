@@ -92,7 +92,7 @@ export default function ViewProducts() {
   };
 
   const handleUpdateNav = (id: number) => {
-    router.push(`/update/${id}`);
+    router.push(`/browse/update-product/${id}`);
   };
 
   return (

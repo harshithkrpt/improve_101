@@ -6,8 +6,8 @@ import { AdminOptionCard } from "@/components/AdminOptionCard";
 
 export default function AdminPage() {
   const cards = [
-    { title: "Add Product", Icon: AddProductIcon, href: "/browse/add-product" },
-    { title: "View Products", Icon: ViewProductIcon, href: "/browse/view-products" }
+    { title: "Add Product",  href: "/browse/add-product", imagePath: "/view-product.jpg" },
+    { title: "View Products", href: "/browse/view-products", imagePath: "/view-product.jpg" }
   ];
 
 
@@ -18,8 +18,8 @@ export default function AdminPage() {
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {cards.map(({ title, Icon ,href}) => (
-          <AdminOptionCard key={title} title={title} Icon={Icon} href={href}/>
+        {cards.map(({ title, imagePath ,href}) => (
+          <AdminOptionCard key={title} title={title} imagePath={imagePath} isImage href={href}/>
         ))}
       </div>
     </main>

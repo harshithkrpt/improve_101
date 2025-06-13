@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ProductUpdateDto {
-    private String productName;
+    private String name;
     private Integer stock;
     private Double price;
 }

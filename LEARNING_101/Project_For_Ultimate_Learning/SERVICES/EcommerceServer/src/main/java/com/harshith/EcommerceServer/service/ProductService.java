@@ -47,7 +47,7 @@ public class ProductService {
         return productRepository.findAllByIsActiveTrue(pageable);
     }
 
-    private Product getProductById(Integer id) {
+    public Product getProductById(Integer id) {
         return productRepository.findById(id).orElseGet(null);
     }
 

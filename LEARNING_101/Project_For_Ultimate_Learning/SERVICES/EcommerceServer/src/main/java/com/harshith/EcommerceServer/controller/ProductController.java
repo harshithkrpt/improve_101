@@ -52,10 +52,23 @@ public class ProductController {
         }
     }
 
+
+    @GetMapping("/get-product/{id}")
+    public ResponseEntity<Product> getProduct(@PathVariable Integer id) {
+        Product product = productService.getProductById(id);
+        if(product != null) {
+            return ResponseEntity.ok().body(product);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+    
+
     @PutMapping("/update/{id}")
     public ResponseEntity<Boolean> updateProduct(@PathVariable String id,
             @RequestBody ProductUpdateDto productUpdateDto) {
-        Boolean isUpdated = productService.updateProduct(Integer.parseInt(id), productUpdateDto.getProductName(),
+        Boolean isUpdated = productService.updateProduct(Integer.parseInt(id), productUpdateDto.getName(),
                 productUpdateDto.getStock(), productUpdateDto.getPrice());
         return isUpdated ? ResponseEntity.ok().body(isUpdated)
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(isUpdated);
