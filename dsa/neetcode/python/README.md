@@ -993,3 +993,233 @@ def largestRectangleArea(heights):
 ## Complexity
 Time: O(n), Space: O(n)
 
+
+# Best Time to Buy and Sell Stock
+
+## Problem Statement
+You are given an array `prices` where `prices[i]` is the price of a given stock on the `i`-th day.
+
+You want to maximize your profit by choosing a single day to buy one stock and choosing a different day in the future to sell that stock.
+
+Return the maximum profit you can achieve from this transaction. If you cannot achieve any profit, return 0.
+
+## Intuition
+Track the minimum price encountered so far while iterating through the array. At each step, compute the potential profit by subtracting the minimum price from the current price, and update the maximum profit.
+
+This ensures a one-pass O(n) solution with constant space.
+
+## Code
+```python
+def maxProfit(prices):
+    min_price = float('inf')
+    max_profit = 0
+    for price in prices:
+        if price < min_price:
+            min_price = price
+        else:
+            max_profit = max(max_profit, price - min_price)
+    return max_profit
+```
+
+# Longest Substring Without Repeating Characters
+
+## Problem Statement
+Given a string `s`, find the length of the longest substring without repeating characters.
+
+## Intuition
+Use the **sliding window** approach with a **hashmap (or set)** to store characters in the current window. Move the `right` pointer to expand the window, and if a duplicate is found, move the `left` pointer to shrink it until the substring becomes unique again. Track the maximum length during the process.
+
+This gives an efficient linear-time solution.
+
+## Code
+```python
+def lengthOfLongestSubstring(s):
+    char_index = {}
+    left = max_len = 0
+
+    for right in range(len(s)):
+        if s[right] in char_index and char_index[s[right]] >= left:
+            left = char_index[s[right]] + 1
+        char_index[s[right]] = right
+        max_len = max(max_len, right - left + 1)
+
+    return max_len
+```
+
+
+## Longest Repeating Character Replacement
+
+### Problem Statement
+You are given a string `s` and an integer `k`. You can replace at most `k` characters in the string with any uppercase English letter. Return the length of the longest possible substring that contains the same character after at most `k` replacements.
+
+### Deep Intuition
+This problem is best tackled using a **sliding window** technique. The key insight is to **keep track of the most frequent character** in the current window.
+
+You can always make a window valid (all same letters) by replacing all other characters — as long as:
+```
+window size - max_frequency <= k
+```
+If this condition is violated, the window is invalid and we shrink it from the left.
+
+### Optimized Code
+```python
+from collections import defaultdict
+
+def characterReplacement(s, k):
+    count = defaultdict(int)
+    max_freq = 0
+    left = 0
+    result = 0
+
+    for right in range(len(s)):
+        count[s[right]] += 1
+        max_freq = max(max_freq, count[s[right]])
+
+        if (right - left + 1) - max_freq > k:
+            count[s[left]] -= 1
+            left += 1
+
+        result = max(result, right - left + 1)
+
+    return result
+```
+
+### Complexity
+- Time: O(n)
+- Space: O(1) — fixed alphabet size
+
+---
+
+## Permutation in String
+
+### Problem Statement
+Given two strings `s1` and `s2`, return `True` if `s2` contains a permutation of `s1`, or `False` otherwise.
+
+### Deep Intuition
+We can use a **fixed-size sliding window** to compare character frequencies. Since permutations share the same frequency of characters, just check if the current window in `s2` matches the frequency of `s1`.
+
+Use two frequency arrays — one for `s1`, and one for the current window in `s2`. Slide the window across `s2` while updating frequencies.
+
+### Optimized Code
+```python
+from collections import Counter
+
+def checkInclusion(s1, s2):
+    if len(s1) > len(s2):
+        return False
+
+    s1_count = Counter(s1)
+    window = Counter(s2[:len(s1)])
+
+    if window == s1_count:
+        return True
+
+    for i in range(len(s1), len(s2)):
+        window[s2[i]] += 1
+        window[s2[i - len(s1)]] -= 1
+
+        if window[s2[i - len(s1)]] == 0:
+            del window[s2[i - len(s1)]]
+
+        if window == s1_count:
+            return True
+
+    return False
+```
+
+### Complexity
+- Time: O(n)
+- Space: O(1) — only 26 lowercase letters
+
+---
+
+## Minimum Window Substring
+
+### Problem Statement
+Given two strings `s` and `t`, return the minimum window in `s` that contains all characters from `t`. If no such window exists, return an empty string.
+
+### Deep Intuition
+We use a **sliding window** with two pointers (`left` and `right`). Expand the window to the right until all characters in `t` are included. Then try to shrink the window from the left to minimize it.
+
+We use two hashmaps:
+- `need`: frequency of characters in `t`
+- `window`: current window character count
+
+Track `formed` (how many unique chars match the required count) and update the answer when all characters are matched.
+
+### Optimized Code
+```python
+from collections import Counter
+
+def minWindow(s, t):
+    if not s or not t:
+        return ""
+
+    need = Counter(t)
+    window = {}
+    have, need_chars = 0, len(need)
+    res = [float("inf"), 0, 0]
+    left = 0
+
+    for right in range(len(s)):
+        char = s[right]
+        window[char] = window.get(char, 0) + 1
+
+        if char in need and window[char] == need[char]:
+            have += 1
+
+        while have == need_chars:
+            if (right - left + 1) < res[0]:
+                res = [right - left + 1, left, right]
+
+            window[s[left]] -= 1
+            if s[left] in need and window[s[left]] < need[s[left]]:
+                have -= 1
+            left += 1
+
+    l, r = res[1], res[2]
+    return s[l:r+1] if res[0] != float("inf") else ""
+```
+
+### Complexity
+- Time: O(n)
+- Space: O(n)
+
+---
+
+## Sliding Window Maximum
+
+### Problem Statement
+Given an array `nums` and a number `k`, return the maximum value in each sliding window of size `k`.
+
+### Deep Intuition
+Use a **deque (double-ended queue)** to store indices of useful elements in decreasing order of values. 
+
+For each element:
+- Remove indices that are out of the window (left side)
+- Remove smaller elements from the back (they won't be needed)
+- The front of the deque is the maximum for the current window
+
+### Optimized Code
+```python
+from collections import deque
+
+def maxSlidingWindow(nums, k):
+    output = []
+    dq = deque()
+    for i in range(len(nums)):
+        while dq and dq[0] < i - k + 1:
+            dq.popleft()
+        while dq and nums[dq[-1]] < nums[i]:
+            dq.pop()
+        dq.append(i)
+        if i >= k - 1:
+            output.append(nums[dq[0]])
+    return output
+```
+
+### Complexity
+- Time: O(n)
+- Space: O(k)
+
+---
