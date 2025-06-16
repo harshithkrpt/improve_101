@@ -802,3 +802,194 @@ def trap(height):
     return trapped_water
 
 ```
+
+# Valid Parentheses
+
+## Problem Statement
+Given a string `s` containing just the characters `'('`, `')'`, `'{'`, `'}'`, `'['`, and `']'`, determine if the input string is valid.
+
+An input string is valid if:
+- Open brackets must be closed by the same type of brackets.
+- Open brackets must be closed in the correct order.
+- Every close bracket has a corresponding open bracket of the same type.
+
+## Intuition
+We can use a **stack** to keep track of opening brackets. As we encounter a closing bracket, we check if it matches the latest opening bracket in the stack. If not, the string is invalid. At the end, the stack should be empty for the string to be valid.
+
+## Code
+```python
+def isValid(s):
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    for char in s:
+        if char in mapping:
+            top_element = stack.pop() if stack else '#'
+            if mapping[char] != top_element:
+                return False
+        else:
+            stack.append(char)
+    return not stack
+```
+
+# Min Stack
+
+## Problem Statement
+Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+
+## Intuition
+Use two stacks: one for all elements, another for the current minimums. Every time we push, we also push the new min to the min stack. When popping, we pop both stacks. This keeps track of the current minimum efficiently.
+
+## Code
+```python
+class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []
+
+    def push(self, val):
+        self.stack.append(val)
+        if not self.min_stack or val <= self.min_stack[-1]:
+            self.min_stack.append(val)
+
+    def pop(self):
+        if self.stack.pop() == self.min_stack[-1]:
+            self.min_stack.pop()
+
+    def top(self):
+        return self.stack[-1]
+
+    def getMin(self):
+        return self.min_stack[-1]
+```
+
+## Complexity
+Time: O(1) for all operations, Space: O(n)
+
+# Evaluate Reverse Polish Notation
+
+## Problem Statement
+Evaluate the value of an arithmetic expression in Reverse Polish Notation (RPN).
+
+## Intuition
+Use a stack. Iterate over the tokens, and for every operator, pop two elements, perform the operation, and push the result back.
+
+## Code
+```python
+def evalRPN(tokens):
+    stack = []
+    for token in tokens:
+        if token in '+-*/':
+            b = stack.pop()
+            a = stack.pop()
+            if token == '+': stack.append(a + b)
+            elif token == '-': stack.append(a - b)
+            elif token == '*': stack.append(a * b)
+            else: stack.append(int(a / b))  # Truncate toward zero
+        else:
+            stack.append(int(token))
+    return stack[0]
+```
+
+## Complexity
+Time: O(n), Space: O(n)
+
+# Generate Parentheses
+
+## Problem Statement
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+
+## Intuition
+Use backtracking. Add '(' when open < n and ')' when close < open. This ensures well-formed combinations.
+
+## Code
+```python
+def generateParenthesis(n):
+    res = []
+    def backtrack(s, open_, close):
+        if len(s) == 2 * n:
+            res.append(s)
+            return
+        if open_ < n:
+            backtrack(s + '(', open_ + 1, close)
+        if close < open_:
+            backtrack(s + ')', open_, close + 1)
+    backtrack('', 0, 0)
+    return res
+```
+
+## Complexity
+Time: O(2^n), Space: O(n) for recursion
+
+# Daily Temperatures
+
+## Problem Statement
+Given a list of daily temperatures T, return a list such that for each day in the input, tells you how many days you would have to wait until a warmer temperature. If there is no future day, put 0 instead.
+
+## Intuition
+Use a monotonic stack that stores indices of decreasing temperatures. As we go through each day, we pop the stack if the current temperature is higher.
+
+## Code
+```python
+def dailyTemperatures(temperatures):
+    res = [0] * len(temperatures)
+    stack = []
+    for i, t in enumerate(temperatures):
+        while stack and temperatures[stack[-1]] < t:
+            prev = stack.pop()
+            res[prev] = i - prev
+        stack.append(i)
+    return res
+```
+
+## Complexity
+Time: O(n), Space: O(n)
+
+# Car Fleet
+
+## Problem Statement
+There are n cars going to the same destination. Each car starts at a position and has a speed. A car fleet is a group of cars that travel at the same speed. Return the number of car fleets that will arrive at the destination.
+
+## Intuition
+Sort cars by starting position. Use a stack to track arrival times. If a car catches up to a slower one ahead, it joins the same fleet.
+
+## Code
+```python
+def carFleet(target, position, speed):
+    pairs = sorted(zip(position, speed), reverse=True)
+    stack = []
+    for pos, spd in pairs:
+        time = (target - pos) / spd
+        if not stack or time > stack[-1]:
+            stack.append(time)
+    return len(stack)
+```
+
+## Complexity
+Time: O(n log n) for sorting, Space: O(n)
+
+# Largest Rectangle in Histogram
+
+## Problem Statement
+Given an array of integers heights representing the histogram's bar height where the width of each bar is 1, return the area of the largest rectangle in the histogram.
+
+## Intuition
+Use a monotonic increasing stack to keep track of indices. When the current height is less, pop and calculate area using the popped index as height.
+
+## Code
+```python
+def largestRectangleArea(heights):
+    stack = []
+    max_area = 0
+    heights.append(0)
+    for i, h in enumerate(heights):
+        while stack and heights[stack[-1]] > h:
+            height = heights[stack.pop()]
+            width = i if not stack else i - stack[-1] - 1
+            max_area = max(max_area, height * width)
+        stack.append(i)
+    return max_area
+```
+
+## Complexity
+Time: O(n), Space: O(n)
+
