@@ -590,3 +590,215 @@ class Solution:
         
         return longest
 ```
+
+# ✅ Valid Palindrome
+
+## 📘 Problem
+Given a string `s`, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases.
+
+---
+
+## 🔍 Algorithm
+
+1. Remove all non-alphanumeric characters from the string.
+2. Convert the cleaned string to lowercase.
+3. Check if the cleaned string is equal to its reverse.
+
+---
+
+## ✅ Python Code (Simple Version)
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        cleaned = ''
+        for ch in s:
+            if ch.isalnum():
+                cleaned += ch.lower()
+        return cleaned == cleaned[::-1]
+```
+
+
+## Optimized version
+
+```python
+class Solution:
+    def isPalindrome(self, s: str) -> bool:
+        left, right = 0, len(s) - 1
+        while left < right:
+            while left < right and not s[left].isalnum():
+                left += 1
+            while left < right and not s[right].isalnum():
+                right -= 1
+            if s[left].lower() != s[right].lower():
+                return False
+            left += 1
+            right -= 1
+        return True
+
+```
+
+# Two Sum II - Input Array Is Sorted
+
+## Problem
+Given a **1-indexed** array of integers `numbers` that is already **sorted in non-decreasing order**, find two numbers such that they add up to a specific target number. Return the indices of the two numbers (1-indexed) as an integer array `answer = [index1, index2]` of length 2.
+
+You may assume that each input would have **exactly one solution** and you may not use the same element twice.
+
+You must solve the problem using only constant extra space.
+
+### Example
+Input: numbers = [2,7,11,15], target = 9
+Output: [1,2]
+Explanation: The sum of 2 and 7 is 9. Therefore, index1 = 1, index2 = 2.
+
+
+---
+
+## Algorithm (Two-Pointer)
+
+1. Initialize two pointers: `left` at index 0 and `right` at the last index.
+2. While `left < right`:
+   - Calculate the sum of `numbers[left] + numbers[right]`.
+   - If the sum equals the target, return `[left + 1, right + 1]`.
+   - If the sum is less than the target, increment `left`.
+   - If the sum is greater than the target, decrement `right`.
+
+---
+
+## Python Code
+
+```python
+class Solution:
+    def twoSum(self, numbers: list[int], target: int) -> list[int]:
+        left = 0
+        right = len(numbers) - 1
+
+        while left < right:
+            curr_sum = numbers[left] + numbers[right]
+            if curr_sum == target:
+                return [left + 1, right + 1]  # 1-indexed
+            elif curr_sum < target:
+                left += 1
+            else:
+                right -= 1
+```
+
+# 3 Sum
+
+## Problem Statement
+Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.
+
+Notice that the solution set must not contain duplicate triplets.
+
+## Intuition
+We sort the array and fix one element. Then, we use the two-pointer technique to find pairs that sum up to the negative of the fixed element. This avoids duplicates and improves performance compared to a brute-force O(n^3) approach.
+
+## Code
+```python
+def threeSum(nums):
+    nums.sort()
+    res = []
+    for i in range(len(nums)-2):
+        if i > 0 and nums[i] == nums[i-1]:
+            continue
+        l, r = i+1, len(nums)-1
+        while l < r:
+            total = nums[i] + nums[l] + nums[r]
+            if total < 0:
+                l += 1
+            elif total > 0:
+                r -= 1
+            else:
+                res.append([nums[i], nums[l], nums[r]])
+                while l < r and nums[l] == nums[l+1]:
+                    l += 1
+                while l < r and nums[r] == nums[r-1]:
+                    r -= 1
+                l += 1
+                r -= 1
+    return res
+```
+
+# Container With Most Water
+
+## Problem Statement
+You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]). Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.
+
+## Intuition
+We use two pointers at the start and end of the array. The idea is to move the pointer with the smaller height inward, because the height of the container is limited by the shorter line. This gives an optimal O(n) solution.
+
+## Code
+```python
+def maxArea(height):
+    left, right = 0, len(height) - 1
+    max_area = 0
+    while left < right:
+        width = right - left
+        max_area = max(max_area, min(height[left], height[right]) * width)
+        if height[left] < height[right]:
+            left += 1
+        else:
+            right -= 1
+    return max_area
+```
+
+# Trapping Rain Water
+
+## Problem Statement
+Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+
+## Intuition
+We precompute the maximum height to the left and right of each bar. Then for each position, the water trapped is the minimum of the left and right max minus the current height. This gives an O(n) time and space solution.
+
+## Code
+```python
+def trap(height):
+    if not height:
+        return 0
+    n = len(height)
+    left_max = [0]*n
+    right_max = [0]*n
+    left_max[0] = height[0]
+    for i in range(1, n):
+        left_max[i] = max(left_max[i-1], height[i])
+    right_max[-1] = height[-1]
+    for i in range(n-2, -1, -1):
+        right_max[i] = max(right_max[i+1], height[i])
+    trapped = 0
+    for i in range(n):
+        trapped += min(left_max[i], right_max[i]) - height[i]
+    return trapped
+```
+
+ Optimized Intuition: 
+
+Use two pointers (left and right) starting from both ends.
+
+Keep track of left_max and right_max seen so far.
+
+At every step, compute the water that can be trapped at the current position by comparing left_max and right_max.
+
+```py
+def trap(height):
+    left, right = 0, len(height) - 1
+    left_max = right_max = 0
+    trapped_water = 0
+
+    while left < right:
+        if height[left] < height[right]:
+            if height[left] >= left_max:
+                left_max = height[left]
+            else:
+                trapped_water += left_max - height[left]
+            left += 1
+        else:
+            if height[right] >= right_max:
+                right_max = height[right]
+            else:
+                trapped_water += right_max - height[right]
+            right -= 1
+
+    return trapped_water
+
+```
