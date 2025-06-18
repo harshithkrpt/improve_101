@@ -6,7 +6,7 @@ class Solution:
             max_num = max(max_num, num)
         res = max_num
         while min_num <= max_num:
-            middle = max_num + min_num // 2
+            middle = (max_num + min_num) // 2
             total = 0
             for n in piles:
               total = total + math.ceil(n/middle)
