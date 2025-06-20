@@ -295,4 +295,4 @@ This is your personal time for active recall and self-assessment.
 * **Refine Your Answer:** **"Can you explain how a Spring Boot application running on a server with 4 CPU cores demonstrates both concurrency and parallelism?"**
     * Start with Spring Boot's design for **concurrency** (using thread pools to *handle* many requests by rapidly switching between them, even on one core). Mention threads share memory within the single process for efficiency.
     * Then, transition to **parallelism**: How the 4 CPU cores enable *true simultaneous execution* of multiple of these threads, boosting throughput and responsiveness.
-    * Conclude by synthesizing: The concurrent design allows effective management, and the parallel hardware enables simultaneous execution for performance.
+    * Conclude by synthesizing: The concurrent design allows effective management, and the parallel hardware enables simultaneous execution for performance. 
