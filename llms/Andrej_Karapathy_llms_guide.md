@@ -34,3 +34,5 @@ https://tiktokenizer.vercel.app/
 
 
 Image input, OCR
+
+- Chatgpt memory management > that is useful for your personalization
