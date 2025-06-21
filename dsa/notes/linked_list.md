@@ -256,3 +256,352 @@ head.next.next = Node(30)
 print(f"Is 20 in the list? {search(head, 20)}") # Expected Output: Is 20 in the list? True
 print(f"Is 40 in the list? {search(head, 40)}") # Expected Output: Is 40 in the list? False
 ```
+
+
+## Double Linked List
+
+- two pointers next & previous node
+- traversal both forward and backward
+
+```python
+class DoublyNode:
+  def __init__(self, data):
+    self.data = data
+    self.next = None
+    self.prev = None # The new addition!
+```
+
+### Linked List vs. Array: Time Complexity Cheat Sheet
+
+| Operation             | Array / Python `list` | Singly Linked List | Notes                                                                   |
+| :-------------------- | :-------------------- | :----------------- | :---------------------------------------------------------------------- |
+| **Access (by index)** | `O(1)`                | `O(n)`             | Arrays have direct access; linked lists must traverse from the head.      |
+| **Search (by value)** | `O(n)`                | `O(n)`             | In the worst case, both need to check every element.                    |
+| **Insertion (Start)** | `O(n)`                | `O(1)`             | Arrays must shift all elements; linked lists just update the head.      |
+| **Insertion (End)** | `O(1)` (amortized)    | `O(n)`* | Python lists are fast. *Linked lists must traverse to the end first.    |
+| **Insertion (Middle)**| `O(n)`                | `O(n)`             | Both require finding the position, but arrays also need to shift.       |
+| **Deletion (Start)** | `O(n)`                | `O(1)`             | Same logic as insertion at the start.                                   |
+| **Deletion (End)** | `O(1)`                | `O(n)`             | Arrays have direct access to the end; linked lists must traverse.         |
+| **Deletion (Middle)** | `O(n)`                | `O(n)`             | Both require finding the element to delete.                             |
+
+---
+
+### Space Complexity
+
+* **Array / Python `list`**: `O(n)`
+    * Stores `n` elements.
+* **Linked List**: `O(n)`
+    * Stores `n` elements, but has slightly more overhead because each of the `n` nodes also needs to store a pointer.
+
+
+### Two Pointer Technique 
+
+- we keep two pointers in linked list 'slow' and 'fast'
+- slow = slow.next -> one step at a time
+- fast = fast.next.next -> two steps at a time
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        slow = head
+        fast = head
+        
+        while fast is not None and fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        
+        return slow
+        
+```
+
+
+### Floyd's Cycle-Finding Algorithm
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+
+        slow = head
+        fast = head
+
+        while fast is not None and fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+            if (slow == fast):
+                return True
+
+
+        return False
+        
+```
+
+
+> https://leetcode.com/problems/remove-linked-list-elements/
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeElements(self, head: Optional[ListNode], val: int) -> Optional[ListNode]:
+        dummy = ListNode(-1)
+        dummy.next = head
+        previous = dummy
+        current = dummy
+        while current is not None:
+            if current.val == val:
+                previous.next = current.next
+                current = current.next
+            else:
+                previous = current
+                current = current.next
+        return dummy.next
+```
+
+https://leetcode.com/problems/reverse-linked-list/
+
+
+- use three pointers and previous node , current node and next node 
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        pre_node = None
+        cur_node = head
+        next_node = head.next if head else None
+        
+        
+        while next_node is not None:
+            cur_node.next = pre_node
+            temp = next_node.next
+            next_node.next = cur_node
+            # make current node and previous node
+            pre_node = cur_node
+            cur_node = next_node
+            next_node = temp
+            
+        
+        return cur_node
+        
+        
+```
+
+
+- solution from gemini
+
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # Initialize a pointer for the previous node. It starts as None
+        # because the new tail of the list will point to nothing.
+        previous_node = None
+        
+        # Start the current node pointer at the head of the list.
+        current_node = head
+        
+        # Loop until we have processed the entire list.
+        while current_node is not None:
+            # 1. Save the next node before we break the link.
+            #    We store it in a temporary variable.
+            next_node_temp = current_node.next
+            
+            # 2. Reverse the actual pointer. This is the core step.
+            #    The current node now points backward to the previous node.
+            current_node.next = previous_node
+            
+            # 3. Move the previous_node pointer one step forward.
+            #    For the next loop, our current node will be the previous one.
+            previous_node = current_node
+            
+            # 4. Move the current_node pointer one step forward.
+            #    We use the temporary variable we saved in step 1.
+            current_node = next_node_temp
+            
+        # When the loop finishes, current_node is None, and previous_node
+        # is at the new head of the reversed list.
+        return previous_node
+```
+
+-- https://leetcode.com/problems/merge-two-sorted-lists/
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        merged_head = None
+        lp = None
+        while list1 is not None or list2 is not None:
+                if list1 and list2:  
+                    if list1.val <= list2.val:
+                        if merged_head is None:
+                            merged_head = list1
+                            lp = merged_head
+                        else:
+                            lp.next = list1
+                            lp = lp.next
+                        
+                        list1 = list1.next
+                    else:
+                        if merged_head is None:
+                            merged_head = list2
+                            lp = merged_head
+                        else:
+                            lp.next = list2
+                            lp = lp.next
+                        list2 = list2.next
+                elif list1:
+                    if merged_head is None:
+                        merged_head = list1
+                        lp = merged_head
+                    else:
+                        lp.next = list1
+                        lp = lp.next
+
+                    list1 = list1.next
+                else:
+                    if merged_head is None:
+                        merged_head = list2
+                        lp = merged_head
+                    else:
+                        lp.next = list2
+                        lp = lp.next
+
+                    list2 = list2.next
+                        
+        return merged_head
+                        
+```
+
+
+-- better approach is to use dummy node for merge two sorted array
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+        cur = dummy = ListNode()
+                        
+        while list1 and list2:
+            if list1.val <= list2.val:
+                cur.next = list1
+                list1 = list1.next
+            else:
+                cur.next = list2
+                list2 = list2.next
+            cur = cur.next
+        
+        cur.next = list1 if list1 else list2
+
+        return dummy.next
+```
+
+-- https://leetcode.com/problems/remove-nth-node-from-end-of-list/submissions/
+
+<!-- Hint: Creating a gap of size n is super important -->
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+        # calculate total size
+        slow = head
+        fast = head
+        exp_gap = n
+        cur_gap = 0
+        prev = ListNode()
+        dummy  = prev
+        prev.next = head
+        while fast or cur_gap != exp_gap:
+            if fast:  
+                if cur_gap != exp_gap:
+                    fast = fast.next
+                    cur_gap += 1
+                else:
+                    prev = slow
+                    slow = slow.next
+                    fast = fast.next
+        
+        if slow:
+            prev.next = slow.next
+        else:
+            prev.next = None
+        return dummy.next
+```
+
+
+
+<!-- check for palindrome in linked list -->
+
+- find middle element
+- second half reverse it
+- compare head before middle with revsersed second half if all equal valid else not valid
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def isPalindrome(self, head: Optional[ListNode]) -> bool:
+        slow = head
+        fast = head
+        while fast is not None and fast.next is not None:
+            slow = slow.next
+            fast = fast.next.next
+        cur = slow
+        pre = None
+        while cur is not None:
+            next_ptr = cur.next
+            cur.next = pre
+            pre = cur
+            cur = next_ptr
+        # now loop till head does not rach slow pointer 
+        is_valid = True
+        print(slow.val)
+        print(pre)
+        while slow and head and head != slow:
+            if pre.val != head.val:
+                is_valid = False
+                break
+            head = head.next
+            pre = pre.next
+        return is_valid
+```
