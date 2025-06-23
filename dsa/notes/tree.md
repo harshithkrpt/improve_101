@@ -231,3 +231,51 @@ def level_order_traversal(root):
         result.append(current.level)
     return result
 ```
+
+# Traversal Strategy: DFS vs. BFS
+
+## Core Differences
+- **DFS (Depth-First Search):**
+    - **Strategy:** Goes deep.
+    - **Data Structure:** Stack (LIFO), often via recursion.
+    - **Flavors:** Preorder, Inorder, Postorder.
+- **BFS (Breadth-First Search):**
+    - **Strategy:** Goes wide.
+    - **Data Structure:** Queue (FIFO).
+    - **Flavor:** Level Order Traversal.
+
+## Complexity
+- **Time Complexity:** $O(N)$ for both.
+- **Space Complexity:**
+    - **DFS:** $O(H)$ (Height of tree). Better for wide trees.
+    - **BFS:** $O(W)$ (Max Width of tree). Better for deep, narrow trees.
+
+## When to Use Which
+- **Use BFS for:**
+    - Shortest path problems.
+    - Any problem related to tree levels.
+    - Finding nodes closer to the root.
+- **Use DFS for:**
+    - Checking path existence.
+    - Problems requiring full subtree processing (e.g., BST validation).
+    - Problems where recursion is a natural fit.
+    - When the tree is very wide.
+
+
+## Max Depth
+
+- find the max (left + right) + 1 calling left , right recursively
+
+```python
+def maxDepth(root):
+    # Base case: an empty tree has a depth of 0
+    if not root:
+        return 0
+    
+    # Recursively find the depth of the left and right subtrees
+    left_depth = maxDepth(root.left)
+    right_depth = maxDepth(root.right)
+    
+    # The depth of the tree is 1 (for the current node) + the max of the two subtrees
+    return 1 + max(left_depth, right_depth)
+```
