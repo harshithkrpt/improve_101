@@ -364,4 +364,126 @@ sequenceDiagram
 - How your browser finds a server IP
 - Why TTL and record types matter
 
-Next: We bring it all together in an end-to-end walkthrough! 🚀
+
+
+
+# System Design Networking Concepts
+
+This guide covers networking topics essential for designing scalable, resilient, and performant distributed systems, building upon the fundamentals of TCP/IP, DNS, and HTTP.
+
+---
+
+## 1. Scaling and Distributing Traffic
+
+### 1.1 Load Balancers
+
+A **Load Balancer** acts as a "traffic cop" that distributes incoming network traffic across multiple backend servers.
+
+**Key Goals:**
+
+- **Scalability:** Handle more traffic by adding servers (horizontal scaling).
+- **Availability:** Detect and reroute traffic from unhealthy servers using health checks.
+
+**Analogy:** Like a restaurant host seating customers across multiple waiters to balance the load.
+
+**Layer 4 vs. Layer 7 Load Balancing:**
+
+- **Layer 4 (Transport Layer):**
+  - Routes based on IP/Port.
+  - Fast but not content-aware.
+- **Layer 7 (Application Layer):**
+  - Inspects HTTP requests (URLs, headers).
+  - Enables intelligent routing, specialization, and fault isolation.
+
+---
+
+### 1.2 Reverse Proxies
+
+A **Reverse Proxy** sits in front of backend servers, forwarding client requests while hiding backend architecture.
+
+**Key Functions:**
+
+- **Load Balancing**
+- **SSL/TLS Termination**
+- **Caching**
+- **Compression**
+
+> A load balancer is a type of reverse proxy.
+
+---
+
+### 1.3 Content Delivery Networks (CDNs)
+
+A **CDN** is a globally distributed network of edge servers that cache content closer to users.
+
+**Problem Solved:** Reduces latency by minimizing data travel distance.
+
+**How it Works:**
+
+1. User requests an asset (e.g., `image.jpg`).
+2. DNS routes to the nearest CDN edge location.
+3. On **Cache Hit**, serve instantly.
+4. On **Cache Miss**, fetch from origin, serve, and cache.
+
+**Benefits:** Faster load times, origin offload, DDoS protection.
+
+---
+
+## 2. Modern Communication Patterns
+
+### 2.1 Polling vs. WebSockets
+
+| Method        | How it Works                                        | Analogy                    | Best For                     |
+|---------------|------------------------------------------------------|-----------------------------|------------------------------|
+| Short Polling | Client asks every X seconds                         | "Are we there yet?"         | ❌ Not recommended           |
+| Long Polling  | Server holds connection until update                 | "Tell me when..."           | ✅ Notifications, updates    |
+| WebSockets    | Persistent two-way TCP connection                    | "Open phone line"           | ✅ Chats, games, collaboration |
+
+---
+
+### 2.2 gRPC
+
+A high-performance communication protocol for microservices.
+
+**Key Features:**
+
+- **Protocol Buffers (Protobuf):** Compact, binary format with strict schema (.proto files).
+- **HTTP/2:** Multiplexing and efficient single-connection communication.
+
+**Use Case:** Low-latency, high-throughput communication between backend services.
+
+---
+
+## 3. Service Architecture and Discovery
+
+### 3.1 API Gateway
+
+Acts as a unified **entry point** for all client requests in a microservices setup.
+
+**Responsibilities:**
+
+- **Routing:** Sends requests to the right service.
+- **Authentication/Authorization**
+- **Rate Limiting**
+- **Aggregation:** Combines responses from multiple services.
+
+---
+
+### 3.2 Service Discovery
+
+Allows services to find each other dynamically in a cloud environment.
+
+**Problem Solved:** IPs of services are dynamic in scalable systems.
+
+**Components:**
+
+- **Service Registry:** A live directory for services.
+
+**Patterns:**
+
+- **Client-Side Discovery:**
+  - Client queries registry, selects an instance.
+- **Server-Side Discovery:**
+  - Request goes to router/load balancer, which queries the registry and forwards to a healthy instance.
+
+---
