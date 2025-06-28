@@ -134,3 +134,39 @@ social_graph = {
 visited_nodes = dfs_recursive(social_graph, 'Anna')
 print(f"Recursive DFS traversal starting from Anna: {visited_nodes}")
 ```
+
+
+### Depth First Traversal Iterative Code
+
+```python
+def dfs_iterative(graph, start_node):
+    if start_node not in graph:
+        return None
+
+    stack = [start_node]
+    visited = set()
+    res = []
+    while stack:
+        node = stack.pop()
+
+        if node not in visited:
+            visited.add(node)
+            res.append(node)
+            
+            for n in graph[node]:
+                if n not in visited:
+                    stack.append(n)
+            
+    return res
+
+social_graph_casey_first = {
+  'Anna': ['Casey', 'Bob'], # Casey is first
+  'Bob': ['Anna'],
+  'Casey': ['Anna', 'David'],
+  'David': ['Casey']
+}
+
+visited_nodes_iterative = dfs_iterative(social_graph_casey_first, 'Anna')
+print(f"Your recursive prediction: ['Anna', 'Casey', 'David', 'Bob']")
+print(f"Iterative DFS traversal:   {visited_nodes_iterative}")
+```
