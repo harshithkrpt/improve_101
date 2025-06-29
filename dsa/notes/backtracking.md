@@ -138,3 +138,44 @@ print("After :", path)
 | 7   | Word Search | Leetcode 79 |
 
 ---
+
+
+## Combinations 
+
+```python
+def combinations(nums):
+  res = []
+  def backtrack(i, current_subset):
+    res.append(list(current_subset))
+
+    for j in range(i, len(nums)):
+      current_subset.append(nums[i])
+      backtrack(i+1, current_subset)
+      current_subset.pop()
+  backtrack(0, [])
+  return res
+```
+
+## Permutations
+
+```python
+def permutations(nums):
+  res = []
+  visited = [False] * len(nums)
+  def backtrack(subset):
+    if len(subset) == len(nums):
+      res.append(list(subset))
+      return
+    for i in range(len(nums)):
+      # skip
+      if visited[i]:
+        continue
+      
+      visited[i] = True
+      subset.append(nums[i])
+      backtrack(subset)
+      visited[i] = False
+      subset.pop()
+  backtrack([])
+  return res
+```
