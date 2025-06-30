@@ -35,6 +35,8 @@ def fib(n):
     return fib(n-1) + fib(n-2)
 ```
 
+-- recursive (top down)
+
 ```python
 def fib_memo(n, memo={}):
   if n in memo:
@@ -48,4 +50,29 @@ def fib_memo(n, memo={}):
 
 # Example call (should print 55)
 # print(fib_memo(10))
+```
+
+-- iterative (tabular bottom up)
+
+```python
+def fib_tab(n):
+  # Base case is the same
+  if n <= 1:
+    return n
+
+  # 1. Create a table of size n + 1
+  dp = [0] * (n + 1)
+
+  # 2. Set the standard base case values
+  # dp[0] is already 0
+  dp[1] = 1
+  
+  # 3. Loop up to and including n
+  for i in range(2, n + 1):
+    dp[i] = dp[i - 1] + dp[i - 2]
+  
+  # 4. The answer is now directly at index n
+  return dp[n]
+
+print(fib_tab(10)) # Also prints 55
 ```
