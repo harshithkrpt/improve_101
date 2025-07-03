@@ -1,0 +1,17 @@
+
+Date,DSA Topic,Low-Level Design,System Design
+2025-07-04,Graph Basics,"Principles: SOLID, YAGNI, KISS",
+2025-07-05,Graph Advanced,Class Diagrams and Object Modeling,
+2025-07-06,Heap & Priority Queue,Tic Tac Toe Game Design,
+2025-07-07,Trie,Snake and Ladder Game Design,
+2025-07-08,Backtracking,Parking Lot Design,
+2025-07-09,Greedy Algorithms,Logger System,
+2025-07-10,Recursion + Memoization,Splitwise System,
+2025-07-11,Dynamic Programming – 1D,Elevator System Design,
+2025-07-12,Dynamic Programming – 2D,,BookMyShow Ticketing System
+2025-07-13,Bit Manipulation,,Amazon Locker System
+2025-07-14,Segment Trees / Fenwick Trees,,File System Simulation
+2025-07-15,Disjoint Set Union (Union-Find),,Cab Booking System
+2025-07-16,Graph Shortest Paths,,In-Memory Key-Value Store
+2025-07-17,Advanced Graphs,,Chess Game Design
+2025-07-18,Mock + Review Day,,UML & Design Patterns Recap
