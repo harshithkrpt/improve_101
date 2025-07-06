@@ -5,9 +5,10 @@ import com.harshith.game.*;
 import com.harshith.user.Player;
 
 public class GameEngine {
+    public final static String TicTacToe = "TicTacToe";
 
     public Board start(String type) {
-        if(type.equals("TicTacToe")) {
+        if(type.equals(GameEngine.TicTacToe)) {
             return new TicTacToeBoard();
         }
         else {
@@ -94,7 +95,7 @@ public class GameEngine {
             int countOfFilledCells = 0;
             for(int i=0;i<3;i++) {
                 for(int j=0;j<3;j++) {
-                    if(board1.getCell(i,j) != null) {
+                    if(board1.getCell(i, j) != null) {
                         countOfFilledCells++;
                     }
                 }
@@ -110,5 +111,23 @@ public class GameEngine {
 
 
         return new GameResult(false, "-");
+    }
+
+    public Move suggestMove(Player player, Board board) {
+        if(board instanceof TicTacToeBoard) {
+            TicTacToeBoard board1 = (TicTacToeBoard) board;
+            for(int i=0;i<3;i++) {
+                for(int j=0;j<3;j++) {
+                    if(board1.getCell(i,j) != null) {
+                        return new Move(new Cell(i, j));
+                    }
+                }
+            }
+
+            throw new IllegalStateException();
+        }
+        else {
+            throw new IllegalArgumentException();
+        }
     }
 }

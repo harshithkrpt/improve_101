@@ -8,7 +8,6 @@ public class Cell {
         this.row = row;
     }
 
-
     public int getRow() {
         return this.row;
     }
