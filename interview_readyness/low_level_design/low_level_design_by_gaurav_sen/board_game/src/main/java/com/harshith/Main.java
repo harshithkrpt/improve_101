@@ -13,8 +13,9 @@ public class Main {
         GameEngine gameEngine = new GameEngine();
         Board board = gameEngine.start(GameEngine.TicTacToe);
         Scanner scanner = new Scanner(System.in);
-        while(gameEngine.isComplete(board).isOver()) {
+        while(!gameEngine.isComplete(board).isOver()) {
             System.out.println("Make your Move : ");
+            System.out.println(board);
             Player computer = new Player("O");
             Player opponent = new Player("X");
             int row = scanner.nextInt();
@@ -26,5 +27,7 @@ public class Main {
                 gameEngine.move(board, computer, computerMove);
             }
         }
+        System.out.println(gameEngine.isComplete(board));
+        System.out.println(board);
     }
 }

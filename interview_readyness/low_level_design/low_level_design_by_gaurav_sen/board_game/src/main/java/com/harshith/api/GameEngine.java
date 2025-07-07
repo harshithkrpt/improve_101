@@ -34,14 +34,17 @@ public class GameEngine {
             TicTacToeBoard board1 = (TicTacToeBoard) board;
             // Row Complete
             for(int i=0;i<3;i++) {
-                 rowComplete = board1.getCell(i,0) != null;
                  firstCharacter = board1.getCell(i,0);
-                 for (int j=1;j<3;j++) {
-                    if(board1.getCell(i,j) == null || !board1.getCell(i,j).equals(firstCharacter)) {
-                        rowComplete = false;
-                        break;
-                    }
+                 rowComplete = firstCharacter != null;
+                 if(firstCharacter != null) {
+                     for (int j=1;j<3;j++) {
+                         if(!firstCharacter.equals(board1.getCell(i,j))) {
+                             rowComplete = false;
+                             break;
+                         }
+                     }
                  }
+
 
                 if(rowComplete) {
                     return new GameResult(rowComplete, firstCharacter);
@@ -50,12 +53,14 @@ public class GameEngine {
 
             // Column Complete
             for(int i=0;i<3;i++) {
-                columnComplete = board1.getCell(0,i) != null;
                 firstCharacter = board1.getCell(0,i);
-                for (int j=1;j<3;j++) {
-                    if(board1.getCell(j,i) == null || !board1.getCell(j,i).equals(firstCharacter)) {
-                        columnComplete = false;
-                        break;
+                columnComplete = firstCharacter != null;
+                if(firstCharacter != null) {
+                    for (int j = 1; j < 3; j++) {
+                        if (!firstCharacter.equals(board1.getCell(j, i))) {
+                            columnComplete = false;
+                            break;
+                        }
                     }
                 }
 
@@ -65,28 +70,34 @@ public class GameEngine {
             }
 
             // Diagonal Complete
-            boolean diagComplete = board1.getCell(0,0) != null;
             firstCharacter = board1.getCell(0,0);
-            for(int i=0;i<3;i++) {
-                if(board1.getCell(i,i) == null || !board1.getCell(i,i).equals(firstCharacter)) {
-                    diagComplete  = false;
-                    break;
+            boolean diagComplete = firstCharacter != null;
+            if(firstCharacter != null) {
+                for(int i=0;i<3;i++) {
+                    if(board1.getCell(i,i) == null || !board1.getCell(i,i).equals(firstCharacter)) {
+                        diagComplete  = false;
+                        break;
+                    }
                 }
             }
+
 
             if(diagComplete) {
                 return new GameResult(diagComplete, firstCharacter);
             }
 
             // Reverse Diagnoal Complete
-            boolean revDiagonalComplete = board1.getCell(0,2) != null;
             firstCharacter = board1.getCell(0,2);
-            for(int i=0;i<3;i++) {
-                if(board1.getCell(i,2-i) == null || !board1.getCell(i,2-i).equals(firstCharacter)) {
-                    revDiagonalComplete = false;
-                    break;
+            boolean revDiagonalComplete = firstCharacter != null;
+            if(firstCharacter != null) {
+                for(int i=0;i<3;i++) {
+                    if(board1.getCell(i,2-i) == null || !board1.getCell(i,2-i).equals(firstCharacter)) {
+                        revDiagonalComplete = false;
+                        break;
+                    }
                 }
             }
+
 
             if(revDiagonalComplete) {
                 return new GameResult(revDiagonalComplete, firstCharacter);
@@ -118,7 +129,7 @@ public class GameEngine {
             TicTacToeBoard board1 = (TicTacToeBoard) board;
             for(int i=0;i<3;i++) {
                 for(int j=0;j<3;j++) {
-                    if(board1.getCell(i,j) != null) {
+                    if(board1.getCell(i,j) == null) {
                         return new Move(new Cell(i, j));
                     }
                 }

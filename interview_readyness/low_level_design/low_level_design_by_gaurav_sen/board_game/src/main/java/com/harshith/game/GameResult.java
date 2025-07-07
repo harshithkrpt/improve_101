@@ -12,4 +12,12 @@ public class GameResult {
     public boolean isOver() {
         return isOver;
     }
+
+    @Override
+    public String toString() {
+        return "GameResult{" +
+                "isOver=" + isOver +
+                ", winner='" + winner + '\'' +
+                '}';
+    }
 }
