@@ -309,3 +309,238 @@ These can be observed in **any order**, because they are **independent** events.
 - Stronger than eventual consistency, **weaker than linearizability**
 
 > Useful when **user-perceived order matters**, but **performance and availability are also priorities**
+
+
+# Quorum Consistency
+
+Quorum consistency is a model used in distributed systems to maintain a balance between consistency, availability, and partition tolerance (CAP theorem) by ensuring that a subset (quorum) of nodes agree on read and write operations.
+
+---
+
+## 🔑 Key Concepts
+
+- **Quorum**: A minimum number of nodes that must participate in a read or write operation to be considered successful.
+- **Write Quorum (W)**: Number of nodes that must acknowledge a write.
+- **Read Quorum (R)**: Number of nodes that must respond to a read.
+- **Replication Factor (N)**: Total number of replicas of the data.
+
+---
+
+## ✅ Quorum Rule
+
+To ensure strong consistency:
+
+R + W > N
+
+This guarantees at least one overlapping node between read and write operations, ensuring that the most recent write is always read.
+
+---
+
+## ⚙️ Example
+
+- N = 3 (3 replicas)
+- W = 2 (write to any 2)
+- R = 2 (read from any 2)
+
+Since `R + W = 4 > 3`, quorum consistency is achieved.
+
+---
+
+## 📈 Trade-offs
+
+| Parameter | Effect |
+|----------|--------|
+| High W, Low R | Optimized for reads, slower writes |
+| High R, Low W | Optimized for writes, slower reads |
+| Low W, Low R (R + W ≤ N) | Potential for stale reads (eventual consistency) |
+
+---
+
+## 📦 Use Cases
+
+- **DynamoDB**, **Cassandra**, and other quorum-based distributed databases.
+- Systems needing tunable consistency (e.g., configurable R, W values).
+- Scenarios where partial failure tolerance is needed.
+
+---
+
+## 📉 Limitations
+
+- Higher latencies than eventual consistency.
+- Write conflicts can still occur and may need conflict resolution mechanisms.
+- Tuning R and W can be complex in large-scale systems.
+
+---
+
+## 📘 Summary
+
+- Quorum consistency is a tunable and reliable way to balance between strong consistency and availability.
+- Ensures data correctness as long as `R + W > N`.
+- Suitable for distributed systems needing flexible consistency guarantees.
+
+# 🧠 Split Brain Problem in Distributed Systems
+
+The **Split Brain** problem occurs in distributed systems when a network partition causes two or more parts of the system to think they are the only active part, leading to **inconsistent or conflicting operations**.
+
+---
+
+## 🔍 What is Split Brain?
+
+- A **network partition** isolates parts of the system.
+- Each partition believes it is the only active primary or leader.
+- Multiple "masters" operate independently — leading to **data divergence**.
+
+---
+
+## 💡 Common Scenarios
+
+- **Leader Election Conflict**: Two nodes both think they are the leader.
+- **Writes from Multiple Masters**: Both partitions accept writes, causing conflicts.
+- **Failover Mistakes**: Cluster incorrectly promotes a secondary due to partition.
+
+---
+
+## ⚠️ Risks & Consequences
+
+- **Data Inconsistency**
+- **Data Loss** (when conflicting writes are overwritten)
+- **System Downtime**
+- **Violation of CAP properties**
+
+---
+
+## 🛠️ Detection Techniques
+
+- **Heartbeat Monitoring**: Nodes send regular heartbeat signals.
+- **Quorum-Based Validation**: Only proceed with majority agreement (quorum).
+- **Fencing Tokens**: Each write is associated with a unique token; outdated nodes are rejected.
+- **Split Brain Detection Tools**: Tools like Pacemaker or Corosync in HA clusters.
+
+---
+
+## ✅ Prevention and Solutions
+
+### 1. **Quorum-Based Systems**
+- Require majority consensus to operate.
+- Helps avoid multiple leaders.
+
+### 2. **Fencing Mechanisms**
+- Prevent stale nodes from accessing shared resources.
+
+### 3. **External Consensus Services**
+- Use systems like **ZooKeeper**, **etcd**, or **Consul** for leader election.
+
+### 4. **Automatic Reconciliation**
+- Detect conflicts and resolve them using merge policies or CRDTs.
+
+---
+
+## 📘 Summary
+
+| Aspect | Description |
+|--------|-------------|
+| **Problem** | Multiple isolated nodes act as leaders due to network split. |
+| **Cause** | Network partitioning or heartbeat failure. |
+| **Impact** | Data conflicts, corruption, inconsistency. |
+| **Solution** | Quorum checks, fencing, consensus algorithms, reconciliation. |
+
+---
+
+# 🔒 Transaction Isolation Levels in Databases
+
+Transaction isolation levels define how/when the changes made by one operation become visible to others. They control **concurrency** and help avoid **anomalies** like dirty reads, non-repeatable reads, and phantom reads.
+
+---
+
+## 🔁 ANSI SQL Standard Isolation Levels
+
+| Level | Dirty Read | Non-Repeatable Read | Phantom Read |
+|-------|------------|---------------------|---------------|
+| **Read Uncommitted** | ✅ Possible | ✅ Possible | ✅ Possible |
+| **Read Committed**   | ❌ Prevented | ✅ Possible | ✅ Possible |
+| **Repeatable Read**  | ❌ Prevented | ❌ Prevented | ✅ Possible |
+| **Serializable**     | ❌ Prevented | ❌ Prevented | ❌ Prevented |
+
+---
+
+## 🔹 1. Read Uncommitted
+
+- **Lowest level** of isolation.
+- Transactions can read **uncommitted changes** from others.
+- Fastest, but **unsafe** for critical applications.
+
+🔸 Issues:
+- Dirty Reads
+- Non-Repeatable Reads
+- Phantom Reads
+
+---
+
+## 🔹 2. Read Committed
+
+- A transaction only reads **committed data**.
+- Default in many databases (e.g., PostgreSQL, Oracle).
+
+🔸 Issues Prevented:
+- ❌ Dirty Reads  
+🔸 Still Possible:
+- ✅ Non-Repeatable Reads  
+- ✅ Phantom Reads
+
+---
+
+## 🔹 3. Repeatable Read
+
+- Ensures that **if a row is read twice**, it won’t change during the transaction.
+- Uses **shared locks** on read rows.
+
+🔸 Issues Prevented:
+- ❌ Dirty Reads  
+- ❌ Non-Repeatable Reads  
+🔸 Still Possible:
+- ✅ Phantom Reads (new rows matching condition may appear)
+
+---
+
+## 🔹 4. Serializable
+
+- **Highest level** of isolation.
+- Transactions are executed as if **serialized** (one after the other).
+- Prevents **all anomalies**, but comes with **performance cost**.
+
+🔸 Prevents:
+- Dirty Reads  
+- Non-Repeatable Reads  
+- Phantom Reads
+
+---
+
+## 🧪 Common Anomalies
+
+| Anomaly | Description |
+|--------|-------------|
+| **Dirty Read** | Reading uncommitted changes of another transaction |
+| **Non-Repeatable Read** | Same query gives different results within a transaction |
+| **Phantom Read** | New rows appear in repeated queries within a transaction |
+
+---
+
+## 💡 Isolation in Popular Databases
+
+| DBMS | Default Isolation Level |
+|------|--------------------------|
+| PostgreSQL | Read Committed |
+| MySQL (InnoDB) | Repeatable Read |
+| SQL Server | Read Committed |
+| Oracle | Read Committed (Serializable via Serializable mode) |
+
+---
+
+## 🧠 Summary
+
+- Use **Read Uncommitted** for maximum concurrency (rare).
+- **Read Committed** is safe for many use cases.
+- Use **Repeatable Read** or **Serializable** when consistency is critical.
+- Higher isolation = fewer anomalies, but more locking & slower performance.
+
+ 
