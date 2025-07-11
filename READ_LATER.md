@@ -16,3 +16,6 @@ https://www.youtube.com/watch?v=LjWug2tvSBU&t=559s
 
 - Event Loop in Js
 - https://www.youtube.com/watch?v=eiC58R16hb8
+
+
+https://medium.com/@jayphelps/backpressure-explained-the-flow-of-data-through-software-2350b3e77ce7
