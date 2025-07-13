@@ -11,6 +11,124 @@
 - V8 Engine
 - Core Modules (`fs`, `http`, `path`, etc.)
 
+### 🧱 Core Node.js Modules
+
+Node.js provides several core (built-in) modules that are compiled into the binary distribution and can be used without installing them via npm.
+
+---
+
+#### 🗂️ File System & Paths
+
+| Module        | Description                                  |
+|---------------|----------------------------------------------|
+| `fs`          | File system operations (read/write, watch)   |
+| `fs/promises` | Promise-based file system API                |
+| `path`        | File and directory path utilities            |
+
+---
+
+#### 🌐 Networking & Communication
+
+| Module        | Description                                      |
+|---------------|--------------------------------------------------|
+| `http`        | Create HTTP servers and clients                  |
+| `https`       | Secure HTTP communication                        |
+| `net`         | TCP servers and clients                          |
+| `tls`         | TLS/SSL secured socket communication             |
+| `dgram`       | UDP datagram sockets                             |
+| `dns`         | DNS resolution and lookups                       |
+
+---
+
+#### 🔄 Streams, Buffers, and Compression
+
+| Module        | Description                           |
+|---------------|---------------------------------------|
+| `stream`      | Stream-based data handling            |
+| `buffer`      | Working with binary data              |
+| `zlib`        | Compression (gzip, deflate) utilities |
+
+---
+
+#### 🧠 Utilities & Helpers
+
+| Module                | Description                           |
+|------------------------|----------------------------------------|
+| `util`                | Utility functions like `promisify()`   |
+| `events`              | EventEmitter class                     |
+| `assert`              | Assertion testing utilities            |
+| `perf_hooks`          | Performance measuring tools            |
+| `diagnostics_channel` | Publish/subscribe diagnostic channel   |
+
+---
+
+#### ⏱️ Timers
+
+| Module            | Description                              |
+|------------------|------------------------------------------|
+| `timers`         | `setTimeout`, `setInterval`, etc.        |
+| `timers/promises`| Promise-based timers                     |
+
+---
+
+#### 🧰 System & Process Management
+
+| Module            | Description                                  |
+|------------------|----------------------------------------------|
+| `os`             | Information about the operating system        |
+| `process`        | Provides process information & control        |
+| `child_process`  | Spawn and communicate with child processes    |
+| `cluster`        | Run multiple Node instances (multi-core)      |
+| `worker_threads` | Spawn threads for parallel execution          |
+
+---
+
+#### 📦 Modules and Execution
+
+| Module    | Description                                |
+|-----------|--------------------------------------------|
+| `module`  | Internal module loader                     |
+| `vm`      | Run code in a virtual machine context      |
+| `repl`    | Read-Eval-Print-Loop interface             |
+
+---
+
+#### 🔐 Security & Encryption
+
+| Module    | Description                                |
+|-----------|--------------------------------------------|
+| `crypto`  | Cryptographic functionality (hashing, HMAC)|
+| `https`   | Secure HTTP via TLS/SSL                    |
+
+---
+
+#### 🐞 Debugging & Inspection
+
+| Module           | Description                                |
+|------------------|--------------------------------------------|
+| `inspector`      | DevTools inspection protocol               |
+| `trace_events`   | Trace event diagnostics                    |
+| `v8`             | Access to V8 engine internals              |
+
+---
+
+#### 🧪 Testing
+
+| Module    | Description                                  |
+|-----------|----------------------------------------------|
+| `test`    | Built-in test runner (since Node v18+)       |
+
+---
+
+#### ✅ Usage
+
+Core modules are used without installing them:
+
+```js
+const fs = require('fs');
+const path = require('path');
+```
+
 **🛠️ Project 1: CLI File Organizer**  
 Build a command-line tool that organizes files in a directory by extension.  
 Learn `fs`, `path`, and CLI args (`process.argv`).
