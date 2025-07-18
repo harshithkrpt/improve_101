@@ -15,6 +15,7 @@ redisClient.on('error', console.error);
 
 async function signup(req, res) {
   const { email, password } = req.body;
+  console.log(`${email} `);
   const hashed = await bcrypt.hash(password, 10);
   const [result] = await pool.query(
     'INSERT INTO users (email, password) VALUES (?, ?)',
