@@ -2,19 +2,11 @@
 module.exports = {
   darkMode: 'class',
   content: [
-    './index.html',
-    './src/**/*.{js,ts,jsx,tsx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
-      colors: {
-        'bg-light': '#ffffff',
-        'bg-dark': '#000000',
-        'text-light': '#1f2937',
-        'text-dark': '#f9fafb',
-        'primary-light': '#3b82f6',
-        'primary-dark': '#ef4444',
-      },
       animation: {
         accordionDown: 'accordion-down 0.2s ease-out',
         accordionUp: 'accordion-up 0.2s ease-out',
