@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.4.4
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT}:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p${MYSQL_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 1
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "${AUTH_SERVICE_PORT}:8080"
+      - "${AUTH_SERVICE_DEBUG_PORT}:5005"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${AUTH_SERVICE_PORT}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 1
+    restart: on-failure
+
+  frontend-dev:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host"
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL=http://localhost:${AUTH_SERVICE_PORT}
+    depends_on:
+      - auth-service
+
+volumes:
+  mysql-data:
