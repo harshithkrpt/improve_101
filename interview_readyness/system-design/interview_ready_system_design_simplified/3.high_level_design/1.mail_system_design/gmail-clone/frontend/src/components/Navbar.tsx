@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
@@ -8,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="w-full border-b px-6 py-4 flex items-center justify-between">
@@ -15,19 +18,19 @@ export function Navbar() {
         <NavigationMenuList className="gap-4">
           <NavigationMenuItem>
             <NavigationMenuLink asChild>
-              <Link to="/" className="text-sm font-medium">Home</Link>
+              <Link to="/" className="text-sm font-medium">{t('home')}</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           {!user && (
             <>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/login" className="text-sm font-medium">Login</Link>
+                  <Link to="/login" className="text-sm font-medium">{t('login')}</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link to="/register" className="text-sm font-medium">Register</Link>
+                  <Link to="/register" className="text-sm font-medium">{t('register')}</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </>
@@ -36,6 +39,7 @@ export function Navbar() {
       </NavigationMenu>
 
       <div className="flex items-center gap-4">
+        <LanguageSwitcher />
         <ThemeToggle />
         {user && (
           <DropdownMenu>
@@ -45,7 +49,7 @@ export function Navbar() {
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={logout}>{t('logout')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}

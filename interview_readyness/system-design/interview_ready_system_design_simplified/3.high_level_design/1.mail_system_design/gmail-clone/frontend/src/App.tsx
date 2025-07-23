@@ -4,12 +4,14 @@ import Register from './pages/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeProvider';
 import { Navbar } from './components/Navbar';
+import { useTranslation } from 'react-i18next';
 
 function Home() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   return (
     <div className="p-6">
-      <h1 className="mt-6 text-xl font-bold">Welcome, {user ?? 'Guest'}!</h1>
+      <h1 className="mt-6 text-xl font-bold">{t('welcome')}, {user ?? t('guest')}!</h1>
     </div>
   );
 }

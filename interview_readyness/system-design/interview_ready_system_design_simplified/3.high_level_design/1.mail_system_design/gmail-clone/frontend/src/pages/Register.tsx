@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { registerUser } from "../services/api";
+import { useForm } from 'react-hook-form';
+import { useRegisterUserMutation } from '../services/userService';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,12 +7,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import { CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
+
+const registerSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { t } = useTranslation();
+  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+  });
   const { user, token } = useAuth();
-  const navigate = useNavigate ? useNavigate() : null;
+  const navigate = useNavigate();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
 
   useEffect(() => {
     if (user && token && navigate) {
@@ -20,47 +33,48 @@ export default function Register() {
     }
   }, [user, token, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
     try {
-      await registerUser(email, password);
-      alert("Registration successful!");
+      await registerUser(data).unwrap();
+      toast.success(t('register_success'), {
+        icon: <CheckCircle2Icon className="text-green-500" />,
+      });
     } catch {
-      alert("Registration failed.");
+      toast.error(t('register_failed'), {
+        icon: <AlertCircleIcon className="text-red-500" />,
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-sm mx-auto mt-20">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-sm mx-auto mt-20">
       <Card>
         <CardHeader>
-          <CardTitle className="text-center">Register</CardTitle>
+          <CardTitle className="text-center">{t('register')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              {...register('email')}
             />
+            {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              {...register('password')}
             />
+            {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
           </div>
-          <Button type="submit" className="w-full">
-            Register
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? t('register') + '...' : t('register')}
           </Button>
         </CardContent>
       </Card>
