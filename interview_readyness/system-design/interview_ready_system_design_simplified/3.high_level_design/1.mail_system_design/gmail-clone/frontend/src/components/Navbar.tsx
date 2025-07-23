@@ -18,16 +18,20 @@ export function Navbar() {
               <Link to="/" className="text-sm font-medium">Home</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink asChild>
-              <Link to="/login" className="text-sm font-medium">Login</Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink asChild>
-              <Link to="/register" className="text-sm font-medium">Register</Link>
-            </NavigationMenuLink>
-          </NavigationMenuItem>
+          {!user && (
+            <>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link to="/login" className="text-sm font-medium">Login</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link to="/register" className="text-sm font-medium">Register</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
 

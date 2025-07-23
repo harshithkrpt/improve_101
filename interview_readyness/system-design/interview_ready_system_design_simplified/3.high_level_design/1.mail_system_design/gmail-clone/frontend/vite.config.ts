@@ -11,4 +11,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: process.env.VITE_HOST || "0.0.0.0",
+    port: parseInt(process.env.VITE_PORT || "5173"),
+    allowedHosts: process.env.VITE_ALLOWED_HOSTS?.split(",") || ["localhost", "127.0.0.1"],
+  },
 })

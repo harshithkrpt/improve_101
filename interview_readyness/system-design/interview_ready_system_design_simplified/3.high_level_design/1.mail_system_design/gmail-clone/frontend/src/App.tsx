@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -14,6 +14,16 @@ function Home() {
   );
 }
 
+function ProtectedRoute() {
+  const { user, token } = useAuth();
+  return user && token ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
+function PublicOnlyRoute() {
+  const { user, token } = useAuth();
+  return user && token ? <Navigate to="/" replace /> : <Outlet />;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -21,9 +31,13 @@ export default function App() {
         <Router>
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Home />} />
+            </Route>
+            <Route element={<PublicOnlyRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
           </Routes>
         </Router>
       </AuthProvider>

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { loginUser } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,13 +11,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
+  const { login, user, token } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user && token) {
+      navigate("/");
+    }
+  }, [user, token, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const data = await loginUser(email, password);
-      login(data.email);
+      login(data.email, data.token); // Save token
       alert("Login successful!");
     } catch {
       alert("Login failed.");
