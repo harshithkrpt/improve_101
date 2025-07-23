@@ -21,7 +21,7 @@ services:
   auth-service:
     build:
       context: ./services/auth-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: auth-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
@@ -31,12 +31,16 @@ services:
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
     depends_on:
       mysql:
         condition: service_healthy
     ports:
       - "${AUTH_SERVICE_PORT}:8080"
       - "${AUTH_SERVICE_DEBUG_PORT}:5005"
+    volumes:
+      - ./services/auth-service/src:/app/src
+      - ./services/auth-service/pom.xml:/app/pom.xml
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${AUTH_SERVICE_PORT}/actuator/health"]
       interval: 30s

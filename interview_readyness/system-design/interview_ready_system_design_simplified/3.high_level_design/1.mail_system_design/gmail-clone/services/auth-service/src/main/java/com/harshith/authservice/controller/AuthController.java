@@ -1,5 +1,6 @@
 package com.harshith.authservice.controller;
 
+import com.harshith.authservice.dto.ApiResponse;
 import com.harshith.authservice.service.AuthService;
 import lombok.*;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,13 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest req) {
         authService.signup(req.getEmail(), req.getPassword());
-        return ResponseEntity.ok("User registered successfully");
+        return ResponseEntity.ok(new ApiResponse(true, "User registered successfully", null));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         String token = authService.login(req.getEmail(), req.getPassword());
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(new ApiResponse(true, "Login successful", new LoginResponse(token)));
     }
 
     @Data static class SignupRequest {

@@ -67,3 +67,12 @@ export default tseslint.config([
   },
 ])
 ```
+
+# Development Hot Reload for Auth Service
+
+- Uses `Dockerfile.dev` for the auth-service in development mode.
+- Hot reload is enabled via Spring Boot DevTools and `mvn spring-boot:run`.
+- Ports 8080 (app) and 5005 (debug) are exposed and mapped via environment variables in docker-compose.dev.yml.
+- Source code is mounted as a volume for live reload.
+
+See `services/auth-service/Dockerfile.dev` and `docker-compose.dev.yml` for details.
