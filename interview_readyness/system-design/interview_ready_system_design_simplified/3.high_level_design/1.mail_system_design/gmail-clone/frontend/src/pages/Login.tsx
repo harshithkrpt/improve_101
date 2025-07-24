@@ -37,10 +37,17 @@ export default function Login() {
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
       const result = await loginUser(data).unwrap();
-      login(result.email, result.token); // Save token
-      toast.success(t('login_success'), {
-        icon: <CheckCircle2Icon className="text-green-500" />,
-      });
+      if(result.success) {
+        login(result.data.email, result.data.token);
+        toast.success(result.message || t('login_success'), {
+          icon: <CheckCircle2Icon className="text-green-500" />,
+        });
+        navigate("/");
+      } else {
+        toast.error(result.message || t('login_failed'), {
+          icon: <AlertCircleIcon className="text-red-500" />,
+        });
+      }
     } catch {
       toast.error(t('login_failed'), {
         icon: <AlertCircleIcon className="text-red-500" />,

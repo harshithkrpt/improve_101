@@ -23,7 +23,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         String token = authService.login(req.getEmail(), req.getPassword());
-        return ResponseEntity.ok(new ApiResponse(true, "Login successful", new LoginResponse(token)));
+        return ResponseEntity.ok(new ApiResponse(true, "Login successful", new LoginResponse(token, req.getEmail())));
     }
 
     @Data static class SignupRequest {
@@ -33,6 +33,7 @@ public class AuthController {
 
     @Data @AllArgsConstructor static class LoginResponse {
         private String token;
+        private String email;
     }
 
     @Data static class LoginRequest {

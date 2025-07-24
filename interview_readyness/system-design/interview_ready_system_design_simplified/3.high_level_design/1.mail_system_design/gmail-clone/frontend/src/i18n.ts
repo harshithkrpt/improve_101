@@ -19,6 +19,9 @@ const resources = {
       login_failed: 'Login failed.',
       register_success: 'Registration successful!',
       register_failed: 'Registration failed.',
+      confirm_password: 'Confirm Password',
+      'Passwords do not match': 'Passwords do not match',
+      'Confirm Password is required': 'Confirm Password is required',
     },
   },
   es: {
@@ -38,6 +41,9 @@ const resources = {
       login_failed: 'Error de inicio de sesión.',
       register_success: '¡Registro exitoso!',
       register_failed: 'Error de registro.',
+      confirm_password: 'Confirmar contraseña',
+      'Passwords do not match': 'Las contraseñas no coinciden',
+      'Confirm Password is required': 'Se requiere confirmar la contraseña',
     },
   },
   te: {
@@ -57,6 +63,9 @@ const resources = {
       login_failed: 'లాగిన్ విఫలమైంది.',
       register_success: 'నమోదు విజయవంతం!',
       register_failed: 'నమోదు విఫలమైంది.',
+      confirm_password: 'పాస్వర్డ్‌ను నిర్ధారించండి',
+      'Passwords do not match': 'పాస్వర్డ్లు సరిపోలడం లేదు',
+      'Confirm Password is required': 'పాస్వర్డ్ నిర్ధారణ అవసరం',
     },
   },
 };

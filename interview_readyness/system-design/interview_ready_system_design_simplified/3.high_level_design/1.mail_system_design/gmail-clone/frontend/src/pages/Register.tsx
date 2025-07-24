@@ -16,11 +16,15 @@ import { CheckCircle2Icon, AlertCircleIcon } from 'lucide-react';
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(6, 'Confirm Password is required'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 export default function Register() {
   const { t } = useTranslation();
-  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof registerSchema>>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
   });
   const { user, token } = useAuth();
@@ -39,6 +43,8 @@ export default function Register() {
       toast.success(t('register_success'), {
         icon: <CheckCircle2Icon className="text-green-500" />,
       });
+      reset();
+      navigate("/login");
     } catch {
       toast.error(t('register_failed'), {
         icon: <AlertCircleIcon className="text-red-500" />,
@@ -72,6 +78,16 @@ export default function Register() {
               {...register('password')}
             />
             {errors.password && <span className="text-red-500 text-xs">{errors.password.message}</span>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">{t('confirm_password')}</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              {...register('confirmPassword')}
+            />
+            {errors.confirmPassword && <span className="text-red-500 text-xs">{errors.confirmPassword.message}</span>}
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? t('register') + '...' : t('register')}

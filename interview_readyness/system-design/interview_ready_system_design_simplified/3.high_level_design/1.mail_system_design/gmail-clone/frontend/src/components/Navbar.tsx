@@ -45,7 +45,7 @@ export function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Avatar className="cursor-pointer h-8 w-8">
-                <AvatarFallback>{user.toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{user[0].toUpperCase()}</AvatarFallback>
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
