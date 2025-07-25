@@ -9,3 +9,7 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka:8082/eureka/} 
+
+spring:
+  application:
+    name: service-registry 
