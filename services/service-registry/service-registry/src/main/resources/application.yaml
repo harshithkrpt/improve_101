@@ -1,0 +1,15 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:eureka}
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka:8082/eureka/} 
+
+spring:
+  application:
+    name: service-registry 
