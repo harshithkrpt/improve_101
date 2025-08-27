@@ -1,5 +1,7 @@
 use std::fs;
-
+use chrono::{Local, Utc};
+mod borrowing;
+use borrowing::{borrowing};
 struct User {
     active: bool,
     username: String,
@@ -61,6 +63,11 @@ fn main() {
 
     println!("Length {}", get_str_len(String::from("harshith")));
 
+    let now = Utc::now();
+    let utc_now = Local::now();
+
+    println!("{} {}", now, utc_now);
+
     let user1 = User {
         active: true,
         username: String::from("harshithkrpt"),
@@ -94,6 +101,7 @@ fn main() {
         Ok(val) => println!("{}", val),
         Err(err) => println!("{}", err)
     }
+    borrowing();
 }
 
 
