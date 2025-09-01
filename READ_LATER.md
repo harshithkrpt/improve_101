@@ -19,3 +19,5 @@ https://www.youtube.com/watch?v=LjWug2tvSBU&t=559s
 
 
 https://medium.com/@jayphelps/backpressure-explained-the-flow-of-data-through-software-2350b3e77ce7
+
+https://www.youtube.com/watch?v=modXC5IWTJI
