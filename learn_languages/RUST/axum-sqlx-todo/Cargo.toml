@@ -1,0 +1,18 @@
+[package]
+name = "axum-sqlx-todo"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.4"
+chrono = "0.4.41"
+dotenvy = "0.15.7"
+serde = "1.0.219"
+serde_json = "1.0.143"
+sqlx = "0.8.6"
+thiserror = "2.0.16"
+tokio = "1.47.1"
+tower-http = "0.6.6"
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
+uuid = "1.18.0"
