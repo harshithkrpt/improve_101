@@ -1,0 +1,231 @@
+- React JS
+    - Core
+        - Components, JSX, rendering lifecycle
+        - Props vs State, derived state, lifting state up
+        - Controlled vs uncontrolled components, refs
+        - Lists, keys, reconciliation
+    - React Router
+        - V6 data APIs: loaders/actions, deferred data
+        - Nested routes, dynamic params, search params
+        - Protected routes, lazy routes, code-splitting
+    - React Context
+        - Provider patterns, avoiding re-renders
+        - Context selector patterns, when to prefer state libraries
+    - React Hooks
+        - useState, useReducer: choosing state models
+        - useEffect: dependencies, teardown, avoiding overuse
+        - useMemo, useCallback: memoization strategy, pitfalls
+        - useRef: mutable refs, DOM refs, caching values
+        - Custom hooks: composition, separation of concerns
+        - useTransition, useDeferredValue, concurrent features
+        - Error boundaries (component), suspense boundaries
+    - State Management
+        - Redux Toolkit: slices, RTK store setup, immer
+        - RTK Query: queries, mutations, caching, invalidation
+        - Alternative libs: Zustand, Jotai, Recoil (when/why)
+        - Normalization, selectors, performance tuning
+    - Data Fetching
+        - React Query/TanStack Query: query keys, cacheTime, staleTime
+        - Pagination, infinite queries, optimistic updates
+        - Prefetching, dehydrate/rehydrate, SSR hydration
+    - Forms
+        - React Hook Form / Formik
+        - Schema validation with Zod/Yup, resolver pattern
+        - Dynamic forms, field arrays, performance
+    - Performance
+        - Avoiding unnecessary renders, memo patterns
+        - Virtualization (react-window, react-virtualized)
+        - Code-splitting, lazy, Suspense for data and code
+        - Image optimization, avoiding large bundles
+    - Accessibility (a11y)
+        - Semantics, ARIA basics, focus management
+        - Keyboard navigation, screen-reader testing
+    - Testing
+        - React Testing Library + Jest: queries, user-event
+        - Mocking network/state, integration tests
+        - Snapshot tests, accessibility checks
+    - Styling
+        - CSS Modules, Tailwind CSS, styled-components/emotion
+        - Design systems, theming, dark mode
+    - SSR/SSG and Frameworks
+        - Next.js: app/router, data fetching, metadata
+        - Routing, server components basics
+    - Build Tooling
+        - Vite/Webpack basics, environment variables
+        - ESLint + Prettier setup, CI checks
+
+- JavaScript
+    - Language Essentials
+        - Scope, closures, hoisting, the "this" keyword
+        - Prototypes, classes, inheritance, composition
+        - Destructuring, spread/rest, template literals
+        - ES Modules vs CommonJS
+    - Asynchrony
+        - Event loop, microtasks vs macrotasks
+        - Promises, async/await, error handling patterns
+        - Fetch API, Axios basics, cancellation (AbortController)
+    - Data Structures & APIs
+        - Arrays, maps/sets, typed arrays, Date, Intl
+        - JSON parsing/stringify, structuredClone
+    - Browser Platform
+        - DOM APIs, events, delegation, forms
+        - Storage: localStorage, sessionStorage, IndexedDB
+        - Performance: debouncing, throttling, web workers
+    - Testing & Tooling
+        - Jest basics, mocking timers/fetch
+        - Node/npm scripts, package.json, semantic versioning
+
+- Creating Polyfills for Javascript
+    - Core Foundations
+        - Prototypes and Inheritance – Know how JavaScript’s prototype chain works, since most polyfills patch Object.prototype, Array.prototype, etc.
+        - Property Descriptors – Object.defineProperty, getters/setters, and configurable/writable/enumerable flags are vital for correct polyfills.
+        - Scope and Closures – Polyfills often rely on closures to avoid polluting the global scope.
+        - Function Binding – Understand this, .bind, .call, .apply (and how to simulate them).
+        - Strict Mode – Many ES5+ features behave differently in strict mode; polyfills must account for both.
+    - Build in Objects
+        - Array Methods – How to implement map, filter, reduce, find, flat, flatMap, etc. from scratch.
+        - String Methods – Polyfilling startsWith, endsWith, includes, padStart, padEnd.
+        - Object Utilities – Polyfills for Object.assign, Object.entries, Object.values, Object.fromEntries.
+        - Number & Math – Number.isNaN, Number.isInteger, Math.trunc, Math.sign.
+        - Promise – Full implementation with then, catch, finally, all, race, allSettled, any.
+    - Advanced APIs
+        - Symbol – Simulating symbols (to some extent), important for Symbol.iterator.
+        - Iterators and Generators – Creating custom iterables ([Symbol.iterator]) for arrays, strings, maps.
+        - Fetch & XHR Wrapping – Polyfilling fetch using XMLHttpRequest.
+        - URL & URLSearchParams – Implementing modern APIs for query parsing and serialization.
+        - ES Modules – Understanding module loading (though not polyfillable fully, knowing shims helps).
+    - DOM/Browser Environment
+        - EventTarget – How to shim addEventListener, removeEventListener, and dispatchEvent.
+        - CustomEvent – Polyfilling new CustomEvent(...).
+        - requestAnimationFrame – Implementing via setTimeout.
+        - ClassList API – Shimming element.classList.add/remove/toggle.
+        - localStorage/sessionStorage – Implementing a fallback using cookies or in-memory objects.
+
+
+
+- Python 
+    - Core Language
+        - Syntax, control flow, functions, typing basics
+        - Data structures: list, dict, set, tuple, heapq
+        - OOP: classes, dataclasses, dunder methods
+    - Environment & Packaging
+        - venv/pyenv, pip, pip-tools/poetry basics
+        - Project layout, entry points
+    - Files & Networking
+        - File I/O, pathlib, csv/json
+        - requests/httpx basics, retries, timeouts
+    - Concurrency
+        - threading vs multiprocessing
+        - asyncio: tasks, gather, async context managers
+    - Testing
+        - pytest: fixtures, parametrization, mocking
+    - Useful Libraries
+        - pandas/numpy basics (tabular operations)
+        - pydantic for validation
+
+- MySQL
+    - Modeling
+        - Normalization, constraints, keys, relationships
+        - Data types, character sets, collation
+    - Querying
+        - Joins, subqueries, window functions
+        - Aggregations, grouping, HAVING
+    - Performance
+        - Indexes, composite indexes, covering indexes
+        - EXPLAIN plans, slow query log
+    - Reliability
+        - Transactions, ACID, isolation levels, locks
+        - Backups, replication basics
+
+- DSA Programming Questions (Go through the patterns)
+    - Arrays & Strings: two pointers, sliding window, prefix sums
+    - Hashing: frequency maps, sets, anagrams
+    - Stack & Queue: monotonic stack, parentheses, next greater
+    - Linked List: reversal, cycle detection, merge
+    - Trees: traversal (DFS/BFS), BST ops, LCA
+    - Heaps & Priority Queues: top-k, scheduling
+    - Graphs: BFS/DFS, shortest path (Dijkstra), union-find
+    - Dynamic Programming: knapsack, LIS, grid paths
+    - Backtracking: subsets, permutations, N-Queens
+    - Complexity analysis and trade-offs
+
+- System Design 
+    - Basic Concepts
+        - Latency vs throughput, availability vs consistency (CAP)
+        - Caching: client, CDN, server, write-through/back
+        - Databases: SQL vs NoSQL, sharding, partitioning
+        - Load balancers, reverse proxies
+        - Messaging: queues, pub/sub, stream processing
+        - Idempotency, retries, rate limiting, circuit breakers
+        - Observability: logs, metrics, traces, SLIs/SLOs
+
+- Docker
+    - Images vs containers, layers, registries
+    - Dockerfile best practices, multi-stage builds
+    - docker-compose, local dev workflows
+    - Networking, ports, bridges; volumes & binds
+    - Security: least privilege, secrets, base image updates
+
+- AWS
+    - IAM & Security
+        - Users, roles, policies, least privilege
+        - KMS basics, parameter store/Secrets Manager
+    - VPC Networking
+        - Subnets, route tables, NAT, security groups, NACLs
+    - EC2
+        - Instance types, AMIs, ASG, ELB/ALB
+        - User data, instance profiles
+    - S3
+        - Buckets, lifecycle rules, versioning, encryption
+        - Static hosting, presigned URLs
+    - RDS
+        - Engine choices, backups, multi-AZ, read replicas
+        - Parameter groups, performance insights
+    - CloudFront
+        - Distributions, behaviors, caches, invalidations
+        - Origin access control, custom domains
+    - Lambda
+        - Event sources, cold starts, memory/time tuning
+        - Layers, environment variables, concurrency
+    - API Gateway
+        - REST vs HTTP vs WebSocket, integrations
+        - Authorizers, throttling, stages, deployments
+    - CloudWatch
+        - Logs, metrics, dashboards, alarms
+    - CloudTrail
+        - Audit trails, event history, insights
+
+- Kubernetes
+    - Core objects: Pods, Deployments, ReplicaSets
+    - Services (ClusterIP/NodePort/LoadBalancer), Ingress
+    - ConfigMaps, Secrets, downward API
+    - Autoscaling: HPA, resource requests/limits
+    - StatefulSets vs Deployments, Jobs/CronJobs
+    - Packaging: Helm charts basics
+    - Observability: kubectl, logs, events, probes
+
+- Git
+    - Basics: clone, commit, push/pull, stash
+    - Branching models: GitFlow, trunk-based
+    - Merge vs rebase, resolving conflicts
+    - Tags, cherry-pick, revert
+    - Hooks and commit conventions (Conventional Commits)
+
+- GitHub
+    - Pull requests, code reviews, protected branches
+    - Issues, Projects, Discussions, Wikis
+    - Actions: workflows, runners, secrets, caching
+    - Security: Dependabot, code scanning, CODEOWNERS
+
+- CI/CD
+    - Pipeline stages: build, test, lint, package, deploy
+    - Artifacts, caching, parallelism, matrix builds
+    - Environments, approvals, rollbacks
+    - Deployment strategies: blue/green, canary
+
+- Jenkins
+    - Controller/agent model, nodes and labels
+    - Declarative pipelines (Jenkinsfile), shared libraries
+    - Credentials management, secrets
+    - Multibranch pipelines, GitHub integration
+    - Common plugins and best practices
