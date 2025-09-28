@@ -101,27 +101,24 @@
         - ClassList API – Shimming element.classList.add/remove/toggle.
         - localStorage/sessionStorage – Implementing a fallback using cookies or in-memory objects.
 
-
-
-- Python 
-    - Core Language
-        - Syntax, control flow, functions, typing basics
-        - Data structures: list, dict, set, tuple, heapq
-        - OOP: classes, dataclasses, dunder methods
-    - Environment & Packaging
-        - venv/pyenv, pip, pip-tools/poetry basics
-        - Project layout, entry points
-    - Files & Networking
-        - File I/O, pathlib, csv/json
-        - requests/httpx basics, retries, timeouts
-    - Concurrency
-        - threading vs multiprocessing
-        - asyncio: tasks, gather, async context managers
-    - Testing
-        - pytest: fixtures, parametrization, mocking
-    - Useful Libraries
-        - pandas/numpy basics (tabular operations)
-        - pydantic for validation
+-  Python
+    Core Python: Variables, Data Types, Loops, Functions
+    Object-Oriented Programming (OOP)
+    Advanced Python: Generators, Decorators, Metaclasses
+    Threading, Concurrency & Global Interpreter Lock (GIL)
+    Unit Testing: unittest, pytest
+    Virtual Environments & Package Management: venv, pipenv, poetry
+    Git & Version Control
+    Linux/Bash Scripting
+    Basic Database Knowledge: SQL & NoSQL
+    Fast API
+    Flask (Lightweight APIs)
+    SQLAlchemy (ORM for Flask, FastAPI)
+    Redis (Caching & Message Queues)
+    Database Optimization (Indexes, Query Optimization)
+    JWT & OAuth2
+    API Security (Rate Limiting, CORS, CSRF)
+    Hashing & Encryption (bcrypt, argon2)
 
 - MySQL
     - Modeling

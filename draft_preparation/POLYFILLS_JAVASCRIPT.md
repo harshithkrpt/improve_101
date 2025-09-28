@@ -109,3 +109,133 @@
         return result;
      }
 ```
+
+
+### Bind
+
+```js
+    const object = {
+        name: "Harshith",
+        age: 25
+    };
+
+    const fn = function(honestOpinion) {
+        return this.name + " " + this.age +  " " + honestOptnion;
+    }
+
+    fn.bind(object, "This is my read name & age");
+
+    Function.prototype.pBind = function(context = {}, ...args) {
+        if(typeof this != "function") {
+            throw new Error("binding method is not callable");
+        }
+
+        context.fn = this;
+
+        return function(...remArgs) {
+            return context.fn(...args, ...remArgs)
+        }
+
+    }
+
+    fn.pBind(object, "This is my read name & age");
+```
+
+
+### Once
+
+```js
+    Function.prototype.pOnce = function() {
+        if(typeof this !== "function") {
+            throw new Error("pOnce must be called with function");
+        }
+
+        let called = false;
+        let result;
+
+        return (...args) => {
+            if(!called) {
+                result = this.apply(this, args);
+                called = true;
+            }
+
+            return result;
+        }
+    }
+```
+
+### Memoise
+
+```js
+    Function.prototype.pMemory = function() {
+        if(typeof this !== "function") {
+            throw new Error("pMemoize must be called with function");
+        }
+
+        const cache = new Map();
+        const fn = this;
+
+        return function(...args) {
+            const key = JSON.stringify(args);
+            if(cache.has(key)) {
+                return cache.get(key);
+            }
+
+            const curResult = fn.apply(this, args);
+            cache.set(key, curResult);
+            
+            return curResult;
+        }
+    }
+```
+
+
+### Debounce
+
+```js
+    const debounce = (cb, delay) => {
+        let timer;
+
+        return function(...args) {
+            const fn = this;
+
+            if(timer) {
+                clearTimeout(timer);
+            }
+
+            timer = setTimeout(() => {
+               cb.apply(fn, ...args);
+
+            }, delay);
+        }
+    }
+```
+
+
+### Throttle
+
+```js
+
+const throttle = (cb, delay) => {
+    let prevCalled = 0;
+
+    return function(...args) {
+        const context = this;
+        const now = Date.now();
+
+        if (now - prevCalled >= delay) {
+            cb.apply(context, args);
+            prevCalled = now;
+        }
+    };
+};
+
+```
+
+
+## Promise Polyfills
+
+### Promise 
+
+
+### Promise.all 
