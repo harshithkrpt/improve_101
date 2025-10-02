@@ -154,8 +154,9 @@ print(twoSum(nums, target))  # Output: [0, 1]
 
 ## 🧾 Python Code (No External Libraries)
 ```python
+from collections import defaultdict
+
 def groupAnagrams(strs):
-    from collections import defaultdict
     
     group_map = defaultdict(list)
 
@@ -628,7 +629,7 @@ class Solution:
         while left < right:
             while left < right and not s[left].isalnum():
                 left += 1
-            while left < right and not s[right].isalnum():
+            while left < right and not s[r`ight].isalnum():
                 right -= 1
             if s[left].lower() != s[right].lower():
                 return False
