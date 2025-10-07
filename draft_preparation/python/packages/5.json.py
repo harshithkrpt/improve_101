@@ -21,3 +21,12 @@ with open("files/newfile.json", 'w') as f:
 with open("files/newfile.json", 'r') as f:
     data = json.loads(f.read())
     print(data['name'])
+
+
+with open("files/newfile.json", 'w') as f:
+    json.dump(data, f ,sort_keys=True, separators=(",", ": "), indent= 2)
+
+
+with open("files/newfile.json", 'r') as f:
+    data = json.load(f)
+    print(data['name'])
