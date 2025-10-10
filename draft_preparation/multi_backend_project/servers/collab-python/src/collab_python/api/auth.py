@@ -1,7 +1,7 @@
 from fastapi import HTTPException, APIRouter
 from collab_python.schemas.user import UserRequestSignUp,UserLoginRequest
 from collab_python.db.base import get_conn
-from collab_python.util.common import hash_password, is_valid_password, generate_jwt
+from collab_python.util.common import hash_password, is_valid_password, generate_login_response, cleanup_login_payload
 from psycopg import errors, rows
 
 
@@ -29,17 +29,13 @@ def login_user(login_request: UserLoginRequest):
     with get_conn() as conn:
         with conn.cursor(row_factory=rows.dict_row) as cur:
             # fetch the user 
-            cur.execute("SELECT email, password_hash, display_name FROM users WHERE email = %s", (login_request.username, ))
+            cur.execute("SELECT email, password_hash, display_name, id FROM users WHERE email = %s", (login_request.username, ))
             user = cur.fetchone()
             if user is None:
                 raise HTTPException(status_code=400, detail='Invalid Credentials') 
-            print(user, "added user", user.get("email"))
             is_valid = is_valid_password(login_request.password, hashed=user.get('password_hash'))
             if is_valid == False:
                 raise HTTPException(status_code=400, detail='Invalid Credentials') 
+            cleanup_login_payload(user)
             
-            # now generate the jwt by adding username, email
-            jwt_token = generate_jwt(payload={'email': user.get('email')})
-            return {
-                'token': jwt_token
-            }
+            return generate_login_response(payload=user)

@@ -8,7 +8,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 @contextmanager
 def get_conn():
-    print(DATABASE_URL)
     # psycopg.Connection used in "autocommit=False" by default
     with psycopg.connect(DATABASE_URL) as conn:
         yield conn
