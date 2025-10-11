@@ -336,3 +336,9 @@ This project is your **cross-language laboratory** — one user interface, four 
 You’ll gain a deep feel for how each stack handles concurrency, type safety, developer experience, and runtime performance.
 
 The joy is not in finishing all four — it’s in *comparing their minds.*
+
+
+```sh
+docker build -t my-redis .
+docker run -d --name redis-server -p 6379:6379 my-redis
+```

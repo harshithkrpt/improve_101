@@ -13,7 +13,10 @@ def _get_username(payload: dict):
     return getattr(payload, "username", None) or getattr(payload, "email", None)
 
 
-def generate_jwt(payload: dict, token_type = 'access', expiry_delta_minutes = 20, jti: str = ''):
+def generate_jwt(payload: dict, token_type = 'access', expiry_delta_minutes = 20, jti: str = None):
+    if jti is None:
+        jti = str(uuid.uuid4())
+
     secret = os.getenv('JWT_SECRET') 
     if not secret:
         raise RuntimeError("JWT_SECRET environment variable is not set")
@@ -43,21 +46,22 @@ def generate_access_jwt(payload, jti):
 def generate_refresh_jwt(payload, jti):
     return generate_jwt(payload, 'refresh', expiry_delta_minutes=2 * 24 * 60, jti=jti)
 
-def decode_jwt(jwt_tokwn: str):
+def decode_jwt(jwt_token: str) -> dict:
     secret = os.getenv('JWT_SECRET')
-    return jwt.decode(jwt_tokwn, secret, algorithm='HS256')
+    return jwt.decode(jwt_token, secret, algorithms=['HS256'])
 
 def cleanup_login_payload(payload: dict):
-    del payload['password_hash']
+    payload.pop('password_hash', None)
 
-def generate_login_response(payload: dict):
-    jti = str(uuid.uuid4())
-   
+def generate_login_response(payload: dict, refresh: bool = None):
+    jti_access = str(uuid.uuid4())
+    jti_refresh = str(uuid.uuid4())
+
     try:
         login_response = {
-            'jti': jti,
-            'access_token': generate_access_jwt(payload=payload, jti=jti),
-            'refresh_token': generate_refresh_jwt(payload=payload, jti=jti),
+            'jti': jti_access,
+            'access_token': generate_access_jwt(payload=payload, jti=jti_access),
+            'refresh_token':  generate_refresh_jwt(payload=payload, jti=jti_refresh) if refresh is None else refresh,
             'expires_in': 20 * 60,
             "user": payload
         }
@@ -65,8 +69,9 @@ def generate_login_response(payload: dict):
         return login_response
     except Exception:
         return {}
-
     
+def get_currenttimestamp():
+    return datetime.now(timezone.utc).timestamp()
 
 
 def hash_password(current_password: str):
