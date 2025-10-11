@@ -7,7 +7,7 @@ load_dotenv()
 import uuid
 from fastapi import HTTPException, Request
 from jwt import InvalidTokenError, ExpiredSignatureError
-
+import json
 import logging
 
 def _get_username(payload: dict):
@@ -37,7 +37,8 @@ def generate_jwt(payload: dict, token_type = 'access', expiry_delta_minutes = 20
         'exp': int(exp_dt.timestamp()), # expiry timestamp
         'iss': 'collab',
         'type': token_type,
-        'jti': jti
+        'jti': jti,
+        'id': payload.get("id")
     }
 
     token = jwt.encode(new_payload, secret, algorithm=os.getenv("JWT_ALGORITHM"))

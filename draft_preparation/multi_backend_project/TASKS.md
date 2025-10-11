@@ -1,3 +1,7 @@
+1. Move the DB Calls to AsyncIo .to_thread so not block I/O - Done
+2. And Change the Key Mapping for Redis to -> user::refresh::{{primary_key}} - Done
+
+
 3. Single per-user Redis key is fragile
 key = f"user::refresh::{user.get('email')}" stores one refresh per email. That wipes multi-device sessions and makes reuse-detection impossible across devices. Use per-session keys (jti or session id) plus a per-user index (set) of active sessions.
 

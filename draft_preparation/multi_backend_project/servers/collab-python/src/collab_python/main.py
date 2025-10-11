@@ -1,7 +1,8 @@
 
 from fastapi import FastAPI
 import uvicorn
-import collab_python.api.auth as auth 
+import collab_python.api.auth as auth
+import collab_python.api.lists as lists 
 import redis.asyncio as redis
 from dotenv import load_dotenv
 import os
@@ -11,6 +12,7 @@ load_dotenv()
 app = FastAPI(title='Collab')
 
 app.include_router(auth.router)
+app.include_router(lists.router)
 
 @app.on_event("startup")
 async def app_start():
