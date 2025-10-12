@@ -11,3 +11,9 @@ class ListAPIRequest(BaseModel):
     description: str
     is_public: bool
     owner_id: int | None = None
+
+class UpdateListIn(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    is_public: bool | None = None
+    id: int | None = None

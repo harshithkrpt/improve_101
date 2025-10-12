@@ -44,6 +44,7 @@ async def login_user(login_request: UserLoginRequest, request: Request):
     return response
         
 
+# TODO: Fix this api as the token generated does not have same keys as generated via login
 @router.post('/refresh_access')
 async def refresh_access(body: RefreshRequest, request: Request):
     redis = request.app.state.redis
