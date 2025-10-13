@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query, Depends, HTTPException
 import logging
 from collab_python.util.common import validate_token
-from collab_python.repository.lists import fetch_my_lists, add_list, delete_list, owner_of_list, fetch_list_id, update_list_id
+from collab_python.repository.lists import fetch_my_lists, add_list, delete_list, owner_of_list, fetch_list_id, update_list_id, add_bookmark_to_list_repo
 logging.basicConfig(level=logging.INFO)
 import asyncio
-from collab_python.schemas.list import UpdateListIn, ListAPIRequest
+from collab_python.schemas.list import UpdateListIn, ListAPIRequest,BookMarkListIn
 
 router = APIRouter(prefix='/api/v1/lists', tags=['List Management'])
 
@@ -86,3 +86,11 @@ async def update_list(id: int, list_request: UpdateListIn, jwt_token = Depends(v
         return {
             'detail': "updated successfully"
         }
+    
+
+@router.post("/{list_id}/bookmarks")
+async def add_bookmark_to_list(list_id: int, bookmark_in: BookMarkListIn):
+    # adding to list id
+    res = await asyncio.to_thread(add_bookmark_to_list_repo, list_id, bookmark_in)
+    
+    return res

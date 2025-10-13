@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class ListDaoIn(BaseModel):
     title: str
@@ -17,3 +18,11 @@ class UpdateListIn(BaseModel):
     description: str | None = None
     is_public: bool | None = None
     id: int | None = None
+
+
+class BookMarkListIn(BaseModel):
+    url: str
+    title: str
+    notes: str
+    tags: List[str]
+    read: bool
