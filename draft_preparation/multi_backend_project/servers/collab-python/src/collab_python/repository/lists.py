@@ -1,7 +1,5 @@
 from collab_python.db.base import get_conn
 from psycopg import rows
-# TODO: Fix this below package properly without psycopg2-binary
-from psycopg2.extras import execute_values
 import logging
 from collab_python.schemas.list import ListDaoIn
 # api dao for fetch data
@@ -162,9 +160,12 @@ def add_bookmark_to_list_repo(list_id: int, bookmark_in: BookMarkListIn):
         # insert into tags
         with conn.cursor() as cur:
            try:
-                tags = [(n,) for n in bookmark_in.tags]
+                tags = bookmark_in.tags
+                tags = list(dict.fromkeys(tags))
                 QUERY = """
-                    WITH new_tags(name) AS (VALUES %s),
+                    WITH new_tags(name) AS (
+                        SELECT unnest(%s::text[])
+                    ),
                     ins AS (
                         INSERT INTO tags(name)
                         SELECT name FROM new_tags nt WHERE NOT EXISTS (
@@ -176,40 +177,17 @@ def add_bookmark_to_list_repo(list_id: int, bookmark_in: BookMarkListIn):
                     FROM tags 
                     WHERE name IN (SELECT name FROM new_tags);
                 """
-                execute_values(cur, QUERY, tags)
+                cur.execute(QUERY, (tags, ))
                 inserted_tags = cur.fetchall()
                 
                 QUERY_FOR_LINKING = """
                     INSERT INTO 
                         bookmark_tags(bookmark_id, tag_id) 
-                    VALUES %s ON CONFLICT DO NOTHING;
+                    VALUES (%s, %s) ON CONFLICT DO NOTHING;
                 """
-                # Normalize bookmark id extraction (works for tuple or dict-row)
-                if isinstance(bookmark, (list, tuple)):
-                    bookmark_id = bookmark[0]
-                elif isinstance(bookmark, dict):
-                    bookmark_id = bookmark.get("id")
-                else:
-                    # try attribute-style
-                    bookmark_id = getattr(bookmark, "id", None)
 
-                if bookmark_id is None:
-                    raise RuntimeError("could not determine inserted bookmark id")
+                cur.executemany(QUERY_FOR_LINKING, [(bookmark.get("id"), tag) for tag in inserted_tags])
 
-                # Prepare linking rows (bookmark_id, tag_id)
-                # tags_rows might be list of tuples (id, name) or list of dicts
-                linking_values = []
-                for r in inserted_tags:
-                    if isinstance(r, (list, tuple)):
-                        tag_id = r[0]
-                    elif isinstance(r, dict):
-                        tag_id = r.get("id")
-                    else:
-                        tag_id = getattr(r, "id", None)
-                    if tag_id is None:
-                        raise RuntimeError("could not determine tag id from inserted_tags")
-                    linking_values.append((bookmark_id, tag_id))
-                execute_values(cur, QUERY_FOR_LINKING, linking_values)
                 return {
                     "bookmark": bookmark,
                     "tags": inserted_tags
@@ -218,3 +196,22 @@ def add_bookmark_to_list_repo(list_id: int, bookmark_in: BookMarkListIn):
                logging.error(exp)
 
         return bookmark
+    
+
+def get_bookmark_to_list_repo(list_id: int):
+    with get_conn() as conn:
+        with conn.cursor(row_factory=rows.dict_row) as cur:
+            QUERY = """
+            SELECT 
+                    b.id, 
+                        b.title, 
+                        b.url, 
+                        b.notes, 
+                        b.read                       
+                    FROM bookmarks b
+                    WHERE b.list_id = %s;
+             """
+
+            cur.execute(QUERY, (list_id, ))
+            res = cur.fetchall()
+            return res
