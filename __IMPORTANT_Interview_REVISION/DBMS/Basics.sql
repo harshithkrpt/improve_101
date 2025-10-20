@@ -105,3 +105,53 @@ CREATE TABLE ENROLLMENTS (
   FOREIGN KEY (student_id) REFERENCES STUDENTS(student_id)
 );
  
+
+ -- DQL
+ 
+-- this is a comment
+# this is a single line comment
+
+/*
+ * 
+ * 
+ * 	This is a Multi Line Comment
+ * 
+ */
+
+USE PlanetaryGoods;
+
+
+SELECT
+	p.ProductName,
+	p.ProductID,
+	p.Description ,
+	p.SupplierID,
+	p.Category,
+	p.SubCategory,
+	p.Price 
+from
+	Products p
+WHERE
+	p.ProductName = "Space Adventure Puzzle"
+	
+
+	
+SELECT 
+	DISTINCT City
+	FROM
+	Customers c;
+
+
+SELECT DISTINCT Country, City FROM Customers c;
+
+
+SELECT DISTINCT Category , SubCategory FROM Products ORDER BY Category;
+
+
+SELECT FirstName as "THIS IS A FIRST NAME" FROM Customers c;
+
+ 
+SELECT Concat(FIRSTNAME, " ", LASTNAME) AS "Full Name" FROM Customers c;
+
+
+
