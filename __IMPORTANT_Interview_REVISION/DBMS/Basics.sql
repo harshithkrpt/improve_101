@@ -155,3 +155,41 @@ SELECT Concat(FIRSTNAME, " ", LASTNAME) AS "Full Name" FROM Customers c;
 
 
 
+
+SELECT 12 - 4;
+
+SELECT 10 + 2;
+
+SELECT 10 * 22;
+
+SELECT p.ProductID , p.ProductName  , p.Price  * p.InStockQuantity as TOTAL_WORTH  FROM Products p ;
+
+SELECT * FROM Customers c WHERE c.Address is NULL; -- null values can not be compared with comparision operators
+
+SELECT count(address) FROM Customers c WHERE c.Address is NOT NULL;
+
+-- below is how ww add aplaceholder when adding null value
+SELECT c.FirstName ,c.LastName , IFNULL(c.Address, "Address Not Provided") AS Address  FROM Customers c;
+
+-- https://chatgpt.com/share/68f6f71d-547c-8006-9060-23f724df4e9f
+SELECT c.FirstName , c.LastName , COALESCE(c.Address, CONCAT("N/A Address", c.City )) AS Address FROM Customers c;
+
+
+-- ORDER BY CLAUSE FOR SORTING THE ROWS IN AESENDING OR DESCENDING ORDER
+SELECT * FROM Orders ORDER BY OrderDate DESC;
+SELECT * FROM Orders ORDER BY TotalPaid;
+
+SELECT * FROM Orders ORDER BY ShippingStatus, TotalPaid;
+
+SELECT * FROM Products p WHERE p.SupplierID = 1 ORDER BY Category DESC, ProductName; 
+
+SELECT * FROM Products p ORDER BY p.Price DESC;
+
+-- LIMIT Resuts Only Fetch few records
+SELECT * FROM Products p ORDER BY p.Price DESC LIMIT 10;
+
+-- Skipping functionality comes with OFFSET
+SELECT * FROM Products p ORDER BY p.Price DESC LIMIT 10 OFFSET 20;
+
+
+select * FROM Products p ORDER BY p.Price DESC LIMIT 5;
