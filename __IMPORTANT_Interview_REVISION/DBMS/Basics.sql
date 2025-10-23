@@ -398,3 +398,43 @@ ORDER BY
 SELECT artist_name, SUM(sale_amount) AS "Total Sales (USD)" FROM art_sales GROUP BY artist_name ORDER BY "Total Sales (USD)" DESC
 
 SELECT od.ProductID, SUM(od.Quantity), SUM(od.FinalTotal ) FROM OrderDetails od GROUP BY od.ProductID;
+
+
+USE PlanetaryGoods;
+
+SHOW TABLES;
+
+-- JOINS
+-- COMBINATION COLUMNS FROM DIFFERENT TABLES
+
+-- Customer And Orders Relation Ship
+
+-- INNER JOIN
+-- LEFT JOIN
+-- RIGHT JOIN 
+-- FULL JOIN
+
+-- NULL VALUES ARE ADDED IF NOT INTERSECTING OR A OPTIONAL VALUE IS NOT AVAILABLE
+SELECT
+	CONCAT(c.FirstName , " " , c.LastName ),
+	o.OrderID ,
+	o.TotalPaid
+FROM
+	Customers c
+INNER JOIN Orders o
+ON
+	o.CustomerID = c.CustomerID;
+
+
+
+
+
+-- Multiple Table Joins 
+SELECT c.FirstName ,c.LastName, p.ProductName, SUM(od.Quantity) AS "Total Quantity" FROM Customers c 
+INNER JOIN Orders o ON c.CustomerID  = o.CustomerID
+INNER JOIN OrderDetails od ON od.OrderID  = o.OrderID
+INNER JOIN Products p ON p.ProductID = od.ProductID GROUP BY c.FirstName,c.LastName,p.ProductName;
+
+
+
+-- DEFAULT JOIN USED IN MYSQL IS INNER JOIN SO MENTIONING JOIN JEY WILL BE SAME BUT GOOD PRACTICE TO ADD INNER JOIN
