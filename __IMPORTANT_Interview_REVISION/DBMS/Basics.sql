@@ -398,3 +398,123 @@ ORDER BY
 SELECT artist_name, SUM(sale_amount) AS "Total Sales (USD)" FROM art_sales GROUP BY artist_name ORDER BY "Total Sales (USD)" DESC
 
 SELECT od.ProductID, SUM(od.Quantity), SUM(od.FinalTotal ) FROM OrderDetails od GROUP BY od.ProductID;
+
+
+USE PlanetaryGoods;
+
+SHOW TABLES;
+
+-- JOINS
+-- COMBINATION COLUMNS FROM DIFFERENT TABLES
+
+-- Customer And Orders Relation Ship
+
+-- INNER JOIN
+-- LEFT JOIN
+-- RIGHT JOIN 
+-- FULL JOIN
+
+-- NULL VALUES ARE ADDED IF NOT INTERSECTING OR A OPTIONAL VALUE IS NOT AVAILABLE
+SELECT
+	CONCAT(c.FirstName , " " , c.LastName ),
+	o.OrderID ,
+	o.TotalPaid
+FROM
+	Customers c
+INNER JOIN Orders o
+ON
+	o.CustomerID = c.CustomerID;
+
+
+
+
+
+-- Multiple Table Joins 
+SELECT c.FirstName ,c.LastName, p.ProductName, SUM(od.Quantity) AS "Total Quantity" FROM Customers c 
+INNER JOIN Orders o ON c.CustomerID  = o.CustomerID
+INNER JOIN OrderDetails od ON od.OrderID  = o.OrderID
+INNER JOIN Products p ON p.ProductID = od.ProductID GROUP BY c.FirstName,c.LastName,p.ProductName;
+
+
+
+-- DEFAULT JOIN USED IN MYSQL IS INNER JOIN SO MENTIONING JOIN JEY WILL BE SAME BUT GOOD PRACTICE TO ADD INNER JOIN
+
+
+SELECT
+	p.ProductName,
+	p.ProductId,
+	SUM(od.FinalTotal)
+FROM
+	Products p
+INNER JOIN OrderDetails od ON
+	od.ProductID = p.ProductID
+GROUP BY
+	p.ProductID,
+	p.ProductName ;
+
+SELECT
+	CONCAT(c.FirstName , " " , c.LastName ),
+	o.OrderID ,
+	o.TotalPaid
+FROM
+	Customers c
+LEFT JOIN Orders o
+ON
+	o.CustomerID = c.CustomerID;
+
+
+SELECT
+	p.ProductName,
+	p.ProductId,
+	COALESCE(SUM(od.Quantity), 0) as total_orders
+FROM
+	Products p
+LEFT JOIN OrderDetails od 
+ON
+	p.ProductID = od.ProductID
+GROUP BY
+	p.ProductID
+ORDER BY
+	total_orders DESC;
+
+-- Right Join is Complete Oppisite of left join 
+-- It will return all the rows from the right table and matched rows from the left 
+
+-- INSTEAD OF "ON" WE CAN USE "USING" if the column name is matching in a bracket notation
+
+/*
+	select column_name(s)
+	from table1
+	inner join table2 
+	using (column_name);
+*/
+
+SELECT
+	CONCAT(c.FirstName , " " , c.LastName ),
+	o.OrderID ,
+	o.TotalPaid
+FROM
+	Customers c
+INNER JOIN Orders o
+USING (CustomerID);
+
+
+-- SELF JOIN IS JOINING THE SAME TABLE WITH CONDITION
+
+
+SELECT
+	p1.ProductName,
+	p2.ProductName,
+	p1.Price AS product1_price,
+	p2.Price AS Procut2_price
+FROM
+	Products p1 
+JOIN Products p2 ON
+	p1.productId != p2.ProductId
+	AND ABS(p1.Price - p2.Price) < 1;
+
+
+SELECT e1.employee_id, e1.employee_name, e2.employee_name as "supervisor_name" 
+FROM employees e1 
+    JOIN employees e2 
+ON e1.supervisor_id = e2.employee_id;
