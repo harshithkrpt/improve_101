@@ -518,3 +518,40 @@ SELECT e1.employee_id, e1.employee_name, e2.employee_name as "supervisor_name"
 FROM employees e1 
     JOIN employees e2 
 ON e1.supervisor_id = e2.employee_id;
+
+
+SELECT
+	c1.CustomerID,
+	c2.CustomerId,
+	c1.city
+from
+	Customers c1
+JOIN Customers c2 ON
+	c1.city = c2.city
+	AND c1.CustomerID <> c2.CustomerID 
+ORDER BY
+	c1.city ;SELECT
+	c1.CustomerID,
+	c2.CustomerId,
+	c1.city
+from
+	Customers c1
+JOIN Customers c2 ON
+	c1.city = c2.city
+	AND c1.CustomerID <> c2.CustomerID 
+ORDER BY
+	c1.city ;
+
+	-- CROSS JOIN produces the Cartesian product of two tables — meaning every row from the first table is paired with every row from the second table.
+
+
+	SELECT c.FirstName, p.productname FROM Customers c CROSS JOIN Products p LIMIT 12 OFFSET 40;
+
+	SELECT t.team_name AS "team", s.stadium_name AS "stadium"
+FROM teams t
+CROSS JOIN stadiums s;
+
+
+-- natural join 
+
+SELECT * FROM Orders NATURAL JOIN OrderDetails od ;
