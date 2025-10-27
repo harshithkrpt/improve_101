@@ -5,3 +5,11 @@
 - More Information and Visual Information is Present below spread sheet
 
     - https://docs.google.com/spreadsheets/d/1WzVq6hlNJNWdpNWOhRMIyqTj-eG3HIDL0mKH9w_hAbI/edit?gid=1786121542#gid=1786121542
+
+
+# Top Interview Questions 
+
+## Databases 
+
+- https://chatgpt.com/s/dr_68ffb13816bc81919c579303bf91b1eb
+

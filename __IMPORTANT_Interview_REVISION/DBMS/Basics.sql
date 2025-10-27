@@ -555,3 +555,115 @@ CROSS JOIN stadiums s;
 -- natural join 
 
 SELECT * FROM Orders NATURAL JOIN OrderDetails od ;
+
+
+
+USE QUANTUM_TUTORS;
+
+/*
+Create the Instructors, Courses, Enrollments, Lessons, Payments, 
+Reviews, and Admins tables for the Quantum Tutors using the 
+provided schema.
+*/
+
+SHOW TABLES;
+
+DROP TABLE customer;
+
+CREATE TABLE customers (
+    customer_id INT AUTO_INCREMENT,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    contact_number VARCHAR(255),
+    email VARCHAR(255),
+    address VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    country VARCHAR(255),
+    registration_date DATE,
+    PRIMARY KEY (customer_id)
+);
+
+CREATE TABLE instructors (
+    instructor_id INT AUTO_INCREMENT,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    bio TEXT,
+    contact_number VARCHAR(255),
+    email VARCHAR(255),
+    address VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
+    country VARCHAR(255),
+    PRIMARY KEY (instructor_id)
+);
+
+CREATE TABLE courses (
+    course_id INT AUTO_INCREMENT,
+    title VARCHAR(255),
+    subtitle VARCHAR(255),
+    description TEXT,
+    price DECIMAL(10,2),
+    instructor_id INT,
+    category VARCHAR(255),
+    sub_category VARCHAR(255),
+    url VARCHAR(255),
+    publish_date DATE,
+    PRIMARY KEY (course_id),
+    FOREIGN KEY (instructor_id) REFERENCES instructors(instructor_id)
+);
+
+CREATE TABLE enrollments (
+    enrollment_id INT AUTO_INCREMENT,
+    customer_id INT,
+    course_id INT,
+    enrollment_date DATE,
+    PRIMARY KEY (enrollment_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+
+CREATE TABLE lessons (
+    lesson_id INT AUTO_INCREMENT,
+    course_id INT,
+    name VARCHAR(255),
+    description TEXT,
+    content TEXT,
+    duration INT,
+    PRIMARY KEY (lesson_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+
+CREATE TABLE payments (
+    payment_id INT AUTO_INCREMENT,
+    customer_id INT,
+    amount DECIMAL(10,2),
+    payment_date DATE,
+    method VARCHAR(255),
+    PRIMARY KEY (payment_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+CREATE TABLE reviews (
+    review_id INT AUTO_INCREMENT,
+    course_id INT,
+    customer_id INT,
+    rating INT,
+    comment TEXT,
+    review_date DATE,
+    PRIMARY KEY (review_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id),
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id)
+);
+
+CREATE TABLE admins (
+    admin_id INT AUTO_INCREMENT,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    contact_number VARCHAR(255),
+    email VARCHAR(255),
+    password VARCHAR(255),
+    PRIMARY KEY (admin_id)
+);
+
+
