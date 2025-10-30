@@ -20,3 +20,8 @@
 - ## React Js + Javascript 
 
 - https://chatgpt.com/s/dr_6900e5dd23b8819199773a9d9a1e85ee
+
+
+## Python 
+
+- https://chatgpt.com/s/dr_69030a40b6f08191af84967462c3e22b
