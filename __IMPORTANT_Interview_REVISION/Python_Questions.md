@@ -938,3 +938,192 @@ When you open a file using open(filename, mode), the mode defines what you inten
 - readlines -> reads all lines as a list 
 
 ### How do you handle binary files?
+
+- we have to use "rb" , "wb" which are read binary & write binary
+
+### What is duck typing in Python?
+
+- Duck typing is central to Python’s dynamic typing and polymorphism:
+- if the attribute is not present it will throw attribute error "AttributeError"
+
+```py
+class Duck:
+    def quack(self):
+        print("Quack! Quack!")
+
+class Person:
+    def quack(self):
+        print("I’m imitating a duck!")
+
+def make_it_quack(thing):
+    thing.quack()
+
+duck = Duck()
+person = Person()
+
+make_it_quack(duck)    # Output: Quack! Quack!
+make_it_quack(person)  # Output: I’m imitating a duck!
+```
+
+### What are type hints and how do they help?
+
+- Type hints in Python are annotations that specify the expected data types of variables, function parameters, and return values — but without enforcing them at runtime.
+
+```py
+def add(a: int, b: int) -> int:
+    return a + b
+```
+
+- advanced
+
+```py
+from typing import List, Dict, Optional, Union
+
+def greet(name: Optional[str] = None) -> str:
+    return f"Hello, {name or 'Guest'}!"
+
+def total(values: List[int]) -> int:
+    return sum(values)
+
+def get_user_data() -> Dict[str, Union[int, str]]:
+    return {"id": 1, "name": "Alice"}
+
+```
+
+
+### What is monkey patching?
+
+- Monkey patching in Python means modifying or extending code at runtime — usually by changing classes, methods, or modules after they’ve already been defined.
+
+```py
+class Animal:
+    def speak(self):
+        print("Some sound")
+
+# Original behavior
+a = Animal()
+a.speak()   # Output: Some sound
+
+# Monkey patching the class method
+def new_speak(self):
+    print("Woof! Woof!")
+
+Animal.speak = new_speak   # Reassign the method
+
+a.speak()   # Output: Woof! Woof!
+
+```
+
+### What is __slots__ and why use it?
+
+- slots is a special attruibute to restrict what attributes can a class have
+- pass it as a tuple , & it will throw attributeerror
+
+```py
+class Person:
+    __slots__ = ('name', 'age')  # Only these attributes allowed
+
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+p = Person("Bob", 30)
+p.name = "Robert"  # Works fine
+p.address = "London"  # ❌ Raises AttributeError
+
+```
+
+### How do you optimize performance in Python applications?
+
+- always measure first (@profile) decorators , 
+- use correct data strucutes and optimised algorighms with lowest possible time complexity
+- use numpy and pandas for vectorised work
+- cache data when possible
+
+### What is pickling and unpickling?
+
+- Pickling is the process of converting a Python object into a byte stream (a sequence of bytes).
+- for pickle and json use dump , load for file , when in memory use dumps and loads
+```py
+import pickle
+data = {"name": "Alice", "age": 25, "skills": ["Python", "AI", "ML"]}
+# Serialize (pickle) the object and save it to a file
+with open("data.pkl", "wb") as f:
+    pickle.dump(data, f)
+
+with open("data.pkl", "rb") as f:
+    loaded_data = pickle.load(f)
+
+```
+
+### json ?
+
+```py
+import json
+
+data = {"name": "Alice", "age": 25, "skills": ["Python", "AI", "ML"]}
+
+json_string = json.dumps(data)
+print(json_string)
+
+data = json.loads(json_string)
+```
+
+### differece between json & picke ?
+
+| Aspect          | **JSON**                                             | **Pickle**                                        |
+| --------------- | ---------------------------------------------------- | ------------------------------------------------- |
+| **Goal**        | Data exchange between systems (language-independent) | Save and restore Python objects (Python-specific) |
+| **Format type** | Text (human-readable)                                | Binary (machine-readable)                         |
+
+
+### what is weak reference ?
+
+- once actual object is deleted the refernced object is also deleted if used as weak reference
+
+```py
+import weakref
+
+class MyClass:
+    pass
+
+obj = MyClass()
+weak_obj = weakref.ref(obj)  # Create weak reference
+
+print(weak_obj())   # Access the object via the weak reference
+del obj             # Delete the strong reference
+print(weak_obj())   # Now returns None (object garbage-collected)
+
+```
+
+
+### What are memory leaks and how can they be avoided?
+
+1. Unintentional Object References
+2. Reference Cycles
+
+```py
+leak_list = []
+
+def add_data():
+    data = [i for i in range(10000)]
+    leak_list.append(data)  # Object never released
+
+for _ in range(1000):
+    add_data()
+
+class A:
+    def __init__(self):
+        self.b = B(self)
+
+class B:
+    def __init__(self, a):
+        self.a = a
+
+```
+
+### What is the difference between __new__ and __init__?
+
+__new__ is called before the object exists.
+
+__init__ is called after the object exists.
