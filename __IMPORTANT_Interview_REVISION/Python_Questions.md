@@ -299,7 +299,7 @@ print(MyClass.created_by_meta)  # True
 ```py
 def greet(param):
     print(f"Hello, {param}!")
-``
+```
 
 - 2. Arguments → in function call
 
@@ -480,3 +480,461 @@ c = Child()
 c.greet()
 
 ```
+
+
+### What is a module in Python?
+
+A module in Python is simply a file that contains Python code — it can define functions, classes, and variables, and can also include runnable code.
+
+
+```py
+# my_module.py
+def greet(name):
+    return f"Hello, {name}!"
+```
+
+
+Key Points
+
+Purpose: Modules help you organize code logically and reuse it across multiple programs.
+
+Types:
+
+Built-in modules: Provided by Python (e.g., math, os, sys).
+
+User-defined modules: Created by you.
+
+Third-party modules: Installed using pip (e.g., requests, numpy).
+
+Importing modules:
+
+import module_name
+
+from module_name import function_name
+
+import module_name as alias
+
+### What is the difference between a module and a package?
+
+
+🧩 Module -> A module is just a single Python file (.py) that contains code — functions, classes, or variables.
+📦 Package -> A package is a collection of modules organized in a directory. It must contain a special file named __init__.py 
+
+```md
+my_package/
+│
+├── __init__.py
+├── math_utils.py
+└── string_utils.py
+```
+
+### How does Python locate modules?
+
+- Current directory (the script’s folder)
+- Directories listed in sys.path or Any directories listed in the PYTHONPATH environment variable.
+- build in modules
+
+```py
+ModuleNotFoundError: No module named 'my_module'
+```
+
+### What is the use of __init__.py?
+
+- it is required for creation a package 
+- Without it, Python treats the folder as a normal directory (not importable as a package).
+- When a package is imported, the code inside __init__.py runs automatically.
+
+
+### What is the difference between import and from-import?
+
+- Both import and from ... import are used to bring external code (modules or functions) into your Python program — but they differ in how you access that code. 
+
+- This imports the entire module. (Import)
+
+```py
+import math
+print(math.sqrt(25))
+```
+
+- This imports specific attributes (functions, classes, or variables) directly from a module. (From Import)
+
+```py
+from math import sqrt
+print(sqrt(25))
+```
+
+| Feature           | `import module` | `from module import name` |
+| ----------------- | --------------- | ------------------------- |
+| What it imports   | Entire module   | Specific names            |
+| Access syntax     | `module.name`   | `name` directly           |
+| Namespace clarity | Clear           | Can cause conflicts       |
+| Typical use       | Larger modules  | Using specific functions  |
+
+
+### Explain the concept of virtual environments in Python ?
+
+- A virtual environment in Python is an isolated workspace that lets you manage dependencies for a specific project — without interfering with other projects or your system-wide Python installation.
+
+```sh
+# creating
+python -m venv venv
+# activating
+source venv/bin/activate
+```
+
+### What is a closure in Python?
+
+- A closure in Python is a function that remembers and has access to variables from its enclosing scope, even after that scope has finished executing.
+
+```py
+def outer_function(x):
+    def inner_function(y):
+        return x + y  # inner function uses x from outer scope
+    return inner_function  # returning the inner function (not calling it)
+
+add_five = outer_function(5)
+print(add_five(10))  # Output: 15
+```
+
+### What are decorators in Python and when to use them?
+
+- decorators are the function which will enhance or modify the function behaviour before or after the function call
+
+```py
+def my_decorator(func):
+    def wrapper():
+        print("Before the function runs")
+        func()
+        print("After the function runs")
+    return wrapper
+
+@my_decorator
+def say_hello():
+    print("Hello")
+
+
+say_hello()
+
+
+def repeat(n):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for _ in range(n):
+                func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@repeat(3)
+def greet(name):
+    print(f"Hello, {name}!")
+
+greet("Alice")
+
+```
+
+### What is a generator? How is it different from a normal function?
+ 
+- generator is a function which will return one value at a time when calling next, It uses the yield keyword instead of return. Each time the function yields a value, it pauses its state — and can resume from where it left off when called again.
+
+```py
+def nums():
+    for i in range(1,6):
+        yield i
+nums_g = nums()
+print(nums_g)
+print(next(nums_g))
+```
+
+### What is a context manager?
+
+- object that manages setup and cleanup actions often used with the "with" keyword
+
+```py
+with open("file.txt", "r") as f:
+    content = f.read()
+    print(content)
+```
+
+A context manager defines two special methods:
+
+
+| Method        | Purpose                                   |
+| ------------- | ----------------------------------------- |
+| `__enter__()` | Runs when the `with` block starts         |
+| `__exit__()`  | Runs when the `with` block ends (cleanup) |
+
+
+```py
+class MyContext:
+    def __enter__(self):
+        print("Entering context...")
+        return "Resource Ready"
+    
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Exiting context...")
+        if exc_type:
+            print(f"An exception occurred: {exc_value}")
+        return True  # suppresses the exception if True
+
+with MyContext() as val:
+    print(val)
+    raise ValueError("Something went wrong!")
+```
+
+- custom contextlib we can create the managers using generators
+
+```py
+from contextlib import contextmanager
+
+@contextmanager
+def my_context():
+    print("Entering...")
+    yield "Resource"
+    print("Exiting...")
+
+with my_context() as res:
+    print(res)
+```
+
+### What is the Global Interpreter Lock (GIL)?
+
+- gil is a thread safety mechanism for metex locking ofter helps in avoiding race conditions 
+- it helps in multithreading to lock simillarly accessed varaibles to wait until a resource is keeping it on hold
+
+Impact on performance
+
+Single-threaded programs: No problem — the GIL doesn’t affect performance much.
+
+Multi-threaded CPU-bound programs: Bad news. Even with multiple cores, Python threads can’t execute in true parallel. They’ll take turns running.
+
+Multi-threaded I/O-bound programs: Fine. While one thread waits for I/O (network, file, etc.), another can use the GIL.
+
+
+### What is the difference between threading and asyncio?
+
+- The difference between threading and asyncio in Python lies in how they handle concurrency — that is, running multiple tasks seemingly at the same time.
+
+| Aspect                 | **Threading**                                                          | **Asyncio**                                     |
+| ---------------------- | ---------------------------------------------------------------------- | ----------------------------------------------- |
+| **Type**               | Multi-threaded concurrency                                             | Single-threaded, asynchronous concurrency       |
+| **Concurrency model**  | Uses **operating system threads**                                      | Uses an **event loop** and **coroutines**       |
+| **Parallel execution** | Threads can run truly in parallel (but limited by GIL for Python code) | Tasks take turns cooperatively — no parallelism |
+| **Control**            | Preemptive — OS decides when to switch threads                         | Cooperative — tasks yield control using `await` |
+| **Best for**           | I/O-bound tasks with blocking APIs                                     | I/O-bound tasks with async-compatible APIs      |
+
+
+```py
+import threading
+import time
+
+def task(name):
+    print(f"{name} Starting")
+    time.sleep(2)
+    print(f"{name} ending")
+
+threads = [threading.Thread(target=task, args=(f"Thread {i}",)) for i in range(3)]
+for t in threads: t.start()
+for t in threads: t.join()
+```
+
+- async io
+
+```py
+import asyncio
+async def task(name):
+    print(f"{name} starting")
+    await asyncio.sleep(2)
+    print(f"{name} ending")
+
+async def main():
+    await asyncio.gather(task("Task 1"), task("Task 2"), task("Task 3"))
+
+asyncio.run(main())
+```
+
+In short:
+Threading is concurrent via multiple threads (but limited by the GIL),
+Asyncio is concurrent via cooperative multitasking in one thread.
+
+### What are coroutines in Python?
+
+- provide a way for pause and resume of async and cooperative multitasking within a single thread
+- it is a non blocking i/o 
+
+```py
+import asyncio
+
+async def greet():
+    print("Hello...")
+    await asyncio.sleep(2)
+    print("...World!")
+
+asyncio.run(greet())
+
+```
+
+explanation:
+async def defines a coroutine.
+await tells Python: “Pause here until this async task completes.”
+The event loop (asyncio.run) manages these pauses efficiently.
+
+### What is the difference between __iter__() and __next__()?
+
+| Method       | Purpose                                         | Used by                                                             |
+| ------------ | ----------------------------------------------- | ------------------------------------------------------------------- |
+| `__iter__()` | Returns an **iterator object** (usually `self`) | Called when iteration starts (e.g., by `iter(obj)` or a `for` loop) |
+| `__next__()` | Returns the **next item** in the sequence       | Called repeatedly by the iterator until it raises `StopIteration`   |
+
+
+### What is a generator expression?
+
+A generator expression in Python is a compact way to create a generator — that is, an iterator that yields items one at a time without storing them all in memory.
+
+```py
+squares = (x*x for x in range(5))
+print(next(squares))  # 0
+print(next(squares))  # 1
+print(next(squares))  # 4
+```
+
+### How are exceptions handled in Python?
+
+```py
+try:
+    x = 10 / 0
+except ZeroDivisionError:
+    print("Cannot divide by zero!")
+
+try:
+    num = int(input("Enter a number: "))
+    print(10 / num)
+except ZeroDivisionError:
+    print("Division by zero not allowed.")
+except ValueError:
+    print("That wasn’t a number.")
+
+try:
+    risky = 10 / int("x")
+except (ZeroDivisionError, ValueError) as e:
+    print("Error:", e)
+
+try:
+    result = 10 / 2
+except ZeroDivisionError:
+    print("Cannot divide by zero.")
+else:
+    print("No error, result:", result)
+finally:
+    print("This runs no matter what.")
+
+class NegativeNumberError(Exception):
+    pass
+
+def check(num):
+    if num < 0:
+        raise NegativeNumberError("Negative numbers not allowed!")
+
+try:
+    check(-10)
+except NegativeNumberError as e:
+    print("Custom error caught:", e)
+
+```
+
+### What is the difference between Exception and Error?
+
+```py
+BaseException
+ ├── SystemExit
+ ├── KeyboardInterrupt
+ └── Exception
+      ├── ArithmeticError
+      │    ├── ZeroDivisionError
+      │    ├── OverflowError
+      │    └── FloatingPointError
+      ├── ImportError
+      ├── IndexError
+      ├── KeyError
+      ├── ValueError
+      ├── TypeError
+      ├── ...
+
+```
+| Aspect           | **Exception**                                      | **Error**                                                 |
+| ---------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| **Meaning**      | Any unusual event during program execution         | A subclass of Exception representing a *fault*            |
+| **Parent class** | `BaseException` → `Exception`                      | `Exception` (and its subclasses ending in “Error”)        |
+| **Examples**     | `StopIteration`, `KeyboardInterrupt`, `SystemExit` | `ValueError`, `TypeError`, `IOError`, `ZeroDivisionError` |
+| **Usage**        | Used for both control flow and error handling      | Used specifically for reporting failures                  |
+
+
+### How do you create custom exceptions?
+
+- In Python, you create custom exceptions by defining a new class that inherits from Exception (or one of its subclasses).
+
+```py
+class MyCustomError(Exception):
+    pass
+
+
+try:
+    raise MyCustomError("Oops, custom issue here")
+except MyCustomError as e:
+    print("Caught custom exception:", e)
+
+```
+
+### What happens if you don’t handle an exception?
+
+If you don’t handle an exception in Python — that is, you let it propagate without a matching try–except block — Python will:
+
+Immediately stop executing the current function (or block of code),
+
+Unwind the call stack to find an enclosing try–except that can handle it, and
+
+If no handler is found, terminate the program and display an error traceback to the user.
+
+### How do you open and close a file in Python?
+
+
+```py
+file = open("data.txt", "w")  # opens file for writing
+file.write("Hello, Python!\n")
+file.close()
+
+```
+
+- modern way
+
+```py
+with open("example.txt", "r") as file:
+    content = file.read()
+    print(content)
+# file is automatically closed here
+```
+
+
+### What are file modes in Python (r, w, a, etc.)?
+
+When you open a file using open(filename, mode), the mode defines what you intend to do with the file — whether you want to read, write, or append data, and whether it’s text or binary.
+
+| Mode   | Meaning                 | Behavior                                                                         |
+| ------ | ----------------------- | -------------------------------------------------------------------------------- |
+| `'r'`  | **Read (default)**      | Opens file for reading. Error if file doesn’t exist.                             |
+| `'w'`  | **Write**               | Opens file for writing (creates new file or overwrites existing one).            |
+| `'a'`  | **Append**              | Opens file for writing but appends at the end. Creates file if it doesn’t exist. |
+| `'x'`  | **Exclusive creation**  | Creates new file, raises error if it already exists.                             |
+| `'r+'` | **Read + Write**        | Opens existing file for both reading and writing.                                |
+| `'w+'` | **Write + Read**        | Overwrites file if it exists, creates if not.                                    |
+| `'a+'` | **Append + Read**       | Opens for reading and appending. File pointer at the end.                        |
+| `'b'`  | **Binary mode**         | Used with other modes (e.g., `'rb'`, `'wb'`) for binary data.                    |
+| `'t'`  | **Text mode (default)** | Used with text files — strings are encoded/decoded automatically.                |
+
+
+### What is the difference between read(), readline(), and readlines()?
+
+- read method reads entire file
+- readline -> reads one line at a time
+- readlines -> reads all lines as a list 
+
+### How do you handle binary files?
