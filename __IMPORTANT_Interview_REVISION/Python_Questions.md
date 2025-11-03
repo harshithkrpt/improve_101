@@ -1555,11 +1555,11 @@ def remember_last_three():
 
 
 ```py
-def even_numbers:
+def even_numbers():
     counter = 0
     while True:
         counter += 2
-        yield i
+        yield counter
 it = iter(even_numbers)
 for i in range(10):
     print(next(it))
