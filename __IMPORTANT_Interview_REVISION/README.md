@@ -25,3 +25,63 @@
 ## Python 
 
 - https://chatgpt.com/s/dr_69030a40b6f08191af84967462c3e22b
+
+
+1. DSA Questions
+    - Two Pointer
+    - Arrays and Hashing
+    - Stack
+    - Sliding Window
+    - Binary Search
+    - Sorting Algorithms
+    - Linked List
+    - Tree
+    - Trie (Optional)
+    - Math (Optional)
+
+    - Common Simple DSA Question
+        Ex: Fibonacci, Factorial, Recursion, ...
+
+
+2. Python Theory 
+    - Concepts Material + Notes for Quick Glimse 
+    - Most Asked Questions -> Theory 
+    - Most Asked Questions -> Coding
+
+
+3. FastAPI 
+    - Concepts Material + Notes for Quick Glimse
+    - Most Asked Questions  -> Theory
+    - Most Asked Questions -> Coding
+
+
+4. SQL
+    - Concepts Material + Notes for Quick Glimse
+    - Most Asked Questions  -> Theory
+    - Most Asked Questions -> Coding
+
+
+5. JS 
+    - Concepts Material + Notes for Quick Glimse
+    - Most Asked Questions -> Theory
+    - Most Asked Questions -> Coding
+        - Polyfills
+        - Tricky Questions
+    
+6. HTML & CSS 
+    - Concepts Material + Notes for Quick Glimse
+    - Most Asked Questions -> Theory
+    - Most Asked Questions -> Coding
+        - Tricky Questions
+
+7. React & Redux
+    - Concepts Material + Notes for Quick Glimse
+    - Most Asked Questions -> Theory
+    - Most Asked Questions -> Coding
+        - Tricky Questions
+
+
+8. MongoDB Basics
+9. Docker Basics 
+10. CICD Pipeline Basics
+11. Kuberneter Basics
