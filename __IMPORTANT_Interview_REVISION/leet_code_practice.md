@@ -169,3 +169,139 @@ var topKFrequent = function(nums, k) {
     return res.slice(0, k);
 };
 ```
+
+- encode & decode strings
+
+```js
+class Solution {
+    /**
+     * @param {string[]} strs
+     * @returns {string}
+     */
+    encode(strs) {
+        let str = "";
+        for(let i=0;i<strs.length;i++) {
+            str += `${strs[i].length}#${strs[i]}`;
+        }
+        console.log(str);
+        return str;
+    }
+
+    /**
+     * @param {string} str
+     * @returns {string[]}
+     */
+    decode(str) {
+        let res = [];
+        let i=0;
+        while(i < str.length - 1) {
+            // find the number till we get hash
+            let n = "";
+            let j=i;
+            while(str[j] != "#") {
+                n += str[j];
+                j++;
+            }
+            n = Number(n);
+            res.push(str.slice(j + 1, j + 1 + n));
+            i = j + n + 1;
+        }
+        return res;
+    }
+}
+
+- multipy of numbers except seld
+
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[]}
+ */
+var productExceptSelf = function(nums) {
+   let resultArray = new Array(nums.length).fill(1);
+   let tempMultiplication = 1;
+   for(let i=0;i<nums.length;i++) {
+        resultArray[i] = tempMultiplication;
+        tempMultiplication *= nums[i];
+   }
+
+    tempMultiplication = 1;
+    for(let i=nums.length - 1;i>=0;i--) {
+        resultArray[i] *= tempMultiplication;
+        tempMultiplication *= nums[i];
+    }
+
+
+   return resultArray;
+};
+```
+
+- valid sudoko
+
+```js
+/**
+ * @param {character[][]} board
+ * @return {boolean}
+ */
+var isValidSudoku = function(board) {
+const rows = Array.from({ length: 9 }, () => {return {}});
+  const cols = Array.from({ length: 9 }, () => {return {}});
+  const boxes = Array.from({ length: 9 }, () => {return {}});
+
+    for(let i=0;i<9;i++) {
+        for(let j=0;j<9;j++) {
+            if(board[i][j] == '.') {
+                continue;
+            }
+
+            if(rows[i][board[i][j]]) return false;
+            rows[i][board[i][j]] = true;
+
+            if(cols[j][board[i][j]]) return false;
+            cols[j][board[i][j]] = true;
+            
+    
+            let boxNumber = Math.floor(i/3) * 3 + Math.floor(j / 3); 
+            if(boxes[boxNumber][board[i][j]]) {
+                return false;
+            }
+            boxes[boxNumber][board[i][j]] = true;
+        }
+    }
+
+    return true;
+};
+```
+
+- longest consecutive sequence
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var longestConsecutive = function(nums) {
+    let set = new Set(nums);
+
+    let max = 0;
+    for(let n of set) {
+        // find the starting number
+        let prev = n - 1;
+        if(set.has(prev)) {
+            continue;
+        }
+        
+        // else case calculate totoal
+        let num = n;
+        let count = 0
+        while(set.has(n)) {
+            n++;
+            count++;
+        }
+        max = Math.max(max, count);
+    }
+
+    return max;
+};
+```
