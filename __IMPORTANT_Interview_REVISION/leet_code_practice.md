@@ -305,3 +305,73 @@ var longestConsecutive = function(nums) {
     return max;
 };
 ```
+
+- is valid palindrome
+
+```js
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+var isPalindrome = function(s) {
+
+    const isAlphaChar = (c) => {
+        return (
+            (c >= 'A' && c <= 'Z') ||
+            (c >= 'a' && c <= 'z') ||
+            (c >= '0' && c <= '9')
+        );
+    }
+
+    let lower = s.toLowerCase();
+    let i=0,j=lower.length-1;
+
+    while(i < j) {
+        let canCompare = true;
+        if(!isAlphaChar(lower[i])) {
+            i++;
+            canCompare = false;
+        }
+        if(!isAlphaChar(lower[j])) {
+            j--;
+            canCompare = false;
+        }
+        if(canCompare) {
+            if(lower[i] !== lower[j]) {
+                 return false;
+            }
+            else {
+                i++;
+                j--;
+            }
+        }
+     }
+
+     return true;
+};
+```
+
+
+- two sum if the input is sorted
+
+```js
+/**
+ * @param {number[]} numbers
+ * @param {number} target
+ * @return {number[]}
+ */
+var twoSum = function(numbers, target) {
+    let l=0,r=numbers.length-1;  
+    while(l < r) {
+        if(numbers[l] + numbers[r] > target) {
+            r--;
+        }
+        else if(numbers[r] + numbers[l] < target) {
+            l++;
+        }
+        else {
+            return [l+1, r+1];
+        }
+     }
+};
+```
