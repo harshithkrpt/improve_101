@@ -375,3 +375,91 @@ var twoSum = function(numbers, target) {
      }
 };
 ```
+
+- three sum 
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number[][]}
+ */
+
+var threeSum = function(nums) {
+    let sNums = nums.slice().sort((a,b) => a - b);
+    const result = [];
+    for(let i=0;i<sNums.length - 2;i++) {
+        if(i > 0 && sNums[i] == sNums[i-1]) {
+            continue;
+        }
+
+        // now check the next items 
+        let j = i + 1;
+        let k = sNums.length - 1;
+        while(j < k) {
+            if(sNums[i] + sNums[j] + sNums[k] > 0) {
+                k--;
+            }
+            else if(sNums[i] + sNums[j] + sNums[k] < 0) {
+                j++;
+            }
+            else {
+                result.push([sNums[i], sNums[j], sNums[k]]);
+                while(j < k && sNums[j] === sNums[j+1]) {
+                    j++;
+                }
+                while(j < k && sNums[k] === sNums[k-1]) {
+                    k--;
+                }
+                j++;
+                k--;
+            }
+        }   
+    }
+
+    return result;
+};
+```
+
+- container with maxmmum water
+
+```js
+/**
+ * @param {number[]} height
+ * @return {number}
+ */
+var maxArea = function(height) {
+    let res = 0;
+    let l = 0, r = height.length -1;
+    while(l < r) {
+        res = Math.max(res, (r - l) * Math.min(height[l], height[r]))
+        if(height[l] < height[r]) {
+            l++;
+        }
+        else {
+            r--;
+        }
+    }
+    return res;
+};
+```
+
+
+- kadane algorithm (Maximum Subarray sum ) uses (Greedy + Dynamic Programming)
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var maxSubArray = function(nums) {
+    let maxAns = nums[0];
+    let curMax = nums[0];
+
+    for(let i=1;i<nums.length;i++) {
+        curMax = Math.max(nums[i], nums[i] + curMax);
+        maxAns = Math.max(maxAns, curMax);
+    }
+
+    return maxAns;
+};
+```

@@ -209,3 +209,10 @@ Document your learning as you go — it helps you stand out.
 ## ⚡ Next Step
 Would you like a **daily time plan (hours + resource links)** to make this roadmap actionable?
 I can give you a 10-day schedule with docs, videos, and code tasks aligned to each day.
+
+
+- add more about domain specific things
+  - scheduling cron jobs
+  - triggeting email notifications
+  - sending whats app message , sms.
+  - building + storing dashboards type of data.
