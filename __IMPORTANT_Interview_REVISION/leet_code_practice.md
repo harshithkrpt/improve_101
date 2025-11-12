@@ -209,8 +209,9 @@ class Solution {
         return res;
     }
 }
+```
 
-- multipy of numbers except seld
+- multipy of numbers except self
 
 
 ```js
@@ -461,5 +462,380 @@ var maxSubArray = function(nums) {
     }
 
     return maxAns;
+};
+```
+
+- Longest Substring Without Repeating Characters
+
+```js
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var lengthOfLongestSubstring = function(s) {
+    let maxLength = 0;
+    let i = 0;
+    let j = 0;
+    const set = new Set();
+
+    if(!s.length) {
+        return 0;
+    }
+
+    while(j < s.length) {
+        if(set.has(s[j])) {
+            set.delete(s[i]);
+            i++;
+        }
+        else {
+             set.add(s[j]);
+            j++;
+            maxLength = Math.max(maxLength, set.size);
+        }
+    }
+
+    return maxLength;
+};
+```
+
+
+- total sub arrays sum to k
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
+ */
+var subarraySum = function(nums, k) {
+    let count = 0;
+    let p_sum = 0;
+    const p_map = {
+        0:1
+    };
+
+    for(let i=0;i<nums.length;i++) {
+        p_sum += nums[i];
+
+        if(p_map[p_sum - k] > 0) {
+            count += p_map[p_sum - k];
+        }
+        if(!p_map[p_sum]) {
+            p_map[p_sum] = 1
+        }
+        else {
+            p_map[p_sum]++;
+        }
+    }
+
+    return count;
+};
+```
+
+- Longest Repeating Character Replacement
+
+```js
+/**
+ * @param {string} s
+ * @param {number} k
+ * @return {number}
+ */
+var characterReplacement = function(s, k) {
+    const windowHash = {};  
+    let l = 0, r = 0;
+    let maxLength = 0
+    while(r < s.length) {
+        const char = s.charAt(r);
+        if(windowHash[char]) {
+            windowHash[char]++;
+        }
+        else {
+            windowHash[char] = 1;
+        }
+
+        // calculate the maxRepeatedChars
+        let max = 0;
+        Object.keys(windowHash).forEach(k => {
+           max = Math.max(windowHash[k], max);
+        });
+        
+        if((r - l + 1) - max <= k) {
+            maxLength = Math.max(maxLength, (r - l + 1));
+        }
+        else {
+            windowHash[s.charAt(l)]--;
+            l++;
+        }
+        r++;
+    }
+
+    return maxLength;
+};
+```
+
+
+- permutation in a string
+
+```js
+/**
+ * @param {string} s1
+ * @param {string} s2
+ * @return {boolean}
+ */
+var checkInclusion = function(s1, s2) {
+    if(s1.length > s2.length) return false;
+    let l = 0, r = s1.length - 1;
+    const hmS1 = new Array(26).fill(0);
+    const hmS2 = new Array(26).fill(0);
+
+    for(let s of s1) {
+       hmS1[s.charCodeAt(0) - 97]++;
+    }
+
+    for(let s of s2.slice(0, s1.length)) {
+        hmS2[s.charCodeAt(0) - 97]++;
+    }
+
+    while(r < s2.length) {
+        // compare if both are equal
+        let isEqual = true;
+        for(let i=0;i<26;i++) {
+            if(hmS1[i] != hmS2[i]) {
+                isEqual = false;
+            }
+        }
+
+        if(isEqual) return true;
+
+        hmS2[s2.charCodeAt(l++) - 97]--;
+        hmS2[s2.charCodeAt(++r) - 97]++;
+    }
+
+    return false;
+};
+```
+
+- valid parenthesis
+
+```js
+/**
+ * @param {string} s
+ * @return {boolean}
+ */
+var isValid = function(s) {
+    const stack = [];
+    const map = {
+        '(': ')',
+        '{': '}',
+        '[' : ']'
+    };
+
+    const revMap = {
+        ')': '(',
+        '}':  '{',
+        ']': '['
+    };
+
+    for(let i of s) {
+        if(map[i]) {
+            stack.push(i);
+        }
+        else {
+            const top = stack.pop();
+            if(top !== revMap[i]) {
+                return false;
+            }
+        }
+    }
+
+    return stack.length === 0;
+};
+```
+
+
+- min stack time complexity
+
+```js
+
+var MinStack = function() {
+   this.stack = [];
+
+};
+
+/** 
+ * @param {number} val
+ * @return {void}
+ */
+MinStack.prototype.push = function(val) {
+    if(!this.stack.length) {
+        this.stack.push([val, val]);
+    }
+    else {
+        const lastIndex = this.stack.length - 1;
+        this.stack.push([val, Math.min(val, this.stack[lastIndex][1])]);
+    }
+};
+
+/**
+ * @return {void}
+ */
+MinStack.prototype.pop = function() {
+    this.stack.pop();
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.top = function() {
+    return this.stack[this.stack.length - 1][0];
+};
+
+/**
+ * @return {number}
+ */
+MinStack.prototype.getMin = function() {
+    return this.stack[this.stack.length - 1][1];
+};
+
+/** 
+ * Your MinStack object will be instantiated and called as such:
+ * var obj = new MinStack()
+ * obj.push(val)
+ * obj.pop()
+ * var param_3 = obj.top()
+ * var param_4 = obj.getMin()
+ */
+```
+
+- reverse polish notation
+
+```js
+/**
+ * @param {string[]} tokens
+ * @return {number}
+ */
+var evalRPN = function(tokens) {
+    const validOperators = '+-*/';
+    const stack = [];
+
+    for(let i=0;i<tokens.length;i++) {
+        if(validOperators.includes(tokens[i])) {
+            const op1 = stack.pop();
+            const op2 = stack.pop();
+            let res;
+            if(tokens[i] === '+') {
+                res = op1 + op2;
+            }
+            else if(tokens[i] === '-') {
+                res = op2 - op1;
+            }
+            else if(tokens[i] === '*') {
+                res = op1 * op2;
+            }
+            else {
+                res = op2 / op1;
+                res = Math.trunc(res)
+            }
+            stack.push(res);
+        }
+        else {
+            stack.push(Number(tokens[i]));
+        }
+    }
+
+    return stack[0];
+};  
+```
+
+- daily temperatures
+
+```js
+/**
+ * @param {number[]} temperatures
+ * @return {number[]}
+ */
+var dailyTemperatures = function(temperatures) {
+    const stack = [];
+    const result = new Array(temperatures.length).fill(0);
+    for(let i=0;i<temperatures.length;i++) {
+        const top = stack.length - 1;
+        if(stack.length === 0 || stack[top] > temperatures[i]) {
+             stack.push([temperatures[i], i]);
+        }
+    
+        const cT = temperatures[i];
+        while(stack.length > 0 && cT > stack[stack.length-1][0]) {
+            const popped = stack.pop();
+            result[popped[1]] = i - popped[1];
+        }
+
+        stack.push([temperatures[i], i]);
+    }
+
+    return result;
+};
+```
+
+
+- car fleet 
+
+```js
+/**
+ * @param {number} target
+ * @param {number[]} position
+ * @param {number[]} speed
+ * @return {number}
+ */
+var carFleet = function(target, position, speed) {
+    // sort based on position
+    const cData = position.map((pos, index) => {
+        return [
+            pos,
+            speed[index]
+        ];
+    }).sort((a,b) => a[0] - b[0]);
+
+    const stack = [];
+
+    for(let i=cData.length-1;i>=0;i--) {
+        const stackLastIndex = stack.length - 1;
+        const currentTimeToReach = (target - cData[i][0]) / cData[i][1];
+        if(stack.length > 0 && stack[stackLastIndex] >= currentTimeToReach) {
+            continue;
+        }
+
+        stack.push(currentTimeToReach);
+    }
+
+    return stack.length; 
+};
+```
+
+
+- binary search
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+var search = function(nums, target) {
+    let l = 0, r = nums.length - 1;
+
+    while(l <= r) {
+        const mid = Math.floor((l + r) / 2);
+        if(nums[mid] > target) {
+            r = mid - 1;
+        }
+        else if(nums[mid] < target) {
+            l = mid + 1;
+        }
+        else {
+            return mid;
+        }
+    }
+
+    return -1;
 };
 ```
