@@ -839,3 +839,180 @@ var search = function(nums, target) {
     return -1;
 };
 ```
+
+- meeting rooms 
+
+```js
+/**
+ * Definition of Interval:
+ * class Interval {
+ *   constructor(start, end) {
+ *     this.start = start;
+ *     this.end = end;
+ *   }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {Interval[]} intervals
+     * @returns {boolean}
+     */
+    canAttendMeetings(intervals) {
+        // sort based on the start time
+        intervals.sort((a,b) => a.start - b.start);
+        
+        for(let i=1;i<intervals.length;i++) {
+            // now check if next element start is coling with previous 
+            // element start
+            if(intervals[i].start < intervals[i-1].end) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+```
+
+- meeting rooms - II
+
+```js
+/**
+ * Definition of Interval:
+ * class Interval {
+ *   constructor(start, end) {
+ *     this.start = start;
+ *     this.end = end;
+ *   }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {Interval[]} intervals
+     * @returns {number}
+     */
+    minMeetingRooms(intervals) {
+        let startTime = [];
+        let endTime = [];
+
+    
+        for(let i=0;i<intervals.length;i++) {
+            startTime.push(intervals[i].start);
+            endTime.push(intervals[i].end);
+        }
+
+        startTime.sort((a,b) => a - b);
+        endTime.sort((a,b) => a - b);
+
+        
+        let needMeetRoom = 0, i = 0, j = 0, n = intervals.length;
+        let maxAns = 0;
+        while(i < n && j < n) {
+            if(startTime[i] < endTime[j]) {
+                needMeetRoom++;
+                maxAns = Math.max(maxAns, needMeetRoom);
+                i++;
+            }
+            else {
+                needMeetRoom--;
+                j++;
+            }
+        } 
+
+        return maxAns;
+    }
+}
+
+```
+
+- koko eating bananas
+
+```js
+/**
+ * @param {number[]} piles
+ * @param {number} h
+ * @return {number}
+ */
+var minEatingSpeed = function(piles, h) {
+    // min = 1
+    // max = Math.max(piles)
+    let low = 1 , high = 1;
+    for(let i=0;i<piles.length;i++) {
+        high = Math.max(high, piles[i]);
+    }
+
+    let mid;
+    while(low <= high) {
+        // now mid
+        mid = Math.floor((low + high) / 2);
+
+        // now check if eating these number of bananas can we complete all the piles
+        let hoursLeft = h;
+        for(let i=0;i<piles.length;i++) {
+            hoursLeft -= Math.ceil(piles[i] / mid);
+        }
+
+        if(hoursLeft >= 0) {
+            high = mid - 1;
+        }
+        else if(hoursLeft < 0) {
+            low = mid + 1;
+        }
+        
+    }
+
+    return low;
+};
+```
+
+- search a 2d matrix
+
+```js
+/**
+ * @param {number[][]} matrix
+ * @param {number} target
+ * @return {boolean}
+ */
+var searchMatrix = function(matrix, target) {
+    // find the vertical row
+
+    let top = 0, bottom = matrix.length - 1;
+    let mid;
+    while (top <= bottom) {
+        mid = Math.floor((top + bottom) / 2);
+
+        if(target < matrix[mid][0]) {
+            bottom = mid - 1;
+        }
+        else if(target > matrix[mid][matrix[0].length - 1]) {
+            top = mid + 1;
+        }
+        else {
+            break;
+        }
+    }
+
+    if(matrix[mid][0] > target || matrix[mid][matrix[0].length - 1] < target) {
+        return false;
+    }
+
+    let l = 0, r = matrix[0].length - 1;
+    while(l <= r) {
+        let cmid = Math.floor((l + r) / 2);
+        if(target < matrix[mid][cmid]) {
+            r = cmid - 1;
+        }
+        else if(target > matrix[mid][cmid]) {
+            l = cmid + 1;
+        }
+        else {
+            return true;
+        }
+    }
+
+    return false;
+};
+```
