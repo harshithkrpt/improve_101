@@ -192,3 +192,127 @@ FROM
 	baby_names) AS P WHERE P.popularity <= 3;
 ```
 
+
+
+### Locks - In Mysql
+
+A database is like a busy food court. Many hungry clients want to read and write data at the same time. Locks keep things consistent so one person’s burger order doesn’t overwrite another’s dosa.
+
+
+#### 🔹 1. Table Locks (the giant “Everyone wait!” lock)
+
+Table locks are the blunt instrument of MySQL.
+
+When MySQL takes a table-level lock, it locks the entire table.
+
+Two flavours:
+
+1. READ LOCK
+Multiple clients can read the table, nobody can write.
+
+2. WRITE LOCK
+Only one client can write. All readers must wait.
+
+MyISAM relies on table locks heavily. InnoDB uses them occasionally but prefers row-level locks.
+
+#### 🔹 2. Row Locks (precision surgery, InnoDB style)
+
+- InnoDB uses row-level locks for most operations. They let MySQL lock only the specific rows needed.
+
+Two primary types:
+
+1. Shared Lock (S Lock)
+
+- shared lock lets you read the row but not modify it
+- multiple shared locks can co exist
+
+```sql
+SELECT * FROM users WHERE id = 10 FOR SHARE;
+```
+
+2. Exclusive Lock (X Lock)
+
+- I am updating it no body can read or write to it
+
+```sql
+SELECT * FROM users WHERE id = 10 FOR UPDATE;
+```
+
+#### 🔹 3. Gap Locks (“Don’t insert anything between these values”)
+
+- Gap locks lock a range of value between them not the rows themselves
+
+```sql
+SELECT * FROM users WHERE age BETWEEN 20 AND 30 FOR UPDATE;
+```
+
+- InnoDB lock:
+    - Existing rows.
+    - The gaps between them to prevent phantom inserts.
+
+- Gap locks exist mainly in REPEATABLE READ isolation level.
+
+### 🔹 4. Next-Key Locks (row + gap combo meal)
+
+A next-key lock = row lock + gap lock around it.
+
+So for row with id=10, the lock covers:
+
+- the row itself.
+- the gap before it.
+
+This is MySQL’s default strategy in REPEATABLE READ to avoid phantom reads.
+Next-key locks are why some innocent-looking queries suddenly block inserts.
+
+### 🔹 5. Intention Locks (meta-locks)
+
+- These are not actual locks on data… they are signals.
+InnoDB uses them to announce its intentions.
+
+Intention Shared (IS): “I’m going to put shared locks on some rows.”
+Intention Exclusive (IX): “I’m going to lock some rows exclusively.”
+
+### 🔹 6. Auto-Increment Locks
+
+- When inserting new rows into an auto-increment column, MySQL may create a special lock to avoid duplicate values.
+- “Auto-inc lock per insert” → only holds the lock during the insertion, not during the whole transaction.
+
+### 🔹 7. Metadata Locks (MDL)
+
+- These lock the definition of a table—not its data.
+
+🔬 Isolation levels and how they change locking
+
+MySQL defaults to REPEATABLE READ.
+
+Impact:
+
+REPEATABLE READ uses next-key locks → prevents phantom reads.
+
+READ COMMITTED reduces gap locks → higher concurrency, less safety.
+
+Interview tip:
+If they ask “What is the default isolation level?” the safe answer is:
+REPEATABLE READ for InnoDB.
+
+
+#### Questions and answers on locks
+
+1. What MySQL actually locks ?
+
+MySQL doesn’t just lock “data.” It locks:
+
+- Tables
+- Rows
+- Ranges
+- Even Metadata
+- Auto Increment Counter
+
+Each lock type solves a different kind of chaos.
+
+
+2. Storage Engine decides lock ?
+
+InnoDB is the star here.
+MyISAM uses table locks only.
+InnoDB is row-locking, transactional, and uses multiple fancy lock types.
