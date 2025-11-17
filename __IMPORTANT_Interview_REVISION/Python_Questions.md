@@ -2043,3 +2043,4 @@ obj2 = Singleton()
 print(obj1 is obj2)  # True → both refer to the same instance
 
 ```
+

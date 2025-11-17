@@ -316,3 +316,66 @@ Each lock type solves a different kind of chaos.
 InnoDB is the star here.
 MyISAM uses table locks only.
 InnoDB is row-locking, transactional, and uses multiple fancy lock types.
+
+
+- Topic Wise Most Asked Questions -> Theory Query Level
+
+---
+
+### Basics
+
+> Databases, tables, rows, columns, data types, constraints, NULL rules
+
+- **Databases are containers**
+    - A database is a logical bucket holding tables, indexes, views—almost like a file system built for structured thinking.
+
+- **Tables are grids**
+    - Each table is a structured sheet with rows (records) and columns (fields). Think of it as the strict version of an Excel sheet that won’t tolerate chaos.
+
+- **Rows are instances**
+    - Each row represents an entity: one user, one transaction, one chocolate bar with questionable calories.
+
+- **Columns are attributes**
+    - Columns define what fields each row must speak. Each has a name and a data type.
+
+- **Data types are shape restrictions**
+    - Examples: INT, BIGINT, VARCHAR, DATE, DECIMAL, JSON, TEXT.
+    - They determine the binary footprint and valid operations.
+
+- **Constraints are rules**
+    - They enforce order: PRIMARY KEY, UNIQUE, NOT NULL, CHECK, FOREIGN KEY, DEFAULT.
+    - They’re the bouncers who decide what enters the table.
+
+- **NULL means “unknown / not applicable,” not “empty” and definitely not “zero.”**
+    - The philosophical prankster of SQL—it complicates comparisons and needs special handling (IS NULL instead of =).
+
+
+### Questions on Basics : 
+
+- What is the difference between a database and a table ?
+    - A database stores multiple tables and related objects; a table stores structured records in rows and columns.
+
+- What is a primary key? Why is it important?
+    - A column or set of columns that uniquely identifies each row. No duplicates, no NULLs. Essential for indexing and relationships.
+
+- Difference between PRIMARY KEY and UNIQUE?
+    -  Both enforce uniqueness. Primary key cannot be NULL and only one is allowed per table. UNIQUE allows NULLs and you can have multiple.
+
+- What is a foreign key?
+    - A reference from one table to a primary (or unique) key of another table, enforcing referential integrity.
+
+- What is the difference between CHAR and VARCHAR?
+    - CHAR is fixed-length (padded), fast for uniform strings. VARCHAR is variable-length, more space-efficient for unpredictable lengths.
+
+- What is a constraint? Name types of constraints.
+    - A rule that controls data integrity. Common: PRIMARY KEY, UNIQUE, NOT NULL, FOREIGN KEY, CHECK, DEFAULT.
+
+- What is a NULL value? Is NULL = NULL?
+    - NULL means “unknown.” NULL = NULL is false.
+    - You must use IS NULL to check.
+
+- What are indexes? Why are they used?
+    - Indexes are data structures (B+Trees by default) used to speed up lookups but at the cost of extra space and slower writes.
+
+
+---
