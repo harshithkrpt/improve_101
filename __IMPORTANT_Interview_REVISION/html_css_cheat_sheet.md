@@ -1809,3 +1809,901 @@ function formDataToJson(fd) {
 ---
 
 _End of cheat sheet_
+
+
+
+# Topic : HTML5 APIs
+## Sub Topic : LocalStorage, SessionStorage, Web Storage, IndexedDB, Web Workers
+
+---
+
+## Quick overview (what & when)
+- **Web Storage (LocalStorage & SessionStorage)**: simple key-value string storage built on `window`.  
+  - `localStorage`: persists across browser sessions (until explicitly cleared).  
+  - `sessionStorage`: persists only for the current tab/window session.  
+  - Best for small amounts of simple data (tokens, UI prefs). Not suitable for large binary blobs or complex queries.
+
+- **IndexedDB**: a transactional, NoSQL-like object store in the browser for structured data (objects, indexes, large values).  
+  - Good for offline apps, large datasets, binary objects (Blobs), and indexed queries.
+
+- **Web Workers**: background threads for running JavaScript off the main UI thread.  
+  - Use to offload expensive CPU work (parsing, compression, heavy loops) to keep UI responsive.
+  - Communicate via `postMessage`. Supports transferable objects (ArrayBuffer) and SharedArrayBuffer (with constraints).
+
+---
+
+## API details & examples
+
+### 1) localStorage / sessionStorage (Web Storage)
+- Synchronous, string-only key → value store.
+- Size limits vary by browser (~5-10MB typical).
+
+**Basic usage**
+```js
+// localStorage
+localStorage.setItem('theme', 'dark');
+const theme = localStorage.getItem('theme'); // "dark"
+localStorage.removeItem('theme');
+localStorage.clear(); // clear all keys
+
+// sessionStorage
+sessionStorage.setItem('draft', JSON.stringify({text:'hi'}));
+```
+
+**Storing non-strings**
+```js
+const obj = { name: 'Alice', age: 30 };
+localStorage.setItem('user', JSON.stringify(obj));
+const user = JSON.parse(localStorage.getItem('user'));
+```
+
+**Cross-tab sync (storage event)**
+```js
+window.addEventListener('storage', (e) => {
+  if (e.key === 'someKey') {
+    console.log('Updated in another tab:', e.newValue);
+  }
+});
+```
+
+**Caveats**
+- Synchronous API can block the main thread if overused.
+- Not secure for sensitive data (e.g., raw auth tokens) without additional protections.
+- No indexing/querying, only exact key lookups.
+
+---
+
+### 2) IndexedDB (modern usage pattern)
+- Asynchronous and transactional. Use Promises or wrappers (idb, dexie) for ergonomics.
+- Data stored as structured clones (no functions; works with Objects, Arrays, Blobs).
+
+**Open DB and create object store**
+```js
+function openDB(name='app-db', version=1) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(name, version);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('notes')) {
+        const store = db.createObjectStore('notes', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('by_date', 'updatedAt');
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+```
+
+**Add / get / query example**
+```js
+async function addNote(db, note) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('notes', 'readwrite');
+    const store = tx.objectStore('notes');
+    const req = store.add({...note, updatedAt: Date.now()});
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAllNotes(db) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('notes', 'readonly');
+    const store = tx.objectStore('notes');
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+```
+
+**When to use IndexedDB**
+- Storing offline data for PWAs.
+- Caching large assets (Blobs), images, search indexes.
+- When you need queries, indexes, and transactions.
+
+---
+
+### 3) Web Workers (Dedicated worker)
+**worker.js**
+```js
+// heavy compute (e.g., fibonacci)
+self.onmessage = function(e) {
+  const n = e.data;
+  // naive example (CPU heavy)
+  function fib(k) {
+    if (k <= 1) return k;
+    return fib(k-1) + fib(k-2);
+  }
+  const result = fib(n);
+  postMessage(result);
+};
+```
+**main thread**
+```js
+const worker = new Worker('worker.js');
+worker.postMessage(40);
+worker.onmessage = (e) => console.log('fib result', e.data);
+```
+
+**Transferable objects** (avoid copying)
+```js
+const buffer = new ArrayBuffer(1024*1024);
+worker.postMessage(buffer, [buffer]); // buffer is transferred (neutered in main thread)
+```
+
+**SharedArrayBuffer**
+- Allows shared memory between worker & main thread; requires COOP/COEP headers on your server and secure contexts.
+- Use atomics for safe synchronization.
+
+**Caveats**
+- Workers have their own global scope (no `window`; `self` is global).
+- DOM access is not available inside workers.
+- Worker creation cost; reuse workers (worker pool) for repeated tasks.
+
+---
+
+## Theory-based interview questions (concise answers)
+1. **What is the difference between localStorage and sessionStorage?**  
+   localStorage persists across browser sessions; sessionStorage is per-tab and cleared on tab close. Both are string-only and synchronous.
+
+2. **Is localStorage shared between tabs?**  
+   Yes — same-origin tabs share localStorage. `storage` events notify other tabs (not the originator).
+
+3. **Why is IndexedDB preferred over localStorage for large datasets?**  
+   IndexedDB is asynchronous, supports structured objects, indexes, transactions and large binary objects. localStorage is synchronous and string-only.
+
+4. **What is the structured clone algorithm?**  
+   The algorithm used by postMessage, IndexedDB, and other APIs to duplicate objects across contexts. It supports objects, arrays, Blobs, typed arrays, Maps, Sets (with some limitations), but not functions or DOM nodes.
+
+5. **Can you access the DOM from a Web Worker?**  
+   No. Workers run in separate threads and cannot access DOM APIs. They communicate via `postMessage`.
+
+6. **How do you store binary data in IndexedDB?**  
+   Store `Blob` or `ArrayBuffer` objects directly; IndexedDB stores them via structured cloning.
+
+7. **What are transferable objects and why use them?**  
+   Transferable objects (like ArrayBuffer) move ownership to another context without copying, which is faster for large buffers.
+
+8. **What’s a Service Worker vs Web Worker?**  
+   Service Worker is a special worker that intercepts network requests and enables offline caching and background sync; it lives outside pages and can respond to fetch events. Web Workers are for general-purpose background computation tied to a page.
+
+9. **How to avoid blocking the UI using Web Storage?**  
+   Keep writes small and infrequent; for heavy data use IndexedDB (async) instead of synchronous Web Storage.
+
+10. **How do you implement cross-tab locking (mutex) in the browser?**  
+    Use BroadcastChannel or `localStorage` with atomic `storage` events and unique tokens (careful with race conditions). More robust: use IndexedDB with transactions to coordinate locks.
+
+11. **How does IndexedDB versioning work?**  
+    `indexedDB.open(name, version)` triggers `onupgradeneeded` when version increases, allowing schema migrations. Transactions in upgrade are versionchange transactions.
+
+12. **What are quotas and how do browsers enforce storage limits?**  
+    Browsers implement per-origin quotas (varies by engine). They may evict least-recently-used data or prompt users for permission for large storage. Exact policies differ by browser.
+
+---
+
+## Coding-based interview tasks & hints + sample solutions
+
+### Task A — Sync theme between tabs using localStorage
+**Spec:** Save `theme` to localStorage; when changed in one tab, update UI in others.
+**Hint:** use `storage` event.
+```js
+// set theme
+function setTheme(theme) {
+  localStorage.setItem('theme', theme);
+  applyTheme(theme);
+}
+
+// react to remote updates
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme') applyTheme(e.newValue);
+});
+```
+
+### Task B — Save large number of notes offline using IndexedDB
+**Spec:** Store notes with fields `{id, title, body, updatedAt}` and fetch latest 20 ordered by updatedAt.
+**Hint:** create index on `updatedAt` and use a cursor in reverse order.
+(Sample snippets in the main section above.)
+
+### Task C — Offload image processing to a Web Worker
+**Spec:** Resize an image in a worker using OffscreenCanvas (if available).
+**Hint:** Transfer `ImageBitmap` or `ArrayBuffer` to worker; use `OffscreenCanvas` within worker to manipulate pixels.
+
+### Task D — Implement simple cache with IndexedDB
+**Spec:** Cache API responses (url → response blob). Check DB first, then network.
+**Hint:** Use fetch, store response.clone().blob() in IndexedDB.
+
+---
+
+## Best practices & tips
+- Prefer **IndexedDB** for large or complex data. Use wrappers (idb, dexie) to avoid callback hell.
+- Avoid storing secrets in localStorage. Use httpOnly cookies for sensitive auth tokens.
+- Keep writes to localStorage minimal (it's synchronous).
+- Reuse workers; create worker pools for recurring tasks.
+- Use `storage` and `BroadcastChannel` for cross-tab communication; `BroadcastChannel` is simpler for structured messages.
+- Test storage limits and behavior across Chromium, Firefox, and Safari (Safari quotas differ).
+
+---
+
+## Further reading & libraries
+- MDN Web Docs: localStorage, IndexedDB, Web Workers (search on MDN).  
+- Libraries: `idb` (tiny promise wrapper for IndexedDB), `dexie.js` (full-featured wrapper).
+
+---
+
+## Quick interview checklist (one-liners you can say)
+- LocalStorage/sessionStorage synchronous, string-only.  
+- IndexedDB async, transactional, supports blobs and indexes.  
+- Web Workers = no DOM, use postMessage and transferable objects.  
+- Use Service Workers for request caching & offline strategies.  
+- Use BroadcastChannel for cross-tab structured messaging.
+
+---
+
+*Prepared for interview revision — concise, with examples and coding tasks.*
+
+# Media Tags in HTML5  
+## Topic: Media Tags  
+## Sub Topic: `<video>`, `<audio>`, `<picture>`, `<source>`, Attributes like `controls` / `autoplay`
+
+---
+
+## 1. Detailed Explanation
+
+### `<video>`
+The `<video>` tag embeds video content in a webpage.  
+It supports multiple formats like MP4, WebM, Ogg.
+
+**Common attributes:**
+- **controls** — shows play/pause UI.
+- **autoplay** — video plays automatically.
+- **muted** — required for autoplay in modern browsers.
+- **loop** — repeats video.
+- **poster** — image shown before video loads.
+- **width/height** — size of video.
+
+**Example:**
+```html
+<video src="movie.mp4" controls autoplay muted width="400"></video>
+```
+
+---
+
+### `<audio>`
+Used to embed audio files (MP3, WAV, Ogg).
+
+**Attributes:**
+- controls  
+- autoplay  
+- loop  
+- muted  
+
+**Example:**
+```html
+<audio controls>
+  <source src="song.mp3" type="audio/mpeg" />
+</audio>
+```
+
+---
+
+### `<picture>`
+Responsive image tag: loads different images depending on screen size or resolution.
+
+Useful for:
+- mobile vs desktop  
+- retina images  
+- art direction  
+
+**Example:**
+```html
+<picture>
+  <source srcset="large.jpg" media="(min-width: 800px)">
+  <source srcset="small.jpg" media="(max-width: 799px)">
+  <img src="fallback.jpg" alt="Example image">
+</picture>
+```
+
+---
+
+### `<source>`
+Defines alternative media sources for `<video>`, `<audio>`, or `<picture>`.
+
+**Example inside `<video>`:**
+```html
+<video controls>
+  <source src="movie.mp4" type="video/mp4">
+  <source src="movie.webm" type="video/webm">
+</video>
+```
+
+---
+
+### Common Media Attributes
+
+| Attribute | Meaning |
+|----------|---------|
+| controls | Shows default UI |
+| autoplay | Starts playing automatically |
+| muted | Mutes media (required for autoplay) |
+| loop | Replays automatically |
+| preload | `none`, `metadata`, `auto` |
+| poster | Video placeholder image |
+
+---
+
+## 2. Theory-Based Interview Questions + Concise Answers
+
+**1. Why do we use multiple `<source>` tags inside `<video>` or `<audio>`?**  
+Browsers support different codecs. Multiple sources ensure maximum compatibility.
+
+**2. Why is muted required for autoplay?**  
+Browsers block autoplay with sound to avoid bad UX. Muted autoplay is permitted.
+
+**3. What is the purpose of the `<picture>` element?**  
+For responsive images and art direction—serves different images depending on screen conditions.
+
+**4. Difference between `<img>` and `<picture>`?**  
+`<img>` loads a single image; `<picture>` can load conditionally different images.
+
+**5. What is `preload` and when is it used?**  
+Tells browser how much data to load before playback. Good for performance tuning.
+
+**6. Does `<audio>` support a poster attribute?**  
+No, only `<video>` supports poster.
+
+**7. Why use `<source type="">`?**  
+Helps browser pick the correct file based on MIME type.
+
+---
+
+## 3. Coding-Based Questions
+
+### Q1: Create a responsive image setup where mobile loads `small.jpg` and desktop loads `large.jpg`.
+```html
+<picture>
+  <source srcset="large.jpg" media="(min-width: 768px)">
+  <img src="small.jpg" alt="Device responsive image">
+</picture>
+```
+
+### Q2: Build a media player with fallback text.
+```html
+<video controls width="500">
+  <source src="trailer.mp4" type="video/mp4">
+  <source src="trailer.webm" type="video/webm">
+  Your browser does not support HTML5 video.
+</video>
+```
+
+### Q3: Audio player with autoplay + loop (muted required for autoplay).
+```html
+<audio autoplay loop muted>
+  <source src="bgtrack.mp3" type="audio/mpeg">
+</audio>
+```
+
+---
+
+This cheat sheet covers all essential interview-ready concepts of HTML5 media tags and attributes.
+
+
+# Semantic HTML Cheat Sheet
+
+## Topic: Semantic HTML  
+## Sub Topic: header, main, footer, article, section, nav, aside
+
+Semantic HTML gives meaningful structure to a webpage. Browsers, search engines, and assistive technologies understand pages better when semantic tags are used correctly.
+
+---
+
+## 1. Semantic Tags Explained
+
+### `<header>`
+Defines introductory content for a page or section.  
+Often contains logo, navigation, page title.
+
+### `<main>`
+Represents the primary content of the document.  
+Only one `<main>` per page.
+
+### `<footer>`
+Contains ending information like copyright, links, author info, or contact details.
+
+### `<article>`
+Represents a self-contained piece of content that can stand on its own.  
+Examples: blog posts, comments, news cards.
+
+### `<section>`
+Groups related content within a page.  
+A section usually has a heading.
+
+### `<nav>`
+Contains navigation links—site menus, table of contents, pagination.
+
+### `<aside>`
+Represents content indirectly related to the main content.  
+Examples: sidebars, ads, related links.
+
+---
+
+## 2. Interview‑Style Theory Questions (With Short Answers)
+
+**1. What is semantic HTML?**  
+Semantic HTML uses descriptive tags that convey meaning about the content structure.
+
+**2. Why use semantic HTML?**  
+Improves accessibility, SEO, maintainability, and helps browsers understand content.
+
+**3. Difference between `<section>` and `<article>`?**  
+`<article>` is independent content; `<section>` groups related content but isn’t standalone.
+
+**4. Can a page have multiple `<header>` tags?**  
+Yes, each section or article can have its own header.
+
+**5. Can `<main>` be nested?**  
+No. There must be exactly one `<main>` and it cannot be nested inside other elements like header or footer.
+
+**6. What goes inside `<nav>`?**  
+Major navigation links such as menus, tables of contents, pagination.
+
+**7. When to use `<aside>`?**  
+For supplementary or tangential content like sidebars or ads.
+
+**8. Is semantic HTML important for SEO?**  
+Yes. Search engines understand page hierarchy better.
+
+**9. Does `<div>` lose meaning compared to semantic tags?**  
+`<div>` has no semantic meaning; semantic elements improve clarity.
+
+**10. Are semantic tags important for screen readers?**  
+Yes. Assistive tools rely on semantic structure for navigation.
+
+---
+
+## 3. Coding Questions Related to Semantic HTML
+
+### **Q1. Create a webpage layout using semantic HTML.**
+```html
+<body>
+  <header>
+    <h1>My Blog</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/posts">Posts</a>
+    </nav>
+  </header>
+
+  <main>
+    <article>
+      <h2>Post Title</h2>
+      <p>This is an article.</p>
+    </article>
+
+    <aside>
+      <h3>Related Links</h3>
+      <ul>
+        <li><a href="#">Another post</a></li>
+      </ul>
+    </aside>
+  </main>
+
+  <footer>© 2025 Harshith</footer>
+</body>
+```
+
+### **Q2. Build multiple articles with sections inside.**
+```html
+<article>
+  <header><h2>HTML Basics</h2></header>
+  <section>
+    <h3>Elements</h3>
+    <p>Everything is an element.</p>
+  </section>
+  <section>
+    <h3>Attributes</h3>
+    <p>Attributes modify elements.</p>
+  </section>
+</article>
+```
+
+### **Q3. Create a navigation menu using `<nav>`.**
+```html
+<nav>
+  <ul>
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+```
+
+---
+
+This completes the cheat sheet for Semantic HTML.
+
+
+# Meta Tags Cheat Sheet
+
+## 1. Meta Charset
+Defines the character encoding of the document.
+
+```html
+<meta charset="UTF-8">
+```
+
+## 2. Viewport Meta Tag
+Controls layout on mobile browsers.
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+```
+
+## 3. SEO Meta Tags
+Used for search engine optimization.
+
+```html
+<meta name="description" content="This is a sample description for SEO.">
+<meta name="keywords" content="HTML, Meta Tags, SEO">
+<meta name="author" content="Your Name">
+```
+
+### Common SEO Tags
+- **description** → summary of the page (very important for ranking & CTR)
+- **keywords** → mostly ignored by modern search engines, but still used sometimes
+- **robots** → control indexing  
+```html
+<meta name="robots" content="index, follow">
+```
+
+## 4. Open Graph (OG) Tags
+Used for social media previews (Facebook, LinkedIn, Twitter/X uses them too).
+
+```html
+<meta property="og:title" content="Website Title">
+<meta property="og:description" content="Short preview description">
+<meta property="og:image" content="https://example.com/image.png">
+<meta property="og:url" content="https://example.com">
+<meta property="og:type" content="website">
+```
+
+## 5. Favicons
+Icons shown in browser tabs, bookmarks, and devices.
+
+```html
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+```
+
+### Multiple Sizes Example
+```html
+<link rel="icon" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" sizes="16x16" href="/favicon-16.png">
+```
+
+---
+
+# Interview Theory Questions (with concise answers)
+
+### 1. Why do we use the viewport meta tag?
+It ensures responsive design by making the layout fit the device width and prevents zooming issues on mobile screens.
+
+### 2. What is the purpose of `<meta charset="UTF-8">`?
+It sets the character encoding, allowing the page to correctly display most languages and symbols.
+
+### 3. What are Open Graph tags?
+They provide rich social media previews with title, description, image, and URL.
+
+### 4. What is the `description` meta tag used for?
+It gives search engines a summary of the page and influences click-through rates.
+
+### 5. Do keywords meta tag impact SEO today?
+Search engines mostly ignore them; they are rarely used now.
+
+### 6. What does robots meta tag do?
+Controls whether search engines index the page or follow links.
+
+### 7. Why are favicons important?
+They improve branding and user experience by showing your icon on tabs, bookmarks, and mobile screens.
+
+---
+
+# Coding Examples
+
+## Adding all essential meta tags in a single HTML boilerplate
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A complete meta tags example page.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="My Website">
+  <meta property="og:description" content="This is a preview description.">
+  <meta property="og:image" content="https://example.com/preview.png">
+  <meta property="og:url" content="https://example.com">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+
+  <title>Meta Tags Example</title>
+</head>
+<body>
+  <h1>Meta Tags Demo Page</h1>
+</body>
+</html>
+```
+
+Topic : Accessibility
+Sub Topic : ARIA roles, alt text, tabindex, screen readers
+
+---
+
+# Accessibility Cheat Sheet — ARIA roles, alt text, tabindex, screen readers
+A compact interview-ready cheat sheet covering practical guidance, common pitfalls, quick examples, theory Q&A, and coding tasks (with short solutions). Designed to be copy-pasteable into notes or an interview repo.
+
+---
+
+## 1. Core concepts (quick overview)
+- **Accessibility (a11y)**: designing so people with disabilities can perceive, understand, navigate, and interact with the web.
+- **Semantic HTML**: always prefer native elements (`<button>`, `<a>`, `<form>`, `<header>`, etc.). They have built-in accessibility.
+- **WAI-ARIA**: provides roles, states, and properties for communicating UI semantics when native HTML is insufficient.
+- **Assistive technologies (AT)**: screen readers (NVDA, VoiceOver, JAWS), screen magnifiers, switch devices, etc.
+
+---
+
+## 2. ARIA roles — when & how to use
+- **Rule of thumb**: Use ARIA only when semantic HTML can't express the intent.
+- **Common roles**:
+  - `role="button"`, `role="link"`, `role="navigation"`, `role="main"`, `role="dialog"`, `role="alert"`, `role="status"`.
+  - Landmark roles: `banner`, `navigation`, `main`, `complementary`, `contentinfo`.
+- **Examples**:
+
+```html
+<!-- Prefer native element -->
+<button>Save</button>
+
+<!-- Only use role when using non-semantic element (avoid if possible) -->
+<div role="button" tabindex="0" aria-pressed="false">Toggle</div>
+```
+
+- **Accessible widgets**: If you implement custom widgets (tabs, accordions, comboboxes), mirror ARIA patterns from WAI-ARIA Authoring Practices, including keyboard behavior.
+
+---
+
+## 3. `alt` text — short, useful guidance
+- **Purpose**: convey the content/meaning of an image to users who cannot see it.
+- **Guidelines**:
+  - If image is **decorative**, use `alt=""` (empty) and consider `role="presentation"` (or CSS background-image for purely decorative cases).
+  - If image conveys content, describe its **meaning** succinctly. Focus on purpose, not pixel details.
+  - For complex images (charts), provide a longer description nearby or via `aria-describedby`/`longdesc` (or a visible caption).
+
+**Examples**:
+```html
+<img src="logo.png" alt="ACME financial services logo">
+<img src="hero.jpg" alt="Smiling people in front of a product display at a conference">
+<img src="pattern.png" alt=""> <!-- decorative -->
+```
+
+---
+
+## 4. `tabindex` and keyboard focus
+- **`tabindex="0"`**: element becomes focusable in natural tab order.
+- **`tabindex="-1"`**: element is programmatically focusable (via `.focus()`), but not in tab order.
+- **`tabindex="N>0"`**: DO NOT USE in most cases — it creates confusing focus orders.
+- **Prefer** native focusable elements. Only add `tabindex` to non-focusable elements when you must.
+
+**Best practices**:
+- Keep a logical document order so tab traversal makes sense.
+- For single-page apps, manage focus on route/dialog changes: move focus to the page heading or dialog container.
+- Use `:focus-visible` for visible focus styles (when supported) and provide clear focus outlines.
+
+Example — moving focus to a modal:
+```js
+const modal = document.getElementById('modal');
+modal.setAttribute('aria-hidden', 'false');
+modal.focus(); // make sure modal has tabindex="-1" or is focusable
+```
+
+---
+
+## 5. Screen readers — practical tips
+- **Common screen readers**: NVDA (Windows, free), VoiceOver (macOS/iOS), JAWS (Windows, paid).
+- **Testing advice**:
+  - Use keyboard-only navigation daily while developing.
+  - Test with NVDA + Firefox (Windows) and VoiceOver + Safari (mac/macOS/iOS).
+  - Test dynamic updates: use `role="status"`, `aria-live="polite"/"assertive"` for announcements.
+- **VoiceOver quick check**: Turn VoiceOver on and try navigating headings (`H`), links (`L`), forms (`Form` rotor), and reading order.
+
+---
+
+## 6. Common mistakes and how to fix them
+- Using `role` that conflicts with native element (e.g., `<button role="link">`) — avoid.
+- Missing keyboard event handlers on `div role="button"` — must implement `Enter` and `Space` key handling.
+- Overusing ARIA instead of semantic HTML.
+- Not managing focus when opening/closing modals or navigating client-side routes.
+- Not providing `alt` or providing redundant `alt` like `"image of logo"`.
+
+---
+
+## 7. Quick ARIA attributes cheat
+- `aria-hidden="true"` — hide from AT (use carefully).
+- `aria-live="polite|assertive"` — announce dynamic content.
+- `aria-checked`, `aria-pressed`, `aria-expanded` — reflect widget state.
+- `aria-describedby` — reference explanatory text.
+- `aria-labelledby` — label an element by another element's text.
+
+---
+
+## 8. Interview-style theory questions (concise answers)
+1. **What is the difference between semantic HTML and ARIA?**
+   - Semantic HTML provides native semantics and keyboard support; ARIA supplements semantics when native HTML is insufficient.
+
+2. **When should you use `aria-hidden`?**
+   - Use to hide purely decorative or duplicate content from AT; avoid hiding interactive elements unless you also disable interaction.
+
+3. **Explain `tabindex` values and their use-cases.**
+   - `0`: include in tab order; `-1`: programmatically focusable only; positive: avoid. Prefer native elements.
+
+4. **What is `aria-live` and when to use it?**
+   - Tells AT to announce content changes in that region. Use for notifications, error summaries, dynamic content updates.
+
+5. **How do you make a non-semantic element act like a button?**
+   - Add `role="button"`, `tabindex="0"`, and keyboard handlers for `Enter` and `Space`, and manage `aria-pressed`/`aria-expanded` if applicable. Still prefer `<button>`.
+
+6. **What should `alt` text contain?**
+   - A succinct description of the image's meaning or function. Empty `alt` for decorative images.
+
+7. **How to make accessible modals?**
+   - Trap focus inside modal, restore focus on close, set `aria-modal="true"`, provide an accessible label (`aria-labelledby`) and `role="dialog"`.
+
+8. **Difference between `aria-labelledby` and `aria-label`?**
+   - `aria-labelledby` references visible element(s) by id for the label; `aria-label` provides a string label not visible on-screen.
+
+9. **What are live regions and types?**
+   - `aria-live` regions; `polite` waits for natural pause, `assertive` interrupts. Use sparingly.
+
+10. **How to test accessibility in CI?**
+   - Use automated linters (axe-core, eslint-plugin-jsx-a11y), static checks, and include sample axe runs in end-to-end tests (Playwright, Cypress with axe).
+
+11. **Why avoid `tabindex` with positive integers?**
+   - It creates an unnatural and hard-to-maintain focus order that differs from DOM order.
+
+12. **What does `role="presentation"` do?**
+   - Removes semantic meaning from an element for AT; used for decorative constructs where semantics would confuse.
+
+---
+
+## 9. Coding-style questions & short solutions (React + plain JS)
+
+### Q1 — Make an accessible toggle button in React
+**Prompt**: Implement a toggle that is keyboard accessible and announces state.
+
+```jsx
+// AccessibleToggle.jsx
+import React, { useState } from 'react';
+export default function AccessibleToggle() {
+  const [on, setOn] = useState(false);
+  return (
+    <button
+      aria-pressed={on}
+      onClick={() => setOn(!on)}
+    >
+      {on ? 'On' : 'Off'}
+    </button>
+  );
+}
+```
+
+Notes: Use native `<button>`; `aria-pressed` exposes state to AT.
+
+---
+
+### Q2 — Accessible image with long description
+**Prompt**: Image that needs a verbose description.
+
+```html
+<figure>
+  <img src="chart.png" alt="Quarterly sales chart, text summary below" />
+  <figcaption id="chart-desc">Q1: 10k, Q2: 12k, Q3: 9k, Q4: 15k — overall growth 25% year-over-year.</figcaption>
+</figure>
+```
+
+Or use `aria-describedby="chart-desc"` on the `<img>`.
+
+---
+
+### Q3 — Custom keyboard-focus trap (modal) plain JS
+```js
+function trapFocus(modal) {
+  const focusable = modal.querySelectorAll('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  modal.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+}
+```
+
+---
+
+### Q4 — Linting & automated checks (example command)
+- Add `axe-core` or `eslint-plugin-jsx-a11y` in CI.
+
+Example (npm script):
+```json
+"scripts": {
+  "test:a11y": "node ./scripts/run-axe.js"
+}
+```
+
+---
+
+### Q5 — Accessible custom dropdown basics (React sketch)
+- Use `role="listbox"` + `role="option"`, manage `aria-activedescendant`, keyboard handlers (Up/Down/Enter/Escape), and ensure focus is on a combobox/button.
+
+---
+
+## 10. Tools & resources
+- WAI-ARIA Authoring Practices — patterns for accessible widgets.
+- MDN Accessibility docs.
+- axe (Deque) — runtime accessibility testing.
+- Lighthouse accessibility audits — quick checks but not comprehensive.
+- NVDA (Windows), VoiceOver (macOS/iOS) — manual testing.
+
+---
+
+## 11. Quick checklist for PR reviews
+- Are native elements used where possible?
+- Do images have meaningful `alt` or empty `alt` if decorative?
+- Are interactive elements keyboard accessible and focusable?
+- Is focus managed for modals and route changes?
+- Any ARIA roles/properties used — are they necessary and correct?
+- Are dynamic updates announced (if needed)?
+- Do color choices meet contrast requirements?
+
+---
+
+## 12. Short actionable tips — one-liners
+- Use a real `<button>` instead of `div role="button"` 99% of the time.
+- Empty `alt` overrides are valid and important for decorative images.
+- Do not rely on automated tools alone — manual testing is essential.
+
+---
+
+_End of cheat sheet._
+
