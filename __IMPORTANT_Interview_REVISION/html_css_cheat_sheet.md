@@ -2705,5 +2705,172 @@ Example (npm script):
 
 ---
 
-_End of cheat sheet._
+# HTML Rendering: How Browsers Parse HTML into DOM, Reflow, Repaint
+
+## Topic: HTML Rendering  
+## Sub Topic: Browser Parsing → DOM, Reflow, Repaint
+
+---
+
+## 1. How Browsers Parse HTML into the DOM
+
+Browsers read HTML as a stream of characters. This stream goes through several stages:
+
+### Tokenization  
+The HTML text is chopped into meaningful units: tags, attributes, text nodes.  
+The tokenizing algorithm is strictly defined by the HTML spec.
+
+### Tree Construction  
+Tokens become **nodes**, and nodes form the **DOM Tree** (Document Object Model).  
+DOM is a live, in‑memory representation of the HTML document.
+
+Example:  
+```html
+<div id="root">
+  <p>Hello</p>
+</div>
+```
+Becomes a node tree:
+- Document  
+  └─ HTML  
+     └─ Body  
+        └─ Div#root  
+           └─ P → "Hello"
+
+### CSS Parsing → CSSOM  
+CSS is parsed separately into its own tree: **CSSOM (CSS Object Model)**.
+
+### Render Tree  
+The browser combines DOM + CSSOM to create the **Render Tree**, which contains only *visible* nodes.  
+Nodes like `<head>` or `display: none` elements don't appear in this tree.
+
+### Layout (Reflow)  
+The browser determines the geometry of each visible node:  
+size, position, box model.
+
+### Painting  
+Pixels are filled: colors, borders, text, shadows.
+
+### Compositing  
+Layers (like those with transforms, opacity, etc.) are merged on the GPU.
+
+---
+
+## 2. Reflow (Layout)
+
+Reflow happens when layout information must be recalculated.
+
+Triggers include:
+- Changing DOM structure (adding/removing nodes)
+- Changing CSS layout properties (width, height, margin)
+- Resizing window
+- Changing font size
+- Getting layout measurements (`offsetHeight`, `getBoundingClientRect`, etc.)
+
+Reflow is expensive because layout changes can cascade across the entire document.
+
+---
+
+## 3. Repaint
+
+Repaint happens when *visual appearance* changes but geometry is unaffected:
+- background-color
+- color
+- visibility changes
+- outline
+
+Repaint is cheaper than reflow because it doesn’t recalc layout—just redraws.
+
+---
+
+## 4. Rendering Pipeline Summary
+
+HTML → Tokens → DOM  
+CSS → CSSOM  
+DOM + CSSOM → Render Tree  
+Render Tree → Layout (Reflow)  
+Layout → Paint  
+Paint → Compositing → Screen
+
+---
+
+## 5. Theory Interview Questions (Concise Answers)
+
+### 1. What is DOM?
+A tree representation of the HTML document where each element is a node.
+
+### 2. What is CSSOM?
+A tree representation of parsed CSS used for styling.
+
+### 3. What is the Render Tree?
+A combination of DOM + CSSOM containing only visible nodes.
+
+### 4. What causes reflow?
+Changes to layout—DOM insertions, size changes, reading layout properties, window resize.
+
+### 5. What causes repaint?
+Changes to visual style without affecting layout—color, background, border changes.
+
+### 6. Why is reflow more expensive?
+Because it can force recalculation of layout for large parts of the page.
+
+### 7. What is compositing?
+The GPU assembles layers (e.g., position: fixed, transforms) into the final screen output.
+
+### 8. What operations are layout‑thrashing?
+Repeatedly reading layout (`offsetTop`) and writing layout (changing style) in a loop.
+
+### 9. How to avoid unnecessary reflows?
+Batch DOM changes, use DocumentFragment, avoid forced synchronous layout reads, prefer CSS transforms.
+
+### 10. What is critical rendering path?
+The sequence of steps needed to convert HTML/CSS/JS into pixels on screen.
+
+---
+
+## 6. Related Coding Questions
+
+### Q1: Example – Triggering Reflow in JavaScript  
+```js
+const box = document.getElementById("box");
+
+// Reflow is forced here because we read layout
+const height = box.offsetHeight;
+
+// Then we write layout → costly
+box.style.height = (height + 10) + "px";
+```
+
+### Q2: How to batch DOM writes to avoid layout thrashing?  
+```js
+const box = document.getElementById("box");
+
+requestAnimationFrame(() => {
+  box.style.width = "200px";
+  box.style.height = "200px";
+});
+```
+
+### Q3: Using DocumentFragment to avoid multiple reflows  
+```js
+const frag = document.createDocumentFragment();
+for (let i = 0; i < 1000; i++) {
+  const item = document.createElement("div");
+  item.textContent = "Node " + i;
+  frag.appendChild(item);
+}
+document.body.appendChild(frag); // Only one reflow
+```
+
+### Q4: CSS that avoids reflow but triggers repaint (safe optimization)
+```css
+.box:hover {
+  background-color: blue;
+}
+```
+
+---
+
+## End
+
 
