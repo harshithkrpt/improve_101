@@ -2874,3 +2874,408 @@ document.body.appendChild(frag); // Only one reflow
 ## End
 
 
+# Script Tags Cheat Sheet  
+## Topic: Scripting  
+## Sub Topic: `<script>` attributes (async, defer), module scripts, noscript  
+
+---
+
+## 1. Detailed Explanation
+
+### 1. `<script>` Attributes: `async`, `defer`
+Browsers normally stop parsing HTML to download and execute scripts. These attributes change that behavior.
+
+**async**  
+The script is downloaded in parallel with HTML parsing and executed immediately when ready. Parsing pauses only at execution time.  
+Useful for: independent scripts like ads, analytics.
+
+**defer**  
+The script is downloaded in parallel but executed only after the entire HTML is parsed, in the order they appear.  
+Useful for: DOM-dependent scripts and when maintaining execution order.
+
+Comparison table:
+
+| Attribute | Download | Execution | Order Guaranteed? | Use Case |
+|----------|----------|-----------|--------------------|----------|
+| None     | Blocking | Immediately | Yes | Legacy scripts |
+| async    | Parallel | Immediately when ready | No | Independent scripts |
+| defer    | Parallel | After HTML parsing | Yes | DOM-driven scripts |
+
+---
+
+### 2. Module Scripts: `type="module"`
+Adds ES modules to HTML.
+
+Key features:
+- Supports `import` and `export`.
+- Automatically deferred (executed after parsing).
+- Loaded in strict mode.
+- Separate execution scope (variables don’t pollute global namespace).
+- Can load other modules dynamically.
+
+Example:
+```html
+<script type="module">
+  import { greet } from "./utils.js";
+  greet();
+</script>
+```
+
+---
+
+### 3. `<noscript>`
+Displayed only when:
+- JavaScript is disabled.
+- Browser doesn’t support scripting.
+
+Useful for:
+- Fallback UI.
+- SEO crawl-friendly content.
+
+Example:
+```html
+<noscript>
+  JavaScript is disabled. Please enable it for full functionality.
+</noscript>
+```
+
+---
+
+## 4. Theory-Based Interview Questions (with concise answers)
+
+### 1. What is the difference between `async` and `defer`?
+Async executes the moment the script is ready, defer waits until HTML is parsed and preserves order.
+
+### 2. Why do module scripts load in strict mode?
+ES modules enforce strict mode to avoid silent errors and provide cleaner semantics.
+
+### 3. When would you use `<noscript>`?
+To show fallback content or messaging when JavaScript is disabled or unsupported.
+
+### 4. Can `async` scripts maintain execution order?
+No. Execution order depends on download completion.
+
+### 5. Do module scripts block HTML parsing?
+No, they behave like `defer` and execute after parsing.
+
+---
+
+## 5. Coding-Based Questions
+
+### 1. Load two scripts where the first must run before the second.
+```html
+<script defer src="a.js"></script>
+<script defer src="b.js"></script>
+```
+
+### 2. Example of dynamically importing a module.
+```js
+import('./math.js').then(mod => {
+  console.log(mod.add(2, 3));
+});
+```
+
+### 3. A script that must not block but must run after DOM is ready.
+```html
+<script defer src="main.js"></script>
+```
+
+---
+
+# Shadow DOM / Web Components — Interview Cheat Sheet
+
+## Topic: Shadow DOM / Web Components  
+## Sub Topic: custom elements, shadowRoot, template tag, slot
+
+---
+
+## 1. Shadow DOM & Web Components (Detailed Explanation)
+
+Web Components are browser-native building blocks for creating reusable, encapsulated UI elements without frameworks. Three main pieces team up here: **Custom Elements**, **Shadow DOM**, and **HTML Templates**.
+
+### Custom Elements  
+These let you define your own HTML tags like `<user-card>` or `<emoji-toggle>`.  
+A custom element extends `HTMLElement` and implements lifecycle callbacks such as `connectedCallback()` and `attributeChangedCallback()`.
+
+Example:  
+```js
+class MyCard extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = "Hello from custom element!";
+  }
+}
+customElements.define("my-card", MyCard);
+```
+
+### Shadow DOM  
+Shadow DOM creates an isolated subtree—essentially a private DOM island that lives inside a component. Styles and structure inside the shadow root do not leak outside, and external styles don’t bleed in.
+
+Creation:  
+```js
+this.attachShadow({ mode: "open" });
+```
+
+Two modes:  
+- **open** → shadowRoot accessible via `.shadowRoot`  
+- **closed** → shadowRoot is hidden from outside access
+
+Encapsulation is the star here. It keeps your component predictable regardless of global CSS chaos.
+
+### Template Tag  
+`<template>` is inert HTML—browser parses it but doesn’t render it until you clone and insert it. Useful for structuring UI for components.
+
+Example:  
+```html
+<template id="card-template">
+  <style>
+    .box { padding: 10px; border: 1px solid #ccc; }
+  </style>
+  <div class="box">
+    <slot></slot>
+  </div>
+</template>
+```
+
+### Slot  
+Slots let users project their own content into your Web Component.
+
+Example in custom element:  
+```html
+<my-card>
+  <p>This gets slotted inside!</p>
+</my-card>
+```
+
+---
+
+## 2. Theory-Based Interview Questions (Concise Answers)
+
+**1. What is Shadow DOM?**  
+A scoped DOM tree inside a component, providing style & structure encapsulation.
+
+**2. Why do we need Custom Elements?**  
+To define reusable, self-contained, framework-agnostic UI components.
+
+**3. Difference between open and closed shadow DOM?**  
+Open: shadowRoot accessible via JS. Closed: hidden from outside, truly private.
+
+**4. What is the purpose of the template tag?**  
+Defines inert markup that can be cloned and inserted later.
+
+**5. What are slots?**  
+Content placeholders inside Shadow DOM enabling content projection.
+
+**6. Do styles inside shadow DOM leak out?**  
+No. Styles are scoped and encapsulated.
+
+**7. What is the lifecycle of a custom element?**  
+`constructor`, `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`.
+
+**8. Can Shadow DOM contain its own styles?**  
+Yes—styles inside shadowRoot apply only within it.
+
+---
+
+## 3. Coding-Based Questions & Examples
+
+### Q1. Create a simple Web Component with Shadow DOM and slot.
+```js
+class SimpleCard extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: "open" });
+
+    shadow.innerHTML = `
+      <style>
+        .card { padding: 12px; background: #f7f7f7; border-radius: 8px; }
+      </style>
+      <div class="card">
+        <slot></slot>
+      </div>
+    `;
+  }
+}
+
+customElements.define("simple-card", SimpleCard);
+```
+
+Usage:
+```html
+<simple-card>Content inside the card</simple-card>
+```
+
+---
+
+### Q2. Create a component using `<template>` cloning.
+```html
+<template id="btn-template">
+  <style>
+    button { padding: 8px 12px; cursor: pointer; }
+  </style>
+  <button><slot></slot></button>
+</template>
+
+<script>
+class MyButton extends HTMLElement {
+  constructor() {
+    super();
+    const template = document.getElementById("btn-template");
+    const clone = template.content.cloneNode(true);
+    const shadow = this.attachShadow({ mode: "open" });
+    shadow.appendChild(clone);
+  }
+}
+customElements.define("my-button", MyButton);
+</script>
+```
+
+---
+
+### Q3. Shadow DOM styling test: internal styles vs global styles.
+```js
+shadow.innerHTML = `
+  <style>
+    p { color: red; }
+  </style>
+  <p>This is always red, global CSS won't override it.</p>
+`;
+```
+
+---
+
+### Q4. Custom element with observed attributes.
+```js
+class RatingStar extends HTMLElement {
+  static get observedAttributes() { return ["count"]; }
+
+  attributeChangedCallback(name, oldVal, newVal) {
+    this.shadowRoot.querySelector(".stars").textContent = "⭐".repeat(newVal);
+  }
+
+  connectedCallback() {
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot.innerHTML = `<div class="stars"></div>`;
+  }
+}
+customElements.define("rating-star", RatingStar);
+```
+
+---
+
+Need more sections added to the Web Components sheet? You can extend this foundation into design patterns, accessibility rules, or performance tuning for large UI libraries.
+
+
+# CSS Fundamentals Cheat Sheet
+## Selectors, Combinators, Specificity, Inheritance, Cascade
+
+### 1. Selectors
+Selectors tell the browser *which* elements to style.
+
+- **Type selector**: `div`, `p`, `span`
+- **Class selector**: `.box`
+- **ID selector**: `#main`
+- **Attribute selector**: `input[type="text"]`
+- **Universal selector**: `*`
+- **Pseudo-class**: `a:hover`, `input:focus`
+- **Pseudo-element**: `p::before`, `::marker`
+
+### 2. Combinators
+Combinators define relationships between selectors.
+
+- **Descendant (`A B`)**: Selects B *inside* A  
+  Example: `div p`
+- **Child (`A > B`)**: Selects B directly inside A  
+  Example: `ul > li`
+- **Adjacent sibling (`A + B`)**: Selects B immediately after A  
+  Example: `h1 + p`
+- **General sibling (`A ~ B`)**: Selects all B after A at same level  
+  Example: `h1 ~ p`
+
+### 3. Specificity
+Specificity determines which rule wins when multiple rules match.
+
+Order (low → high):  
+`Universal < Type < Class/Attribute/Pseudo-class < ID < Inline Style`
+
+Numeric format (a,b,c,d):
+- Inline style → `1,0,0,0`
+- ID selector → `0,1,0,0`
+- Class/attribute/pseudo-class → `0,0,1,0`
+- Type/pseudo-element → `0,0,0,1`
+
+Example:
+```css
+#id { }          /* 0100 */
+.container { }   /* 0010 */
+p { }            /* 0001 */
+```
+
+### 4. Inheritance
+Some CSS properties *inherit automatically* (e.g., `font-size`, `color`).  
+Others *do not inherit* (e.g., `margin`, `padding`, `border`).
+
+Control inheritance:
+- `inherit` → force inheritance  
+- `initial` → reset to default  
+- `unset` → inherit if natural; else initial
+
+### 5. Cascade
+Cascade decides the final applied style using:
+1. **Origin** (author > user > browser)
+2. **Specificity**
+3. **Importance** (`!important`)
+4. **Order of appearance** (later wins)
+
+### Interview Theory Questions (Short Answers)
+
+**Q1: What is CSS specificity?**  
+Specificity is a scoring mechanism that determines which selector’s styles apply when multiple rules target the same element.
+
+**Q2: How does the CSS cascade work?**  
+The cascade uses rule origin, specificity, importance, and order to decide the final applied style.
+
+**Q3: Which CSS properties are inherited?**  
+Text-related properties like `font-family`, `color`, `line-height` generally inherit; box-model properties do not.
+
+**Q4: Difference between `A B` and `A > B`?**  
+`A B` selects *any descendant*.  
+`A > B` selects *only direct children*.
+
+**Q5: What does `!important` do?**  
+It overrides normal specificity rules but is overridden by another `!important` with higher specificity.
+
+### Coding-Based Questions
+
+**1. Style all `<p>` inside `.card` but not nested deeper than 1 level.**
+```css
+.card > p {
+  color: blue;
+}
+```
+
+**2. Highlight input fields with errors (using attribute selector).**
+```css
+input[aria-invalid="true"] {
+  border: 2px solid red;
+}
+```
+
+**3. Style only the first paragraph after an `<h2>`.**
+```css
+h2 + p {
+  font-weight: bold;
+}
+```
+
+**4. Add an icon before every list item using pseudo-element.**
+```css
+li::before {
+  content: "• ";
+  color: orange;
+}
+```
+
+---
+
+This cheat sheet covers selectors, combinators, specificity, inheritance, and cascade with interview prep sections and coding examples.
+

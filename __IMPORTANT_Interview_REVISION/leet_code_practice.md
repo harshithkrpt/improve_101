@@ -1153,3 +1153,106 @@ TimeMap.prototype.get = function(key, timestamp) {
  * var param_2 = obj.get(key,timestamp)
  */
 ```
+
+- reversing the linked list
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    let prev = null;
+    let cur = head;
+
+    while(cur) {
+        const next = cur.next;
+        cur.next = prev;
+        prev = cur;
+        cur = next;
+    }
+
+    return prev;
+};
+```
+
+
+- merge two sorted linked lists
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} list1
+ * @param {ListNode} list2
+ * @return {ListNode}
+ */
+var mergeTwoLists = function(list1, list2) {
+    let head = new ListNode(0, null);
+    let temp = head;
+    let ptr1 = list1, ptr2 = list2;
+    while(ptr1 && ptr2) {
+        if(ptr1.val > ptr2.val) {
+            temp.next = ptr2;
+            ptr2 = ptr2.next;
+        }
+        else {
+            temp.next = ptr1;
+            ptr1 = ptr1.next;
+        }
+
+        temp = temp.next;
+    }
+
+    if(ptr1) {
+        temp.next = ptr1;
+    }
+    else if(ptr2) {
+        temp.next = ptr2;
+    }
+
+    return head.next;
+};
+```
+
+- has cycle in linked list
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var hasCycle = function(head) {
+    let slow = head, fast = head;
+
+    while(fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if(slow == fast) {
+            return true;
+        }
+    }
+
+    return false;
+};
+```
