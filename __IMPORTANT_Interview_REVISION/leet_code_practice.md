@@ -183,7 +183,7 @@ class Solution {
         for(let i=0;i<strs.length;i++) {
             str += `${strs[i].length}#${strs[i]}`;
         }
-        console.log(str);
+       
         return str;
     }
 
@@ -759,7 +759,7 @@ var dailyTemperatures = function(temperatures) {
     const result = new Array(temperatures.length).fill(0);
     for(let i=0;i<temperatures.length;i++) {
         const top = stack.length - 1;
-        if(stack.length === 0 || stack[top] > temperatures[i]) {
+        if(stack.length === 0 || stack[top][0] > temperatures[i]) {
              stack.push([temperatures[i], i]);
         }
     
@@ -1009,6 +1009,246 @@ var searchMatrix = function(matrix, target) {
             l = cmid + 1;
         }
         else {
+            return true;
+        }
+    }
+
+    return false;
+};
+```
+
+- find minimum in rotated sorted array
+
+```js
+    /**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var findMin = function(nums) {  
+    // O(log(n)) // roated sorted array 
+    let l = 0, r = nums.length - 1, res = nums[0];
+
+
+    while(l <= r) {
+        const mid = Math.floor((l + r) / 2);
+        if(nums[l] < nums[r]) {
+            res = Math.min(nums[l], res);
+            break;
+        }
+
+        res = Math.min(res, nums[mid]);
+    
+        if(nums[mid] >= nums[l]) {
+            l = mid + 1;
+        }
+        else {
+            r = mid - 1;
+        }
+        
+    }
+
+    return res;
+};
+```
+
+- search in a rotated sorted array
+
+```js
+/**
+ * @param {number[]} nums
+ * @param {number} target
+ * @return {number}
+ */
+var search = function(nums, target) {
+    let res = -1;
+    let l = 0, r = nums.length - 1;
+
+    while(l <= r) {
+        const m = Math.floor((l + r) / 2 );
+
+        if(nums[m] == target) return m;
+
+        // left half is sorted
+        if(nums[l] <= nums[m]) {
+            if(target >= nums[l] && target < nums[m]) {
+                r = m - 1;
+            }
+            else {
+                l = m + 1;
+            }
+        }
+        else {
+            if (target > nums[m] && target <= nums[r]) {
+                l = m + 1;
+            } else {
+                r = m - 1;
+            }
+        }
+    }
+
+    return -1;
+};
+```
+
+- time based key value store
+
+```js
+
+var TimeMap = function() {
+    this.object = {};
+};
+
+/** 
+ * @param {string} key 
+ * @param {string} value 
+ * @param {number} timestamp
+ * @return {void}
+ */
+TimeMap.prototype.set = function(key, value, timestamp) {
+    if(!this.object[key]) {
+        this.object[key] = [];
+    }
+    
+    this.object[key].push([timestamp, value]);
+
+    return null;
+};
+
+/** 
+ * @param {string} key 
+ * @param {number} timestamp
+ * @return {string}
+ */
+TimeMap.prototype.get = function(key, timestamp) {
+    // search the binary search 
+    const data = this.object[key];
+     if(!data) return "";
+    let l = 0, r = data.length - 1;
+ let res = "";
+    while(l <= r) {
+        let m = Math.floor((l + r) / 2);
+       
+        const [k, v] = data[m];
+        
+        if(k == timestamp) {
+            return v;
+        }
+
+        if(k < timestamp) {
+            res = v;
+            l = m + 1;
+        }
+        else {
+            r = m - 1;
+        }
+    }
+
+    return res;
+};
+
+/** 
+ * Your TimeMap object will be instantiated and called as such:
+ * var obj = new TimeMap()
+ * obj.set(key,value,timestamp)
+ * var param_2 = obj.get(key,timestamp)
+ */
+```
+
+- reversing the linked list
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {ListNode}
+ */
+var reverseList = function(head) {
+    let prev = null;
+    let cur = head;
+
+    while(cur) {
+        const next = cur.next;
+        cur.next = prev;
+        prev = cur;
+        cur = next;
+    }
+
+    return prev;
+};
+```
+
+
+- merge two sorted linked lists
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} list1
+ * @param {ListNode} list2
+ * @return {ListNode}
+ */
+var mergeTwoLists = function(list1, list2) {
+    let head = new ListNode(0, null);
+    let temp = head;
+    let ptr1 = list1, ptr2 = list2;
+    while(ptr1 && ptr2) {
+        if(ptr1.val > ptr2.val) {
+            temp.next = ptr2;
+            ptr2 = ptr2.next;
+        }
+        else {
+            temp.next = ptr1;
+            ptr1 = ptr1.next;
+        }
+
+        temp = temp.next;
+    }
+
+    if(ptr1) {
+        temp.next = ptr1;
+    }
+    else if(ptr2) {
+        temp.next = ptr2;
+    }
+
+    return head.next;
+};
+```
+
+- has cycle in linked list
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val) {
+ *     this.val = val;
+ *     this.next = null;
+ * }
+ */
+
+/**
+ * @param {ListNode} head
+ * @return {boolean}
+ */
+var hasCycle = function(head) {
+    let slow = head, fast = head;
+
+    while(fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if(slow == fast) {
             return true;
         }
     }
