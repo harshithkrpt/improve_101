@@ -1256,3 +1256,106 @@ var hasCycle = function(head) {
     return false;
 };
 ```
+
+
+- reorder linked list
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @return {void} Do not return anything, modify head in-place instead.
+ */
+var reorderList = function(head) {
+    if(!head || !head.next) return;
+
+    let slow = head;
+    let fast = head;
+    while(fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+
+    let ptr = slow.next;
+    slow.next = null;
+   
+    // now reverse the linked list
+    let newHead = null;
+    while(ptr) {
+        let next = ptr.next;
+        ptr.next = newHead;
+        newHead = ptr;
+        ptr = next;
+    }
+
+    // merge the head with new reversed linked list 
+    let dummyNode = new ListNode(0, null);
+    temp = dummyNode;
+    let takeFirst = true;
+    while(head && newHead) {
+        if(takeFirst) {
+            temp.next = head;
+            head = head.next;
+        }
+        else {
+            temp.next = newHead;
+            newHead = newHead.next;
+        }
+
+        temp = temp.next;
+        takeFirst = !takeFirst;
+    }   
+
+    if(head) {
+        temp.next = head;
+    }
+
+    if(newHead)
+    {
+        temp.next = newHead;
+    }
+};
+```
+
+- remove nth node from end
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} head
+ * @param {number} n
+ * @return {ListNode}
+ */
+var removeNthFromEnd = function(head, n) {
+    let c = 0;
+    let dummy = new ListNode(0, head);
+    let temp = head;
+    while(c != n) {
+        temp = temp.next;
+        c++;
+    }
+
+    let s = dummy;
+    while(temp) {
+        s = s.next;
+        temp = temp.next;
+    }
+
+    s.next = s.next.next;
+    
+    
+    return dummy.next;
+};
+```
