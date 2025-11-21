@@ -1359,3 +1359,78 @@ var removeNthFromEnd = function(head, n) {
     return dummy.next;
 };
 ```
+
+
+- copy linked list with a random list
+
+```js
+/**
+ * // Definition for a _Node.
+ * function _Node(val, next, random) {
+ *    this.val = val;
+ *    this.next = next;
+ *    this.random = random;
+ * };
+ */
+
+/**
+ * @param {_Node} head
+ * @return {_Node}
+ */
+var copyRandomList = function(head) {
+    const map = new Map();
+    map.set(null, null);
+    let cur = head;
+    while(cur) {
+        map.set(cur, new Node(cur.val))
+        cur = cur.next;
+    }
+
+    cur = head;
+    while(cur) {
+        let copy = map.get(cur);
+        copy.next = map.get(cur.next);
+        copy.random = map.get(cur.random);
+        cur = cur.next;
+    }
+
+    return map.get(head);
+};
+```
+
+- Add Two Numbers
+
+```js
+/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+/**
+ * @param {ListNode} l1
+ * @param {ListNode} l2
+ * @return {ListNode}
+ */
+var addTwoNumbers = function(l1, l2) {
+    let dummy = new ListNode();
+    let carry = 0;
+    let cur = dummy;
+    while(l1 || l2 || carry) {
+        let v1 = l1 ? l1.val : 0;
+        let v2 = l2 ? l2.val : 0;
+
+        let val = v1 + v2 + carry;
+        carry = Math.floor(val / 10);
+        val = val % 10;
+        cur.next = new ListNode(val);
+
+        cur = cur.next;
+        l1 = l1 ? l1.next : null;
+        l2 = l2 ? l2.next : null;
+    }
+
+    return dummy.next;
+};
+```
