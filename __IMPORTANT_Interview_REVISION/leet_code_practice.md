@@ -465,6 +465,32 @@ var maxSubArray = function(nums) {
 };
 ```
 
+- best time to buy and sell stocks 
+
+```js
+/**
+ * @param {number[]} prices
+ * @return {number}
+ */
+var maxProfit = function(prices) {
+    let maxP = 0;
+    let l = 0;
+    let r = 0;
+
+    while(r < prices.length) {
+        if(prices[l] < prices[r]) {
+            maxP = Math.max(maxP, prices[r] - prices[l]);
+        }
+        else {
+            l = r;
+        }
+        r++;
+    }
+
+    return maxP;
+};
+```
+
 - Longest Substring Without Repeating Characters
 
 ```js
@@ -488,7 +514,7 @@ var lengthOfLongestSubstring = function(s) {
             i++;
         }
         else {
-             set.add(s[j]);
+            set.add(s[j]);
             j++;
             maxLength = Math.max(maxLength, set.size);
         }
@@ -747,6 +773,43 @@ var evalRPN = function(tokens) {
 };  
 ```
 
+- generate parenthesis
+
+```js
+/**
+ * @param {number} n
+ * @return {string[]}
+ */
+var generateParenthesis = function(n) {
+    let output = [];
+    let stack = [];
+    
+
+    const backtracking = (open, closed) => {
+        if(open === closed && n === open) {
+            output.push(stack.join(""));
+            return;
+        }
+
+        if(open < n) {
+            stack.push('(');
+            backtracking(open + 1, closed);   
+            stack.pop();
+        }
+        
+        if(open > closed) {
+            stack.push(')');
+            backtracking(open, closed + 1);
+            stack.pop();
+        }
+    }
+
+    backtracking(0,0);
+
+    return output;
+};
+```
+
 - daily temperatures
 
 ```js
@@ -755,25 +818,25 @@ var evalRPN = function(tokens) {
  * @return {number[]}
  */
 var dailyTemperatures = function(temperatures) {
-    const stack = [];
+    const stack = []; // [temp, index]
     const result = new Array(temperatures.length).fill(0);
-    for(let i=0;i<temperatures.length;i++) {
-        const top = stack.length - 1;
-        if(stack.length === 0 || stack[top][0] > temperatures[i]) {
-             stack.push([temperatures[i], i]);
-        }
-    
+
+    for (let i = 0; i < temperatures.length; i++) {
         const cT = temperatures[i];
-        while(stack.length > 0 && cT > stack[stack.length-1][0]) {
-            const popped = stack.pop();
-            result[popped[1]] = i - popped[1];
+
+        // First: resolve all smaller temps before current
+        while (stack.length > 0 && cT > stack[stack.length - 1][0]) {
+            const [, idx] = stack.pop();
+            result[idx] = i - idx;
         }
 
-        stack.push([temperatures[i], i]);
+        // Then push the current one
+        stack.push([cT, i]);
     }
 
     return result;
 };
+
 ```
 
 
@@ -1284,7 +1347,6 @@ var reorderList = function(head) {
 
     let ptr = slow.next;
     slow.next = null;
-   
     // now reverse the linked list
     let newHead = null;
     while(ptr) {
@@ -1359,7 +1421,6 @@ var removeNthFromEnd = function(head, n) {
     return dummy.next;
 };
 ```
-
 
 - copy linked list with a random list
 
