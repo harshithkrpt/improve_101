@@ -1434,3 +1434,121 @@ var addTwoNumbers = function(l1, l2) {
     return dummy.next;
 };
 ```
+
+
+- find the duplicate numbers (floys algorithm using linked list cycle detection)
+
+```js
+/**
+ * @param {number[]} nums
+ * @return {number}
+ */
+var findDuplicate = function(nums) {
+    // Floyds Tortoise and Hare Problem  
+    let slow = 0, fast = 0;
+
+    while(true) {
+        slow = nums[slow]
+        fast = nums[nums[fast]]
+        if (slow == fast) {
+            break;
+        }
+    }
+
+    let slow2 = 0;
+    while(true) {
+        slow = nums[slow]
+        slow2 = nums[slow2]
+        if(slow === slow2) {
+            return slow;
+        }
+    }
+};
+```
+
+-- lru cache
+
+```js
+class Node {
+    constructor(key, val) {
+        this.key = key;
+        this.val = val;
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+/**
+ * @param {number} capacity
+ */
+var LRUCache = function(capacity) {
+    this.capacity = capacity;
+    this.cache = new Map();
+    this.start = new Node(0,0);
+    this.end = new Node(0,0);
+    this.start.next = this.end;
+    this.end.prev = this.start;
+};
+
+LRUCache.prototype._remove = function(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+};
+
+LRUCache.prototype._insert = function(node) {
+    node.prev = this.end.prev;
+    node.next = this.end;
+    this.end.prev.next = node;
+    this.end.prev = node;
+};
+
+
+/** 
+ * @param {number} key
+ * @return {number}
+ */
+LRUCache.prototype.get = function(key) {
+    // check if the key is present in map
+    const node = this.cache.get(key)
+    if(!node) {
+        return -1;
+    }
+
+    // delete the key 
+    this._remove(node);
+    // insert the key
+    this._insert(node);
+    return node.val;
+    
+};
+
+/** 
+ * @param {number} key 
+ * @param {number} value
+ * @return {void}
+ */
+LRUCache.prototype.put = function(key, value) {
+    if(this.cache.has(key)) {
+        const node = this.cache.get(key);
+        node.val = value;
+        this._remove(node);
+        this._insert(node);
+        return;
+    }
+    let node = new Node(key, value);
+    this.cache.set(key, node);
+    this._insert(node);
+    if(this.cache.size > this.capacity) {
+        let lru = this.start.next;
+        this._remove(lru);
+        this.cache.delete(lru.key);
+    }
+};
+
+/** 
+ * Your LRUCache object will be instantiated and called as such:
+ * var obj = new LRUCache(capacity)
+ * var param_1 = obj.get(key)
+ * obj.put(key,value)
+ */
+```
