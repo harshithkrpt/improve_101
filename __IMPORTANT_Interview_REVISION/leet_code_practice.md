@@ -2030,3 +2030,105 @@ class Solution {
     }
 }
 ```
+
+
+- Kth Smallest Element In a BST
+
+- iterative dfs and maintain total nodes visited and for k print the value
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @param {number} k
+     * @return {number}
+     */
+    kthSmallest(root, k) {
+        let n = 0;
+        let cur = root;
+        let stack = [];
+        while(cur || stack) {
+            while(cur) {
+                stack.push(cur);
+                cur = cur.left;
+            }
+            cur = stack.pop();
+            n += 1;
+            if(n == k) {
+                return cur.val;
+            }
+            cur = cur.right;
+        }
+    }
+}
+
+```
+
+- Construct Binary Tree From Preorder & Inorder
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    constructor() {
+        this.indexes = {};   // value -> index in inorder
+        this.preIndex = 0;   // pointer in preorder
+    }
+
+    dfs(preorder, left, right) {
+        // left & right are bounds in inorder array
+        if (left > right) return null;
+
+        // pick current root from preorder
+        const rootVal = preorder[this.preIndex++];
+        const root = new TreeNode(rootVal);
+
+        // find root position in inorder in O(1)
+        const mid = this.indexes[rootVal];
+
+        // build left and right subtrees
+        root.left = this.dfs(preorder, left, mid - 1);
+        root.right = this.dfs(preorder, mid + 1, right);
+
+        return root;
+    }
+
+    /**
+     * @param {number[]} preorder
+     * @param {number[]} inorder
+     * @return {TreeNode}
+     */
+    buildTree(preorder, inorder) {
+        this.preIndex = 0;
+        this.indexes = {};
+
+        // map each value to its index in inorder
+        inorder.forEach((v, index) => {
+            this.indexes[v] = index;
+        });
+
+        return this.dfs(preorder, 0, inorder.length - 1);
+    }
+}
+
+```
