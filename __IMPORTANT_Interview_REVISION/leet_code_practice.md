@@ -1613,3 +1613,202 @@ LRUCache.prototype.put = function(key, value) {
  * obj.put(key,value)
  */
 ```
+
+- Invert Binary Tree
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {TreeNode}
+     */
+    invertTree(root) {
+        if(!root) return null;
+        
+        let temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+
+        this.invertTree(root.left);
+        this.invertTree(root.right);
+
+
+        return root;
+    }
+}
+```
+
+- max depth of a tree
+
+```js
+class Solution {
+    maxDepth(root) {
+        if (!root) return 0;
+        
+        const leftDepth = this.maxDepth(root.left);
+        const rightDepth = this.maxDepth(root.right);
+        
+        return 1 + Math.max(leftDepth, rightDepth);
+    }
+}
+
+```
+
+- same above solution but level order traversal 
+
+```js
+class Solution {
+    maxDepth(root) {
+        if(!root) return 0;
+        let queue = [root];
+        let level = 0;
+        while(queue.length) {
+            let len = queue.length;
+            for(let i=0;i<len;i++) {
+                const cur = queue.shift();
+                if(cur.left) {
+                    queue.push(cur.left);
+                }
+                if(cur.right) {
+                    queur.push(cur.right);
+                }
+            }
+
+            level += 1;
+        }
+    
+        return level;
+    }
+}
+```
+
+
+- diameter of binary tree
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {number}
+     */
+    diameterOfBinaryTree(root) {
+        if(!root) return 0;
+
+        let diameter = 0;
+
+        const depth = (ptr) => {
+            if(!ptr) return 0;
+
+            let lDp = depth(ptr.left);
+            let rDp = depth(ptr.right);
+
+            diameter = Math.max(lDp + rDp , diameter);
+
+            return 1 + Math.max(lDp, rDp);
+        }
+
+        depth(root, 0);
+        return diameter;
+    }
+}
+
+```
+
+
+- is binary tree balanced or not
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    
+
+    /**
+     * @param {TreeNode} root
+     * @return {boolean}
+     */
+    isBalanced(root) {
+        let glob = true;
+
+        const depth = (ptr) => {
+            if(!ptr) return 0;
+            let left = depth(ptr.left);
+            let right = depth(ptr.right);
+
+            if(Math.abs(left - right) > 1) {
+                glob = false;
+            }
+
+            return 1 + Math.max(left, right);
+        }
+
+        depth(root);
+       
+        return glob;
+    }
+}
+
+```
+
+- is same tree
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} p
+     * @param {TreeNode} q
+     * @return {boolean}
+     */
+    isSameTree(p, q) {
+        if(!p && !q) return true;
+        if(!p || !q || p.val != q.val) return false;
+
+        let leftEqual = this.isSameTree(p.left, q.left);
+        let rightEqual = this.isSameTree(p.right, q.right);
+        return leftEqual && rightEqual;
+    }
+}
+
+```
