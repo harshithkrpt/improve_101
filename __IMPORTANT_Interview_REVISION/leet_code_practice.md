@@ -1812,3 +1812,221 @@ class Solution {
 }
 
 ```
+
+- lowest common ancestor
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @param {TreeNode} p
+     * @param {TreeNode} q
+     * @return {TreeNode}
+     */
+    lowestCommonAncestor(root, p, q) {
+        let cur = root;
+
+        while(cur) {
+            if(p.val < cur.val && q.val < cur.val) {
+                cur = cur.left;
+            }
+            else if(p.val > cur.val && q.val > cur.val) {
+                cur = cur.right;
+            }
+            else {
+                return cur;
+            }
+        }
+    }
+}
+
+```
+
+- binary tree level order traversal
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {number[][]}
+     */
+    levelOrder(root) {
+        if(!root) return [];
+        const res = [];
+        let q = [root];
+        while (q.length) {
+            const l = q.length;
+            const lres = [];
+            for(let i=0;i<l;i++) {
+                let node = q.shift();
+                lres.push(node.val);
+                node.left ? q.push(node.left) : null;
+                node.right ? q.push(node.right): null;
+            }
+            res.push(lres);
+        }
+
+        return res;
+    }
+}
+```
+
+
+- good nodes in binary tree
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {number}
+     */
+    goodNodes(root) {
+        if(!root) return 0;
+        let count = 0;
+        const dfs = (cur, max) => {
+            const node = cur;
+            if(node.val >= max) {
+                count++;
+                max = node.val;
+            }           
+
+            cur.left ? dfs(cur.left, max) : null;
+            cur.right ? dfs(cur.right, max) : null;
+        }
+
+        dfs(root, -Infinity);
+
+        return count;
+    }
+}
+
+```
+
+- is a valid binary search tree
+
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {boolean}
+     */
+    isValidBST(root) {
+        // in order adding new element value should be grater >=
+        if(!root) return true;
+        const order = [];
+        let isValid = true;
+        const dfs = (cur) => {
+            if(!cur || !isValid) return;
+            // check validity
+            cur.left && dfs(cur.left);
+            if(order.length == 0 || order[order.length - 1] < cur.val) {
+                order.push(cur.val);
+            }
+            else {
+                isValid = false;
+                return;
+            }
+            
+            cur.right && dfs(cur.right);
+        };
+
+        dfs(root);
+        return isValid;
+    }
+}
+
+```
+
+
+### Alternative approach for valid bst maintaining a left most valid , right most valid boundaries
+
+A node in a BST isn’t checked only against its parent, but against the **entire chain of ancestors**.  
+Each recursive call carries a value-range `(left, right)` that the current node must fit inside.
+
+- When moving **left**, the `right` bound becomes `node.val`.
+- When moving **right**, the `left` bound becomes `node.val`.
+
+If any node breaks its allowed range, the whole tree fails the BST test.
+
+---
+
+##### Time Complexity
+
+`O(n)` — every node is visited exactly once,  
+and the bound checks (`val > left` and `val < right`) are constant-time.
+
+---
+
+##### Space Complexity
+
+`O(h)` — where `h` is the height of the tree.
+
+This comes from the recursion stack:
+
+- **Balanced tree:** `h = log n` → space is `O(log n)`
+- **Skewed tree (like a linked list):** `h = n` → space is `O(n)`
+
+No extra data structures are used beyond the recursion stack.
+
+---
+
+```js
+class Solution {
+    isValidBST(root) {
+        const helper = (node, left = -Infinity, right = Infinity) => {
+            if (!node) return true;
+            if (!(node.val < right && node.val > left)) return false;
+
+            return helper(node.left, left, node.val) &&
+                   helper(node.right, node.val, right);
+        };
+
+        return helper(root);
+    }
+}
+```
