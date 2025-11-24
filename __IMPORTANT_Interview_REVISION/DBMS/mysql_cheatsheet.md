@@ -2557,3 +2557,591 @@ Goes beyond replication to scale writes and distribute data.
 **Logical vs Physical Backups**  
 Understanding how backups interact with binlogs and replication recovery.
 
+# MySQL Backup & Restore — Cheatsheet
+
+> **Previewable + Downloadable Link:** Use the top-right corner to preview or download this cheatsheet.
+
+---
+
+## I. 💡 Basic Details of MySQL Backup & Restore
+
+**Definition / Purpose:** Procedures and tools to create copies of MySQL data and metadata so you can recover from data loss, corruption, accidental deletes, or migrate data between servers. Backups can be *logical* (SQL text) or *physical* (files and binary data). Restoration is the opposite process — putting the data back into a working server.
+
+**History & Relevance:** MySQL has long supported logical export tools (`mysqldump`), faster parallel tools (`mysqlpump`), and physical-level approaches (filesystem snapshots, Percona XtraBackup). In production, combining full backups with point-in-time recovery (PITR) using binary logs (`binlogs`) is the industry standard to minimize data loss.
+
+
+## II. 🧠 Important Concepts to Remember (5–7)
+
+1. **Logical vs Physical Backups**
+   - *Logical*: SQL statements representing schema + data (e.g., `mysqldump`, `mysqlpump`). Portable, readable, slow for large datasets.
+   - *Physical*: Raw copy of InnoDB files, ibdata, ib_logfiles, or filesystem snapshot (LVM, ZFS) and hot backup tools (Percona XtraBackup). Fast, exact, sensitive to server/innodb versions.
+   - _Analogy:_ Logical backup is a cookbook recipe; physical backup is the finished cake.
+
+2. **Consistency / Crash-safe backups**
+   - Consistent snapshot requires either flushing and locking tables (for logical backups) or a crash-consistent filesystem snapshot or an online backup tool that understands InnoDB (XtraBackup). For multi-table transactions, ensure transaction consistency (use `--single-transaction` for InnoDB with `mysqldump`).
+
+3. **Point-in-Time Recovery (PITR)**
+   - Achieved by applying binary logs (binlogs) to a base backup. You restore the full backup and then replay binlog events up to a precise timestamp or binlog position.
+   - Keep `binlog_format` and retention policies aligned with PITR plans.
+
+4. **Binary Logs (binlogs)**
+   - Binlogs record statements or row changes (depending on `binlog_format`). They enable replication and PITR. Must be rotated and retained long enough for recovery.
+
+5. **Hot vs Cold Backups**
+   - *Cold:* Server shut down, copy files — simplest & consistent but requires downtime.
+   - *Hot:* Taken while server runs — requires tools or careful locking to ensure consistency.
+
+6. **Incremental & Differential Strategies**
+   - Physical incremental backups (e.g., XtraBackup incremental) store changed pages between backups. Logical incremental is harder — typically achieved via binlogs.
+
+7. **Restore Validation & Automation**
+   - Always practice restores in a staging environment. Automate backups, transfers, verification (checksum), and alerting.
+
+
+## III. 📝 Theory — Most Asked Questions (Interview Prep)
+
+**Q1: What's the difference between `mysqldump` and `mysqlpump`?**
+**A:** `mysqldump` is the classic logical dumper that outputs SQL; it’s stable, mature, and supports many options. `mysqlpump` is a newer logical dump tool designed for parallelism (faster on multi-core systems) and better default filtering. Both produce logical backups; choose `mysqlpump` for faster large logical exports, `mysqldump` for compatibility and simplicity.
+
+**Q2: How does Point-in-Time Recovery work?**
+**A:** Take a full backup (logical or physical). Ensure binary logging is enabled and collect the binlogs generated after the backup. To recover, restore the full backup, then use `mysqlbinlog` to replay events from the binlog(s) up to the desired timestamp or position.
+
+**Q3: What is `--single-transaction` in `mysqldump`?**
+**A:** `--single-transaction` issues a consistent read (REPEATABLE READ snapshot) for InnoDB tables, avoiding table locks and allowing an online logical backup. It does not work for non-transactional MyISAM tables — you must lock those.
+
+**Q4: When should you use a physical backup over logical?**
+**A:** Use physical backups for very large datasets where logical dumps are too slow or where you need exact binary-level recovery (e.g., preserving internal metadata, large BLOBs). Use logical when portability and human-readable SQL are priorities.
+
+**Q5: How do you ensure backups are consistent when using replication?**
+**A:** Stop or coordinate replication, note the binary log coordinates (or GTID) at backup time, and include them with the backup. This lets you rejoin replicas or perform PITR consistently. With GTID enabled, record GTID set for easier resynchronization.
+
+
+## IV. 💻 Coding / Practical — Most Asked Questions (Commands & Steps)
+
+### 1) `mysqldump` — basic full logical dump
+```bash
+mysqldump --single-transaction --quick --routines --events --triggers -u backup_user -p my_database > my_database.sql
+```
+- `--single-transaction`: consistent InnoDB snapshot.
+- `--quick`: stream rows to avoid memory bloat.
+- `--routines`/`--events`/`--triggers`: include stored objects.
+
+
+### 2) `mysqlpump` — parallel logical dump
+```bash
+mysqlpump --exclude-databases=mysql,sys --users --parallel-schemas=4 -u backup_user -p > dump.sql
+```
+- Use `--parallel-schemas` to speed up multi-schema exports.
+
+
+### 3) Physical backup with Percona XtraBackup (high-level)
+- Take a hot backup:
+```bash
+xtrabackup --backup --target-dir=/backups/xtrabackup/2025-11-24 --datadir=/var/lib/mysql
+xtrabackup --prepare --target-dir=/backups/xtrabackup/2025-11-24
+```
+- Restore by copying prepared files back to `datadir` and starting server.
+- XtraBackup preserves InnoDB online consistency without server downtime.
+
+
+### 4) Binary log based PITR (extract & apply)
+- Identify binlogs and start position (or timestamp) `binlog.000012` and position `12345`.
+- Create SQL from binlogs:
+```bash
+mysqlbinlog --start-position=12345 --stop-datetime='2025-11-24 15:30:00' /var/lib/mysql/binlog.000012 > pitr.sql
+```
+- Apply to restored server:
+```bash
+mysql -u root -p restored_db < pitr.sql
+```
+- Or pipe directly: `mysqlbinlog ... | mysql -u root -p`.
+
+
+### 5) Restore from `mysqldump`
+```bash
+mysql -u root -p my_database < my_database.sql
+```
+- For large dumps, consider `pv` and `gzip` streaming to monitor and compress:
+```bash
+pv my_database.sql | mysql -u root -p my_database
+# or compressed
+zcat my_database.sql.gz | pv | mysql -u root -p my_database
+```
+
+
+### 6) Useful tips & flags
+- `--single-transaction` + `--quick` for large InnoDB dumps.
+- `--master-data=2` with `mysqldump` to embed binlog coordinates for replication/PITR.
+- `--set-gtid-purged=ON|OFF|AUTO` to control GTID info in dumps when GTID is enabled.
+- Keep binlog retention (`expire_logs_days` or `binlog_expire_logs_seconds`) long enough for restores.
+
+
+## V. 🚀 Follow-Up Topics to Learn
+
+1. **Percona XtraBackup internals & incremental restore workflows** — good for mastering physical incremental backups and fast restores without downtime.
+2. **GTID-based replication and recovery** — simplifies replica rejoin and PITR with global transaction identifiers.
+3. **Backup orchestration & verification (backup-utils, scripts, cron, monitoring)** — automating, testing, and verifying daily backups is the difference between an idea and a reliable system.
+4. **Cloud-native backups (RDS snapshots, Google Cloud SQL backups)** — if you run DBs in managed services, learn their snapshot semantics and PITR limits.
+5. **Disaster Recovery Planning (RTO/RPO, runbooks, failover testing)** — tie backups into business requirements for recovery time/objectives.
+
+
+---
+
+### Quick Checklist (Daily/Weekly)
+- [ ] Verify successful backup jobs and sizes
+- [ ] Check latest binlog files and retention policy
+- [ ] Test a restore periodically in staging
+- [ ] Archive backups offsite and verify integrity
+- [ ] Rotate/retire old backups according to policy
+
+
+---
+
+*Cheatsheet created for quick interview prep and practical use. Keep automation, verification, and regular restore drills as your true backup insurance.*
+
+
+# MySQL Security Cheatsheet
+
+## I. Basic Details of MySQL Security
+MySQL Security covers how access is granted, controlled, and protected within a MySQL server. Its purpose is to ensure that only authorized users perform allowed actions. Over time, MySQL introduced roles, better authentication plugins, and fine‑grained privileges to modernize database security. It matters because databases often hold sensitive, business-critical information.
+
+## II. Important Concepts to Remember
+1. **Users & Authentication**  
+   A MySQL user is defined by both username and host. Authentication plugins (like `caching_sha2_password`) govern how MySQL validates identities.
+
+2. **Roles**  
+   Roles bundle privileges into reusable profiles, simplifying security management.
+
+3. **GRANT & REVOKE**  
+   These statements assign or remove privileges like SELECT or INSERT at different levels (global, database, table, or column).
+
+4. **Least Privilege**  
+   Grant only what is necessary. Over-granting is a security hazard.
+
+5. **SQL Injection Prevention**  
+   SQL injection happens when unvalidated input becomes executable SQL. Prepared statements prevent this by parameterizing inputs.
+
+6. **Privilege Types**  
+   MySQL privileges control actions like reading data, modifying schemas, or administering the server.
+
+7. **Audit & Logging**  
+   Logs help track suspicious activity and validate compliance.
+
+## III. Theory Most Asked Questions (Interview Prep)
+
+**Q: What identifies a MySQL user?**  
+A: A combination of username and host, such as `'alice'@'localhost'`.
+
+**Q: How do roles help in MySQL?**  
+A: Roles group privileges so administrators can apply sets of permissions consistently.
+
+**Q: Difference between GRANT and REVOKE?**  
+A: GRANT assigns privileges while REVOKE removes them.
+
+**Q: What is the principle of least privilege?**  
+A: Grant only the minimum permissions a user needs to do their job, reducing damage from misuse or compromise.
+
+**Q: How does MySQL mitigate SQL injection?**  
+A: Use prepared statements, parameter binding, minimal dynamic SQL, and strict validation.
+
+**Q: What is the purpose of authentication plugins?**  
+A: They control how MySQL validates users, such as via SHA-256 hashing.
+
+## IV. Coding/Practical Most Asked Questions (Interview Prep)
+
+**Q: Create a user and grant SELECT privileges on a database.**  
+```sql
+CREATE USER 'appuser'@'%' IDENTIFIED BY 'strongpassword';
+GRANT SELECT ON mydb.* TO 'appuser'@'%';
+```
+Optimal approach: grant only the minimal required privilege.
+
+**Q: Create a role and assign it to a user.**  
+```sql
+CREATE ROLE reporting_role;
+GRANT SELECT ON reports.* TO reporting_role;
+GRANT reporting_role TO 'analyst'@'%';
+SET DEFAULT ROLE reporting_role TO 'analyst'@'%';
+```
+Use roles for scalable privilege management.
+
+**Q: Revoke insert access from a user.**  
+```sql
+REVOKE INSERT ON mydb.* FROM 'writer'@'%';
+```
+Revoke unnecessary privileges to comply with least privilege.
+
+**Q: Prevent SQL Injection in code.**  
+Use parameterized queries such as:
+```python
+cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+```
+Parameter binding ensures user input isn’t executed as SQL.
+
+## V. Follow-Up Topics to Learn
+
+1. **MySQL Auditing**  
+   Helps track changes and suspicious behavior.
+
+2. **Encryption (TLS + Data-at-Rest)**  
+   Adds protection for data in motion and on disk.
+
+3. **MySQL Firewall / WAF Concepts**  
+   Enhances security against injection and malicious patterns.
+
+4. **Advanced Authentication (LDAP, PAM)**  
+   Integrates MySQL with enterprise identity systems.
+
+5. **Security Architecture & Compliance**  
+   Understanding broader system design strengthens database protection.
+
+
+# MySQL Stored Data Structures Cheatsheet
+
+## I. Basic Details of Stored Data Structures
+MySQL (especially InnoDB) relies on several foundational on-disk and in-memory data structures that make queries fast, consistent, and crash‑safe. These structures evolved from decades of database research, blending B-tree indexing, write-ahead logging, and multiversion concurrency control.
+
+## II. Important Concepts to Remember
+
+### 1. B-Tree Layout
+A B-tree is a balanced tree structure storing sorted key-value pairs. In InnoDB, secondary indexes use B+Tree structures where leaf nodes hold index entries pointing to primary keys. Think of it like an ordered bookshelf where every shelf is linked and balanced to guarantee quick search.
+
+### 2. Clustered Index Organization
+InnoDB stores table rows in the primary key order. This is the clustered index. All secondary indexes reference the primary key rather than the physical location. It’s like a master table of contents that every secondary note refers to.
+
+### 3. Hash Pages (Adaptive Hash Index)
+InnoDB observes frequently accessed B-tree pages and builds an in-memory hash index on top of them. This is not persisted; it's a performance-sidecar that creates a shortcut when the engine notices repetition.
+
+### 4. Undo Segments
+Undo segments store BEFORE images of modified rows. They allow rollbacks and enable MVCC (Multi-Version Concurrency Control). Imagine these as time-travel notes that let older transactions see previous versions of rows.
+
+### 5. Redo Logs
+Redo logs store AFTER images of changes in a write-ahead log (WAL). Even if the server crashes, redo logs are replayed to make sure committed transactions are not lost. They are like the black box flight recorder.
+
+### 6. Buffer Pool Pages
+Data and index pages read from disk are cached in the buffer pool. Pages are 16 KB by default. These pages include data pages, index pages, undo pages, and more.
+
+### 7. Page Types & Organization
+InnoDB stores data in units called pages inside data files. Pages contain slots of records, directory entries, and metadata. The engine organizes pages into extents and segments.
+
+## III. Theory Most Asked Questions (Interview Prep)
+
+### Q1. What is a B+Tree and why does InnoDB use it?
+A B+Tree is a balanced search tree where all values are stored at leaf nodes. InnoDB uses it because it guarantees log-time lookups, efficient range scans, and predictable disk I/O patterns.
+
+### Q2. What is a clustered index in InnoDB?
+A clustered index is the primary index where actual row data is stored. Rows are physically arranged according to the primary key, making primary-key lookups very fast.
+
+### Q3. How do undo segments support MVCC?
+Undo segments store previous versions of rows. Readers access undo records to view the snapshot of data that existed when their transaction began.
+
+### Q4. What is the purpose of the redo log?
+The redo log ensures durability. After committing a transaction, changes are written to the redo log so that recovery can replay them after a crash.
+
+### Q5. What are hash pages and how do they help performance?
+Adaptive Hash Index (AHI) pages are in-memory hash structures built automatically based on frequent B-tree lookups. They make repeated lookups much faster.
+
+### Q6. How does InnoDB organize data files internally?
+Files are divided into pages (16 KB), grouped into extents (64 pages), which belong to segments representing indexes or rollback segments.
+
+## IV. Coding/Practical Most Asked Questions (Interview Prep)
+
+### Q1. How to check buffer pool read/write stats?
+Use:
+```sql
+SHOW ENGINE INNODB STATUS;
+```
+Approach: Inspect buffer pool hit rate to understand caching effectiveness.
+
+### Q2. How to identify undo log size and history length?
+```sql
+SHOW ENGINE INNODB STATUS;
+```
+Approach: Look for “History list length”—large values may indicate long-running transactions.
+
+### Q3. How to inspect redo log configuration?
+```sql
+SHOW VARIABLES LIKE 'innodb_log%';
+```
+Approach: Tune log file size and buffer size depending on workload.
+
+### Q4. How to view index page structure?
+Use `innodb_page_inspector` plugin:
+```sql
+SELECT * FROM INFORMATION_SCHEMA.INNODB_SYS_INDEXES;
+```
+Approach: Inspect B-tree internals for index tuning diagnostics.
+
+## V. Follow-Up Topics to Learn
+
+### 1. InnoDB MVCC Internals
+Deep understanding clarifies how locks, snapshots, and undo logs dance together.
+
+### 2. Transaction Isolation Levels
+Enhances reasoning about phantom reads, repeatable reads, and serialization costs.
+
+### 3. Log-structured Systems (LSM Trees)
+Contrast B-trees with LSM-based engines like RocksDB to expand storage‑engine intuition.
+
+### 4. Buffer Pool Algorithms (LRU, Flush List)
+Helps tune memory-heavy workloads and reduce disk pressure.
+
+### 5. Binlog Architecture
+Important for replication, point-in-time recovery, and high availability setup.
+
+# MySQL — JSON Cheatsheet
+
+**Previewable + Downloadable Link is available in the top-right corner.**
+
+---
+
+## I. 💡 Basic Details of JSON in MySQL
+**What it is:** MySQL provides a native `JSON` column type (binary JSON internally) to store JSON documents efficiently. It supports JSON-specific functions (e.g., `JSON_EXTRACT`, `JSON_SET`), automatic validation on write, and optimized storage.
+
+**Purpose:** Let relational tables store semi-structured data while enabling querying, indexing and manipulation of those JSON documents without leaving SQL.
+
+**History & relevance:** Introduced in MySQL 5.7 (2015) and refined in 8.0 with better functions, indexes and performance improvements. Useful when some fields are schemaless or variable between rows (events, metadata, configs).
+
+---
+
+## II. 🧠 Important Concepts to Remember
+1. **`JSON` column = binary JSON storage**
+   - Behind the scenes MySQL stores JSON in a compact binary format (not plain text), which speeds parsing and equality tests.
+   - Analogy: Think of `JSON` = a compressed suitcase for nested objects — faster to open and access specific items than rummaging through raw text.
+
+2. **Paths and JSON path syntax**
+   - Use `$.key`, `$.arr[0]`, `$.a.b` and wildcard `$.items[*]`. Strings in paths use double quotes when keys have special characters: `$."weird-key"`.
+   - Path selects values inside the JSON document.
+
+3. **Common JSON functions**
+   - `JSON_EXTRACT(json_doc, path, ...)` — pull value(s). Returns JSON value(s).
+   - `JSON_UNQUOTE(JSON_EXTRACT(...))` — get scalar string/number without JSON quoting.
+   - `JSON_SET`, `JSON_REPLACE`, `JSON_REMOVE` — mutate a JSON doc returning a new JSON document.
+   - `JSON_ARRAY`, `JSON_OBJECT` — construct JSON values.
+   - `JSON_CONTAINS`, `JSON_CONTAINS_PATH` — test presence or containment.
+   - `->` and `->>` operators: `col->'$.a'` returns JSON, `col->> '$.a'` returns unquoted scalar.
+
+4. **Indexing JSON: functional indexes & virtual/generated columns**
+   - MySQL cannot index arbitrary JSON fragments directly. Create a generated (virtual or stored) column that extracts the JSON value, then index that column.
+   - Example: `ALTER TABLE t ADD COLUMN status VARCHAR(20) GENERATED ALWAYS AS (json_unquote(json_extract(payload, '$.status'))) VIRTUAL; CREATE INDEX idx_status ON t(status);`
+   - Choose `STORED` if extraction is expensive or you need to index large data reliably; `VIRTUAL` saves storage but may compute at runtime.
+
+5. **Data types and conversions**
+   - JSON values have types (object, array, number, string, boolean, null). When extracting into SQL columns, convert to compatible SQL types (e.g., `CAST(... AS UNSIGNED)` ) or use `->>` to get string and then cast.
+
+6. **Performance considerations**
+   - Avoid heavy use of `JSON_EXTRACT` on large datasets without indexes. Prefer indexing extracted fields or normalizing hot query fields into native columns.
+   - Use `INVISIBLE` or selective indexing only on fields used frequently in WHERE or JOIN.
+
+7. **Validation & storage caps**
+   - MySQL enforces valid JSON on write. JSON columns are limited by row size and general MySQL limits — extremely large JSON may hit `max_allowed_packet` or row-size limits.
+
+---
+
+## III. 📝 Theory — Most Asked Questions (Interview Prep)
+
+**Q1: What are the advantages of using MySQL's `JSON` type over `TEXT`?**
+**Model answer:** `JSON` stores data in a compact binary format and validates JSON on write. It provides JSON-specific functions and operators for easy extraction and modification, and attains better performance for structured access compared to plain `TEXT` which requires parsing on every query.
+
+**Q2: How do you index a key inside a JSON document for fast lookups?**
+**Model answer:** Create a generated column that extracts the JSON key (using `JSON_UNQUOTE(JSON_EXTRACT(...))` or `->>`), make it the correct SQL type, then create an index on that generated column. If you need persistence or better performance, use `STORED` generated columns.
+
+**Q3: Explain difference between `->` and `->>` operators.**
+**Model answer:** `->` returns a JSON value (with JSON typing and quoting). `->>` returns the unquoted scalar value as text (SQL `TEXT`), suitable for comparisons and casting.
+
+**Q4: When would you avoid storing data in JSON and prefer normalized columns?**
+**Model answer:** When fields are frequently queried, filtered, sorted, or joined — normalization with proper SQL columns and indexes offers better performance and clarity. Use JSON for flexible, rarely-filtered metadata.
+
+**Q5: What is a generated column and why use it with JSON?**
+**Model answer:** A generated column computes its value from other columns (here, extracts JSON content). Using generated columns allows indexing JSON-derived values, enabling fast WHERE scans and joins on JSON fields.
+
+---
+
+## IV. 💻 Coding / Practical — Most Asked Questions (Interview Prep)
+
+**P1 — Query a nested value**
+**Question:** Get the `city` from `address` inside `profile` JSON column.
+**SQL / Approach:**
+```sql
+SELECT JSON_UNQUOTE(JSON_EXTRACT(profile, '$.address.city')) AS city
+FROM users;
+-- or
+SELECT profile->>'$.address.city' AS city
+FROM users;
+```
+**Notes:** Use `->>` for direct scalar extraction.
+
+**P2 — Filter rows where JSON array contains a value**
+**Question:** Find rows where `tags` array contains `'urgent'`.
+**SQL / Approach:**
+```sql
+SELECT * FROM items
+WHERE JSON_CONTAINS(tags, '"urgent"', '$');
+```
+**Notes:** `JSON_CONTAINS` compares JSON values; wrap scalars in quoted JSON text. For simple text search in array you can also use `JSON_SEARCH`.
+
+**P3 — Index a JSON field via generated column**
+**Question:** Index `payload->$.status`.
+**SQL / Approach:**
+```sql
+ALTER TABLE events
+  ADD COLUMN status VARCHAR(64) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(payload, '$.status'))) VIRTUAL,
+  ADD INDEX idx_status (status);
+```
+**Notes:** Use `STORED` if you prefer materialized value or if the expression is not deterministic or is expensive.
+
+**P4 — Update or insert a nested JSON key**
+**Question:** Set `profile.address.city` = 'Bengaluru' in row id=123.
+**SQL / Approach:**
+```sql
+UPDATE users
+SET profile = JSON_SET(profile, '$.address.city', 'Bengaluru')
+WHERE id = 123;
+```
+**Notes:** `JSON_SET` returns a new JSON document; use `JSON_REPLACE` to only replace existing keys or `JSON_INSERT` to insert only if missing.
+
+**P5 — Search for objects matching a sub-document**
+**Question:** Find rows where `meta` contains an object `{"priority": "high"}`.
+**SQL / Approach:**
+```sql
+SELECT * FROM tasks
+WHERE JSON_CONTAINS(meta, '{"priority":"high"}');
+```
+**Notes:** `JSON_CONTAINS` supports searching for subdocuments; ensure JSON syntax is correct.
+
+**P6 — Cast JSON values to SQL types**
+**Question:** Treat `metrics.views` as integer and sum.
+**SQL / Approach:**
+```sql
+SELECT SUM(CAST(profile->>'$.metrics.views' AS UNSIGNED)) AS total_views
+FROM users;
+```
+**Notes:** Use `->>` to get scalar string then `CAST` as needed.
+
+---
+
+## V. 🚀 Follow-Up Topics to Learn
+1. **MySQL Generated Columns (deep dive)** — learn STORED vs VIRTUAL, determinism rules and performance tradeoffs. Good because indexing JSON relies on generated columns.
+2. **Full-Text Search & JSON** — strategies to combine full-text indexing with JSON fields for searching text-heavy JSON content.
+3. **Document DB vs Relational Hybrid Design** — patterns for when to normalize vs store JSON; polyglot persistence strategies.
+4. **Performance tuning / EXPLAIN on JSON queries** — how query planner handles JSON operations and using indexes effectively.
+5. **JSON Schema & validation patterns in application layer** — enforce schema, migrations, and evolving JSON shapes safely.
+
+---
+
+### Quick reference snippets
+
+- Extract scalar: `col->> '$.a.b'`
+- Extract JSON: `col-> '$.a.b'`
+- Contains: `JSON_CONTAINS(col, '"x"', '$.arr')`
+- Mutate: `col = JSON_SET(col, '$.a', 1)`
+- Generated column index pattern:
+```sql
+ALTER TABLE t
+  ADD COLUMN v_col VARCHAR(255) GENERATED ALWAYS AS (JSON_UNQUOTE(JSON_EXTRACT(jcol, '$.x'))) VIRTUAL,
+  ADD INDEX (v_col);
+```
+
+---
+
+*End of cheatsheet.*
+
+# MySQL — Query Patterns Cheatsheet
+
+**Previewable + Downloadable Link: (use the top-right preview/download button)**
+
+---
+
+## I. 💡 Basic Details of Query Patterns
+**What it is:** Common query designs and anti-patterns you encounter when building apps that access MySQL — how queries are written, when they scale, and when they become bottlenecks.
+
+**Purpose & relevance:** Understanding query patterns helps you write efficient SQL, avoid high-latency DB calls (e.g., N+1), design pagination that scales, and choose bulk operations that reduce round-trips and locks.
+
+**Brief history/context:** As web apps moved from monolithic pages to JSON APIs and ORMs, patterns like N+1 and offset pagination became widespread. Modern best practice blends SQL knowledge with application-layer batching and careful indexing.
+
+---
+
+## II. 🧠 Important Concepts to Remember
+1. **N+1 queries (and why it hurts)**
+   - *Idea:* One query to fetch N parent rows, then N separate queries to fetch children. Causes N additional round-trips and often O(N) DB work.
+   - *Analogy:* Ordering 10 pizzas one-by-one instead of placing a single bulk order.
+
+2. **Join vs. Batch vs. Subquery tradeoffs**
+   - Joins fetch related rows in one pass (good for small result sets). Batching (IN + GROUP) reduces round-trips without exploding row multiplicity. Subqueries/derived tables can simplify logic but may affect optimization.
+   - *Rule:* If result multiplicity is small and you need combined columns, JOIN. If you need separate aggregated data per parent, consider batching + join to aggregated subquery.
+
+3. **Offset (LIMIT/OFFSET) vs. Keyset (seek) pagination**
+   - Offset: easy to implement but slow for large offsets (database must scan/skip rows). Keyset: uses indexed columns (e.g., `WHERE (col, id) > (last_col, last_id)`) — constant-time per page.
+   - Use offset for small offsets or admin pages; use keyset for user-facing infinite scroll / large datasets.
+
+4. **Anti-patterns: SELECT * and unbounded queries**
+   - Pulling unnecessary columns increases IO and network time. Unbounded `WHERE` or missing LIMIT can kill the server.
+
+5. **Bulk inserts/updates and transactional considerations**
+   - Use multi-row `INSERT ... VALUES (...),(...),...` or `LOAD DATA` for large imports. For updates, use single statement patterns (`UPDATE ... JOIN`, `INSERT ... ON DUPLICATE KEY UPDATE`) to reduce round-trips. Beware of lock escalation and large transactions: break into chunks.
+
+6. **Avoiding repeated computations: use caching and materialized aggregates**
+   - Pre-compute expensive aggregations into denormalized columns or maintain counters atomically to prevent repeated heavy queries.
+
+7. **Index awareness**
+   - Query patterns must match indexes. Keyset pagination, JOIN conditions, and WHERE filters should use left-prefix of composite indexes for performance.
+
+---
+
+## III. 📝 Theory — Most Asked Questions (Interview Prep)
+
+**Q1: What is the N+1 query problem and how do you fix it?**
+**A:** N+1 occurs when an application queries parent rows then issues one query per parent to fetch children. Fixes: use JOINs or fetch children in a single batched query with `WHERE parent_id IN (...)` and map them in the application; use ORM eager-loading features.
+
+**Q2: When is offset pagination acceptable and when should you prefer keyset pagination?**
+**A:** Offset is acceptable for small datasets or low offsets (admin tools, reporting). Keyset pagination is preferred for large datasets or infinite scroll where consistent, fast next-page retrieval is needed and where you can use a stable sort key (e.g., created_at + id).
+
+**Q3: How do you perform bulk inserts safely and efficiently?**
+**A:** Use multi-row `INSERT` or `LOAD DATA INFILE` for huge imports. Wrap smaller batches (1k–10k rows) per transaction to limit lock time and reduce rollback costs. Use `INSERT ... ON DUPLICATE KEY UPDATE` for upserts and consider disabling indexes during massive loads and rebuilding them after.
+
+**Q4: Explain the tradeoffs between JOINs and multiple queries.**
+**A:** JOINs reduce round-trips and let the DB optimize. But they can produce large result multiplicity (parent row repeated per child) which increases transfer and processing cost. Multiple queries (batched) keep result sets compact and let the app assemble relationships with less duplication.
+
+**Q5: How do you avoid SELECT * and why?**
+**A:** `SELECT *` transfers unnecessary columns, prevents the optimizer from using covering indexes, and creates fragility when schemas change. Specify columns, prefer projections that match indexes.
+
+---
+
+## IV. 💻 Coding/Practical — Most Asked Questions (Interview Prep)
+
+**Q1 — Fix this N+1 (ORM-style):**
+- *Problem:* Fetch posts, then for each post fetch comments in separate queries.
+- *Optimal approach:* `SELECT * FROM posts WHERE user_id = ?; SELECT * FROM comments WHERE post_id IN (list_of_post_ids);` then map comments to posts in memory. Or use a single JOIN if you can handle duplication.
+
+**Q2 — Keyset pagination example:**
+- *Query:* `SELECT id, created_at, title FROM posts WHERE (created_at, id) < (:last_created_at, :last_id) ORDER BY created_at DESC, id DESC LIMIT 20;`
+- *Notes:* Use the same ORDER BY and WHERE tuple; ensure an index on `(created_at, id)`.
+
+**Q3 — Efficient bulk insert pattern:**
+- *Query:* `INSERT INTO metrics (ts, name, value) VALUES (?,?,?),(?,?,?),...;`
+- *Implementation:* Send in batches of 1k–5k rows. On conflicts use `ON DUPLICATE KEY UPDATE` or `REPLACE` depending on semantics.
+
+**Q4 — Bulk update using JOIN:**
+- *Query:* `UPDATE users u JOIN tmp_updates t ON u.id = t.id SET u.balance = t.new_balance WHERE t.some_flag = 1;` — avoids per-row updates.
+
+**Q5 — Anti-pattern to avoid:**
+- `SELECT * FROM big_table ORDER BY created_at DESC LIMIT 100 OFFSET 100000;` — causes large scan/skip. Replace with keyset or maintain a cursor.
+
+---
+
+## V. 🚀 Follow-Up Topics to Learn
+1. **Query optimization and EXPLAIN plans** — learn how to read `EXPLAIN`/`EXPLAIN ANALYZE` to spot costly operations and missing indexes.
+2. **Index design (composite, covering, prefix)** — deeper index strategies will make your pagination and JOINs fast.
+3. **ORM internals and eager-loading strategies** — understand what your ORM issues under the hood to avoid hidden N+1s.
+4. **Partitioning & sharding strategies** — for very large datasets where single-node queries still become bottlenecks.
+5. **Change-data-capture and materialized views** — for maintaining denormalized aggregates and reducing runtime query cost.
+
+---
+
+*Short checklist when designing queries:*
+- Avoid N+1: batch or join.
+- Prefer keyset for large pagination.
+- Use multi-row insert for bulk loads.
+- Project only necessary columns.
+- Match queries to indexes.
+
