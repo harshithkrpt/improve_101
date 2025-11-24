@@ -2132,3 +2132,83 @@ class Solution {
 }
 
 ```
+
+### Intervals Problems
+
+- Insert Interval
+
+```js
+class Solution {
+    /**
+     * @param {number[][]} intervals
+     * @param {number[]} newInterval
+     * @return {number[][]}
+     */
+    insert(intervals, n) {
+        let newInterval = n;
+        const res = [];
+
+        for(let i=0;i<intervals.length;i++) {
+            // not overlapping & matchig
+            if(newInterval[1] < intervals[i][0]) {
+                res.push(newInterval);
+                return [...res, ...intervals.slice(i)];
+            }
+            // not overlapping and not in the range
+            else if(newInterval[0] > intervals[i][1]) {
+                res.push(intervals[i]);
+            }
+            else {
+                newInterval = [
+                    Math.min(newInterval[0], intervals[i][0]),
+                    Math.max(newInterval[1], intervals[i][1])
+                ]
+            }
+        }
+        res.push(newInterval);
+
+        return res;
+    }
+}
+
+```
+
+- Merge Intervals
+
+```js
+
+class Solution {
+    /**
+     * @param {number[][]} intervals
+     * @return {number[][]}
+     */
+    merge(intervals) {
+        const res = [];
+        let sortedInt = [];
+        if(Array.isArray(intervals)) {
+            sortedInt = intervals.sort((a, b) => {
+            return a[0] - b[0];
+        });
+        }
+        for(let i=0;i<sortedInt.length;i++) {
+            if(!res.length) {
+                res.push(intervals[i]);
+                continue;
+            }
+
+            // get the last overlapping
+            const lastItem = res.length - 1;
+            const endItem = res[lastItem][1];
+
+            if(intervals[i][0] > endItem) {
+                res.push(intervals[i]);
+            }
+            else {
+                res[lastItem][1] = Math.max(endItem, intervals[i][1]);
+            }
+        }
+
+        return res;
+    }
+}
+```
