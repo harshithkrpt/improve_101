@@ -3145,3 +3145,503 @@ ALTER TABLE t
 - Project only necessary columns.
 - Match queries to indexes.
 
+# MySQL — Common Interview Queries Cheatsheet
+
+> **Previewable + Downloadable:** Use the canvas top-right to preview or download this file.
+
+---
+
+## I. 💡 Basic Details of "Common Interview Queries"
+
+**Definition & purpose**
+A compact guide of common MySQL interview topics and patterns that frequently appear in technical screens: JOIN pitfalls, window functions, ranking, top‑N per group, removing duplicates, and grouping sets. The goal is to provide concise explanations, typical pitfalls, canonical SQL patterns, and short model answers for interview-style questions.
+
+**Relevance & brief history**
+These patterns exercise a candidate's understanding of set-based thinking, indexes, execution plans and ANSI SQL features added in modern MySQL versions (notably window functions introduced in MySQL 8.0). Mastery shows you can transform business questions into efficient SQL.
+
+---
+
+## II. 🧠 Important Concepts to Remember (5–7 fundamentals)
+
+1. **Set-based thinking vs row-by-row** — SQL works best when you express problems as operations on sets (joins, aggregations, windows) rather than procedural loops. *Analogy:* treat a table like a batch conveyor belt, not a queue of single items.
+
+2. **JOIN types and semantics** — `INNER`, `LEFT/RIGHT`, `FULL` (emulated), `CROSS`. Know which rows are preserved and how NULLs appear for missing matches. Mistaking `LEFT JOIN` for `INNER JOIN` is a top cause of logical bugs.
+
+3. **Window functions vs aggregation** — Window functions (e.g., `ROW_NUMBER()`, `RANK()`, `SUM() OVER(...)`) compute values across rows while keeping row-level granularity. Aggregates collapse rows. *Think:* window = running/peer-aware calculation; aggregate = reduce to summary.
+
+4. **Ranking functions subtleties** — `ROW_NUMBER()` gives a distinct sequence; `RANK()` gives ties the same rank and leaves gaps; `DENSE_RANK()` gives ties same rank without gaps. Use the right one depending on tie handling.
+
+5. **Top‑N per group patterns** — Two canonical approaches: window functions (`ROW_NUMBER()`) and correlated subqueries / joins using aggregated thresholds. Window methods are usually clearer and often faster in MySQL 8+.
+
+6. **Duplicate removal strategies** — Identify duplicates via `ROW_NUMBER()` or `GROUP BY` with `MIN(id)`. When removing rows physically, use `DELETE` joined to a subquery that marks duplicates.
+
+7. **Grouping sets / rollup / cube** — Provide multiple aggregate groupings in one pass: `GROUPING SETS`, `ROLLUP`, `CUBE`. Useful for multi-level summaries (totals, subtotals) with fewer scans.
+
+---
+
+## III. 📝 Theory — Most Asked Questions (Interview Prep)
+
+### Q1: Explain the difference between `INNER JOIN` and `LEFT JOIN` and give an example bug caused by mixing them up.
+**Model answer:** `INNER JOIN` returns rows that match in both tables; `LEFT JOIN` returns all rows from the left table and matches where possible from the right, filling with `NULL` when no match. A common bug: using `LEFT JOIN` but placing a condition on a right-table column in the `WHERE` clause (e.g., `WHERE right.col = 'x'`) — that filter turns the `LEFT JOIN` effectively into an `INNER JOIN` because it removes rows with `NULL` matches. Move such conditions into the `ON` clause to preserve left-side rows.
+
+### Q2: When would you prefer window functions over GROUP BY?
+**Model answer:** Use window functions when you need row-level context plus aggregate information (e.g., running totals, rank per partition) without collapsing rows. Use `GROUP BY` when you want a reduced summary (one row per group).
+
+### Q3: Describe `ROW_NUMBER()`, `RANK()`, `DENSE_RANK()` differences.
+**Model answer:** `ROW_NUMBER()` gives unique sequential numbers per partition; `RANK()` assigns equal rank to ties but leaves gaps after ties; `DENSE_RANK()` assigns equal rank to ties and does not leave gaps.
+
+### Q4: What are grouping sets and why use them?
+**Model answer:** `GROUPING SETS` lets you compute multiple different aggregates (e.g., by `region`, by `product`, and grand total) in a single query, avoiding multiple scans. `ROLLUP` is a shorthand for hierarchical subtotals.
+
+### Q5: How do you remove duplicate rows while keeping a canonical row?
+**Model answer:** Identify duplicates by the columns that define equality, use `ROW_NUMBER()` partitioned by those columns ordered by a surrogate/stable column (e.g., `created_at` or `id`), then delete rows where `row_number > 1`.
+
+---
+
+## IV. 💻 Coding / Practical — Most Asked Questions & Patterns
+
+### 1) JOIN pitfalls — preserve left rows when filtering the right table
+**Pattern**
+```sql
+-- WRONG (turns LEFT JOIN into INNER JOIN):
+SELECT a.*
+FROM customers a
+LEFT JOIN orders b ON a.id = b.customer_id
+WHERE b.status = 'ACTIVE';
+
+-- RIGHT: move filter into ON
+SELECT a.*
+FROM customers a
+LEFT JOIN orders b
+  ON a.id = b.customer_id
+  AND b.status = 'ACTIVE';
+```
+
+### 2) Top‑N per group — get top 3 salespeople per region (MySQL 8+)
+**Approach: window function**
+```sql
+SELECT * FROM (
+  SELECT s.*, ROW_NUMBER() OVER (PARTITION BY region ORDER BY sales DESC) rn
+  FROM sales_people s
+) t
+WHERE rn <= 3;
+```
+**Alternative: correlated subquery** (older MySQL)
+```sql
+SELECT s.*
+FROM sales_people s
+WHERE (
+  SELECT COUNT(*)
+  FROM sales_people s2
+  WHERE s2.region = s.region
+    AND s2.sales > s.sales
+) < 3;
+```
+
+### 3) Ranking ties — keep all tied top scorers
+```sql
+SELECT * FROM (
+  SELECT p.*, RANK() OVER (PARTITION BY contest_id ORDER BY score DESC) rnk
+  FROM participants p
+) t
+WHERE rnk = 1;
+```
+
+### 4) Remove duplicates (physically delete extras)
+**Pattern**
+```sql
+WITH dup AS (
+  SELECT id, ROW_NUMBER() OVER (PARTITION BY user_id, email ORDER BY id) rn
+  FROM users
+)
+DELETE u
+FROM users u
+JOIN dup d ON u.id = d.id
+WHERE d.rn > 1;
+```
+*Note:* MySQL does not allow `DELETE` directly from a CTE in all versions; the common workaround is `DELETE users FROM users JOIN (...) dup ON ... WHERE dup.rn > 1`.
+
+### 5) Top‑N per group with ties handling (keep ties)
+```sql
+SELECT * FROM (
+  SELECT t.*, DENSE_RANK() OVER (PARTITION BY group_col ORDER BY score DESC) dr
+  FROM table t
+) x
+WHERE dr <= 3;
+```
+
+### 6) Grouping sets / rollup / cube examples
+```sql
+-- GROUPING SETS: sales by (region), (product), and grand total
+SELECT region, product, SUM(amount) AS total
+FROM sales
+GROUP BY GROUPING SETS ((region), (product), ());
+
+-- ROLLUP: region -> region+product -> grand total
+SELECT region, product, SUM(amount)
+FROM sales
+GROUP BY region, product WITH ROLLUP;
+```
+
+### 7) Efficient duplicate detection (without window functions)
+```sql
+SELECT col1, col2, COUNT(*) cnt
+FROM t
+GROUP BY col1, col2
+HAVING cnt > 1;
+```
+Use this to inspect duplicates before deleting.
+
+### 8) Anti-join to find rows without matches
+```sql
+SELECT a.*
+FROM a
+LEFT JOIN b ON a.id = b.a_id
+WHERE b.a_id IS NULL; -- rows in A not in B
+```
+
+---
+
+## V. 🚀 Follow-Up Topics to Learn
+
+1. **Index strategies for joins and top‑N queries** — learn composite indexes, covering indexes and how MySQL uses indexes for `ORDER BY ... LIMIT` to avoid filesorts.
+*Why:* Performance matters in interviews and production.
+
+2. **Query execution plans & `EXPLAIN`** — how to read `EXPLAIN`/`EXPLAIN ANALYZE`, optimizer decisions and cardinality estimation.
+*Why:* Demonstrates depth; explains why one query is faster.
+
+3. **Advanced window patterns** — running totals with `ROWS BETWEEN`, moving averages, cumulative distributions (`CUME_DIST`).
+*Why:* Shows mastery of analytical SQL tasks.
+
+4. **Partitioning and large-scale deduplication methods** — strategies to deduplicate very large tables efficiently (chunked deletes, using temporary tables).
+*Why:* Real-world scale changes the approach.
+
+5. **OLAP features: materialized views & summary tables** — when to precompute aggregates.
+*Why:* Sometimes the right answer is not a single SQL query but an architecture pattern.
+
+---
+
+### Quick cheat-card (one-liners)
+- `ROW_NUMBER()` = unique seq; `RANK()` = ties + gaps; `DENSE_RANK()` = ties no gaps.
+- Move right-table filters into `ON` to preserve `LEFT JOIN`.
+- `GROUPING SETS` / `ROLLUP` = multiple aggregates in one scan.
+- To delete duplicates: mark with `ROW_NUMBER()` partition and delete where `> 1`.
+
+---
+
+*Prepared for technical interviews — concise, practical, and ready to paste into your editor.*
+
+# MySQL — Advanced SQL: Window Functions, CTEs & Recursive CTEs
+
+> **Previewable + Downloadable Link in the top-right corner.**
+
+---
+
+## I. 💡 Basic Details of Advanced SQL (Window functions & CTEs)
+
+**What it is (concise):**
+Advanced SQL here refers to analytic window functions (e.g., `ROW_NUMBER()`, `RANK()`, `LAG()`, `LEAD()`), Common Table Expressions (CTEs), and recursive CTEs that let you express row-aware calculations, chain intermediate queries cleanly, and perform recursive traversals directly in SQL.
+
+**Purpose:**
+- Window functions compute values across rows related to the current row without collapsing result rows (unlike `GROUP BY`).
+- CTEs make complex queries readable, reusable, and easier to maintain; recursive CTEs let you express hierarchical or iterative logic (tree traversal, series generation) in SQL.
+
+**Brief history & relevance:**
+Window functions were added to SQL standards to support analytics (rankings, running totals, moving averages) efficiently. MySQL implemented window functions in 8.0 and CTEs (including recursive) also in 8.0 — making advanced analytical patterns possible without moving data into application code.
+
+**When to use:**
+- Ranking, top-N-per-group, gaps-and-islands, running totals, and moving averages → window functions.
+- Breaking a complicated query into named steps, improving readability, or reusing intermediate results → CTEs.
+- Traversing hierarchies (organizational chart, bill of materials), computing transitive closures, or generating sequences → recursive CTEs.
+
+---
+
+## II. 🧠 Important Concepts to Remember
+
+1. **Window vs Aggregate**
+   *Aggregate collapses rows; window retains rows and adds computed columns.*
+   - Analogy: aggregate = blender (makes a smoothie), window = overlaying a ruler on each item and annotating it.
+
+2. **Partitioning and Ordering in Window Functions**
+   - `OVER (PARTITION BY ... ORDER BY ...)` splits rows into groups (partitions) and defines the order for frame calculations.
+   - Partition = separate sublists; Order = the sequence inside each sublist.
+
+3. **Frame clauses**
+   - Default frames differ by function type (e.g., rows between `UNBOUNDED PRECEDING` and `CURRENT ROW` for running totals). Know `ROWS` vs `RANGE` semantics.
+   - `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` = cumulative from start to current row.
+
+4. **ROW_NUMBER vs RANK vs DENSE_RANK**
+   - `ROW_NUMBER()` assigns unique sequential integers (no ties). Use for deterministic top-N.
+   - `RANK()` leaves gaps for ties (1,2,2,4). Useful when ties should affect subsequent ranks.
+   - `DENSE_RANK()` compresses ties (1,2,2,3).
+
+5. **Lag/Lead for offsets**
+   - `LAG(expr, offset, default)`, `LEAD(...)` let you access previous/next row values inside partition/order — great for deltas and change detection.
+   - Analogy: look back/forward one seat in the classroom to compare scores.
+
+6. **CTEs for modular queries**
+   - Non-recursive CTEs: `WITH name AS (subquery)` — used like temporary named views within a single statement.
+   - CTEs can be referenced multiple times in the same query and help the optimizer read complex logic; they may or may not be materialized depending on engine.
+
+7. **Recursive CTEs and termination**
+   - Structure: anchor member `UNION ALL` recursive member with a termination condition. Always ensure the recursion reaches a base case to avoid infinite loops.
+   - Use `LIMIT` safeguards during development and consider cycle detection (`visited` set) for graphs.
+
+---
+
+## III. 📝 Theory — Most Asked Questions (Interview Prep)
+
+**Q1: Explain the difference between `ROW_NUMBER()`, `RANK()`, and `DENSE_RANK()` and give one use-case for each.**
+**A:** `ROW_NUMBER()` assigns a unique sequential number to each row; use when you need a deterministic single top row per partition (top-1). `RANK()` gives the same rank to tied values but leaves gaps; use when ties should cause gaps in ranking (e.g., competition ranks). `DENSE_RANK()` gives the same rank to ties without gaps; use when you want compact ordinal ranks.
+
+**Q2: When would you use a window function instead of a correlated subquery or join?**
+**A:** Use window functions when you need row-level results augmented with aggregated/ordered context (running totals, rank, preceding value) — they are usually clearer and more efficient than correlated subqueries which re-run per-row and joins which may require group/aggregation and re-join logic.
+
+**Q3: What is a CTE and why use it?**
+**A:** A CTE (Common Table Expression) is a named temporary result set defined within a single SQL statement using `WITH`. It improves readability, allows reuse of the same subquery, and can make complex transformations easier to follow. Recursive CTEs extend this to iterative or hierarchical queries.
+
+**Q4: Describe how a recursive CTE works and a common pitfall.**
+**A:** A recursive CTE has two parts: the anchor member (base rows) and the recursive member that references the CTE itself to expand results iteratively. Results are repeated until the recursive member returns no new rows. Pitfall: missing termination condition causing infinite recursion; also be careful with `UNION ALL` vs `UNION` (avoid accidental deduplication with `UNION` which can be expensive).
+
+**Q5: Explain `ROWS` vs `RANGE` frame types and when their results differ.**
+**A:** `ROWS` frames are defined by physical row counts (e.g., `ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING` = previous and next row). `RANGE` frames are defined by logical value ranges relative to the sort key (e.g., all rows with the same ordering value). They differ when ordering values repeat; `RANGE` could include multiple rows with identical ORDER BY value, while `ROWS` relies strictly on row positions.
+
+---
+
+## IV. 💻 Coding / Practical — Most Asked Questions (Interview Prep)
+
+### 1) Top-N per group (get top 1 salary per department)
+**Problem:** For each department, get employee(s) with the highest salary.
+**Approach:** Use `RANK()` or `DENSE_RANK()` partitioned by department ordered by salary desc.
+
+```sql
+WITH ranked AS (
+  SELECT *, RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+  FROM employees
+)
+SELECT *
+FROM ranked
+WHERE rnk = 1;
+```
+
+**Notes:** Use `ROW_NUMBER()` if you want exactly one arbitrary row per department (tie-break with additional ordering columns).
+
+### 2) Running total / cumulative sum
+**Problem:** Running cumulative sales per day.
+**Approach:** `SUM(amount) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`
+
+```sql
+SELECT date, amount,
+  SUM(amount) OVER (ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total
+FROM sales
+ORDER BY date;
+```
+
+### 3) Gap-and-islands (find consecutive date ranges where a user was active)
+**Problem:** Collapse consecutive days into ranges per user.
+**Approach:** Use `ROW_NUMBER()` and arithmetic on dates to compute island ids.
+
+```sql
+WITH numbered AS (
+  SELECT user_id, activity_date,
+    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY activity_date) as rn
+  FROM user_activity
+), islands AS (
+  SELECT user_id, activity_date,
+    DATE_SUB(activity_date, INTERVAL rn DAY) AS grp
+  FROM numbered
+)
+SELECT user_id, MIN(activity_date) AS start_date, MAX(activity_date) AS end_date
+FROM islands
+GROUP BY user_id, grp;
+```
+
+### 4) Calculate change from previous row (LAG)
+**Problem:** Show difference in metric from previous month.
+**Approach:** Use `LAG(value) OVER (PARTITION BY ... ORDER BY ...)`.
+
+```sql
+SELECT
+  month, value,
+  LAG(value) OVER (ORDER BY month) AS prev_value,
+  value - LAG(value) OVER (ORDER BY month) AS delta
+FROM monthly_metrics
+ORDER BY month;
+```
+
+### 5) Recursive CTE — traverse simple parent-child tree
+**Problem:** Given `items(id, parent_id)`, find all descendants of `id = 42`.
+
+```sql
+WITH RECURSIVE descendants AS (
+  -- anchor: start with the root
+  SELECT id, parent_id, 0 AS depth
+  FROM items
+  WHERE id = 42
+
+  UNION ALL
+
+  -- recursive member: find children of previously found nodes
+  SELECT i.id, i.parent_id, d.depth + 1
+  FROM items i
+  JOIN descendants d ON i.parent_id = d.id
+)
+SELECT * FROM descendants;
+```
+
+**Safety:** For cyclic graphs, detect cycles by tracking a path or using `WHERE NOT FIND_IN_SET(i.id, d.path)` pattern; include depth limits during testing.
+
+### 6) Generate a sequence of dates (iterative generation via recursive CTE)
+
+```sql
+WITH RECURSIVE seq AS (
+  SELECT DATE('2025-01-01') AS dt
+  UNION ALL
+  SELECT DATE_ADD(dt, INTERVAL 1 DAY)
+  FROM seq
+  WHERE dt < DATE('2025-01-31')
+)
+SELECT * FROM seq;
+```
+
+**Note:** MySQL may require `MAX_RECURSION_DEPTH` style limits and recursion is bounded by server limits — use carefully.
+
+---
+
+## V. 🚀 Follow-Up Topics to Learn
+
+1. **Advanced window use: `FIRST_VALUE`, `LAST_VALUE`, `NTILE`** — for more specialized analytic queries (partition percentiles, bucketization).
+   - *Why:* Complements ranking/lag patterns for richer analytics.
+
+2. **Performance & indexing for analytic queries (covering indexes, composite order-by indexes)**
+   - *Why:* Window queries with ORDER BY can benefit from proper indexing to avoid sorts and large memory consumption.
+
+3. **Materialized views (emulated) & incremental aggregation strategies**
+   - *Why:* For heavy analytical workloads, pre-aggregation or materialized results reduce repeated computation.
+
+4. **Graph & hierarchical patterns beyond CTEs (closure table, nested sets)**
+   - *Why:* Recursive CTEs are expressive but sometimes not optimal; alternative schema patterns can improve performance for deep trees.
+
+5. **Window functions in OLAP vs OLTP contexts (batch vs real-time analytics)**
+   - *Why:* Understand when to run these queries in real-time systems vs scheduled batch jobs to balance cost and latency.
+
+---
+
+*Cheat tips:*
+- Prefer `ROW_NUMBER()` for deterministic single-row selection; use `RANK()`/`DENSE_RANK()` when ties matter.
+- Always include an `ORDER BY` in window frames when order matters; missing order is nondeterministic.
+- When building recursive CTEs, start small and test with `LIMIT`/depth columns to validate termination.
+
+---
+
+*End of cheatsheet.*
+
+# MySQL Real-World Optimization Guide
+
+## I. 💡 Basic Details of MySQL Real-World Optimization
+MySQL real-world optimization focuses on improving the performance of queries, especially those used in dashboards, analytics, and high-traffic applications. Over time, as data grows and filters become more complex, queries often slow down. The goal of optimization is to reduce query execution time, minimize resource usage, and make applications feel fast and responsive.
+
+These techniques grew from decades of database engineering experience. They matter because most real-world slowness comes not from hardware but from inefficient queries, missing indexes, excessive joins, or unoptimized patterns.
+
+## II. 🧠 Important Concepts to Remember
+**1. Index Selectivity**
+High-selectivity indexes (those filtering down to fewer rows) act like well-organized library catalogues. They let MySQL jump straight to the right shelf instead of scanning every book.
+
+**2. Query Execution Plans**
+`EXPLAIN` reveals how MySQL reads your data. It's like peeking into the kitchen to see how a chef prepares your dish. It shows whether MySQL is using indexes, performing full scans, or doing unnecessary work.
+
+**3. Sargable Conditions**
+A query is *sargable* if MySQL can use an index to filter data. Using functions on indexed columns (e.g., `LOWER(name)`) makes queries non-sargable, like putting sunglasses on MySQL and asking it to search in dim light.
+
+**4. Avoiding OR Conditions**
+`OR` often forces full scans. MySQL struggles because it's like telling someone: "Search row A, but maybe row B, or maybe both." Splitting into `UNION` queries helps.
+
+**5. USING EXISTS Instead of IN**
+`EXISTS` is often faster because it stops searching as soon as it finds one match. `IN` collects all possibilities first. Think of `EXISTS` as checking if a shop is open by peeking through the door once, instead of calling every employee.
+
+**6. Proper Use of LIMIT With ORDER BY**
+Sorting huge datasets is slow. Using proper indexes and avoiding sorts on unindexed columns prevents MySQL from sorting entire mountains of data.
+
+## III. 📝 Theory Most Asked Questions (Interview Prep)
+**Q1. Why are OR conditions slow in MySQL?**
+They often prevent the optimizer from using indexes efficiently, forcing full table scans or index merges, which are slower.
+
+**Q2. What is the advantage of EXISTS over IN?**
+`EXISTS` stops as soon as a match is found, making it more efficient for large subqueries. `IN` may materialize large result sets.
+
+**Q3. What is an index selectivity?**
+It describes how well an index filters rows. High selectivity (e.g., unique or rare values) improves query performance.
+
+**Q4. What does EXPLAIN do?**
+It shows the execution plan MySQL chooses: index usage, join order, filtering strategy, and expected number of rows.
+
+**Q5. What is a sargable query?**
+A query that allows MySQL to use indexes to filter data. Avoiding functions on columns preserves sargability.
+
+## IV. 💻 Coding/Practical Most Asked Questions (Interview Prep)
+**Q1. Optimize a slow query with OR conditions.**
+**Problem:**
+```sql
+SELECT * FROM orders
+WHERE customer_id = 15 OR status = 'CANCELLED';
+```
+**Approach:** Split using `UNION` so indexes can be used correctly.
+```sql
+SELECT * FROM orders WHERE customer_id = 15
+UNION
+SELECT * FROM orders WHERE status = 'CANCELLED';
+```
+
+**Q2. Replace IN with EXISTS for optimization.**
+**Problem:**
+```sql
+SELECT * FROM users
+WHERE id IN (SELECT user_id FROM logins);
+```
+**Approach:**
+```sql
+SELECT * FROM users u
+WHERE EXISTS (
+  SELECT 1 FROM logins l WHERE l.user_id = u.id
+);
+```
+
+**Q3. Optimize a slow dashboard query with filters + sorting.**
+**Problem:** Sorting large datasets by unindexed columns.
+**Approach:** Add composite index.
+```sql
+CREATE INDEX idx_status_date ON orders(status, created_at);
+```
+Then MySQL can avoid full sorts.
+
+**Q4. Fix slow pagination (OFFSET).**
+**Problem:**
+```sql
+SELECT * FROM orders
+ORDER BY id
+LIMIT 20 OFFSET 100000;
+```
+**Approach:** Use keyset pagination.
+```sql
+SELECT * FROM orders
+WHERE id > last_seen_id
+ORDER BY id
+LIMIT 20;
+```
+
+## V. 🚀 Follow-Up Topics to Learn
+**1. Query Profiling & Performance Schema**
+Helps analyze real workload bottlenecks.
+
+**2. Advanced Indexing (BTREE, HASH, Fulltext)**
+Understanding index internals leads to smarter schema design.
+
+**3. Partitioning Strategies**
+Useful when dealing with massive tables to reduce data scanned.
+
+**4. Caching Layers (Redis, Memcached)**
+Reduces repeated expensive queries.
+
+**5. MySQL Replication & Read Scaling**
+Distributes load across multiple servers for large-scale apps.
+
