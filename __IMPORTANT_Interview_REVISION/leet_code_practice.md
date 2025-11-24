@@ -2212,3 +2212,55 @@ class Solution {
     }
 }
 ```
+
+- Non Overlapping Intervals (My Solution)
+ 
+```js
+class Solution {
+    /**
+     * @param {number[][]} intervals
+     * @return {number}
+     */
+    eraseOverlapIntervals(intervals) {
+        let sInt = intervals.sort((a, b) => a[0] - b[0]);
+        let res = [sInt[0]];
+
+        for(let i=1;i<sInt.length;i++) {
+            const li = res.length - 1;
+            const lastItem = res[li][1];
+
+            if(lastItem <= sInt[i][0]) {
+                res.push(sInt[i]);
+            }
+            else {
+                res[li][1] = Math.min(res[li][1], sInt[i][1]);
+            }
+        }
+        return sInt.length - res.length;
+    }
+}
+
+```
+
+- solution as per neetcode
+
+```js
+class Solution {
+    /**
+     * @param {number[][]} intervals
+     * @return {number}
+     */
+    eraseOverlapIntervals(intervals) {
+        let sInt = intervals.sort((a, b) => a[1] - b[1]);
+        let prevEnd = -Infinity;
+        let res = 0;
+        for(let i=0;i<sInt.length;i++) {
+            if(sInt[i][0] >= prevEnd) {
+                res++;
+                prevEnd = sInt[i][1];
+            }
+        }
+        return sInt.length - res;
+    }
+}
+```
