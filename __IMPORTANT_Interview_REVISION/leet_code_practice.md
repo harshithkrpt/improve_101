@@ -2264,3 +2264,165 @@ class Solution {
     }
 }
 ```
+
+### Bit Manipulation
+
+- single number
+
+
+```js
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @return {number}
+     */
+    singleNumber(nums) {
+        let ans = nums[0];
+        for(let i=1;i<nums.length;i++) {
+            ans ^= nums[i];
+        }
+
+        return ans;
+    }
+}
+
+```
+
+- Number of 1 Bit
+
+```js
+class Solution {
+    /**
+     * @param {number} n - a positive integer
+     * @return {number}
+     */
+    hammingWeight(n) {
+        let count = 0;
+        
+        while(n) {
+            count += n & 1;
+            n >>= 1;
+        }
+       
+        return count;
+    }
+}
+
+```
+
+- efficient answer for num of 1 bits
+
+> Whenever you do n &= (n - 1), you slice off the rightmost 1-bit from n.
+
+```js
+class Solution {
+    /**
+     * @param {number} n - a positive integer
+     * @return {number}
+     */
+    hammingWeight(n) {
+        let count = 0;
+        
+        while(n) {
+            n &= (n - 1);
+            count++;
+        }
+       
+        return count;
+    }
+}
+
+```
+
+- Counting Bits
+
+> this involves dynamic programming + bit manipulation.
+
+```js
+class Solution {
+    /**
+     * @param {number} n
+     * @return {number[]}
+     */
+    countBits(n) {
+        let dp = new Array(n+1).fill(0);
+        let offset = 1;
+
+        for(let i=1;i<=n;i++) {
+            if(offset * 2 == i) {
+                offset = i;
+            }
+            dp[i] = 1 + dp[i - offset];
+        }
+        return dp;
+    }
+}
+
+```
+
+- reverse bits
+
+```js
+class Solution {
+    /**
+     * @param {number} n - a positive integer
+     * @return {number} - a positive integer
+     */
+    reverseBits(n) {
+        let rep = 0;
+        let ans = 0;
+        while(rep < 32) {
+            if(n % 2) {
+                 ans += Math.pow(2, 31 - rep);
+            }
+            n >>= 1;
+            rep++;
+        }
+        
+
+        return ans;
+    }
+}
+
+```
+
+- same reverse bits but neetcode optimised way by shifting the bit wise operators 
+
+```js
+class Solution {
+    /**
+     * @param {number} n - a positive integer
+     * @return {number} - a positive integer
+     */
+    reverseBits(n) {
+        let res = 0;
+        for(let i=0;i<32;i++) {
+            let l = (n >>> i) & 1;
+            res = res | (l << (31 - i))
+        }
+
+        return res >>> 0;
+    }
+}
+```
+
+
+- missing number
+
+```js
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @return {number}
+     */
+    missingNumber(nums) {
+          let res;
+          for(let i=0;i<=nums.length;i++) {
+            res ^= i ^ nums[i];
+          }      
+
+        return res;
+    }
+}
+
+```
