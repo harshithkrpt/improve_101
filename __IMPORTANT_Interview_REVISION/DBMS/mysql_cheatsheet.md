@@ -144,27 +144,39 @@ CREATE TABLE products (
 **2. Store and query JSON data.** Approach: Use JSON functions and indexes.
 
 ```sql
-CREATE TABLE users (
-    id INT PRIMARY KEY,
-    info JSON
+CREATE TABLE one (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  json_1 JSON NOT NULL
 );
-SELECT info->>'$.email' FROM users;
+
+INSERT INTO one(name, json_1) VALUES 
+  ("Harshith", '{"age": 25, "location": "Telangama", "email": "harshith.krpt@gmail.com"}');
+  
+SELECT json_1->>'$.email' as email FROM one;
 ```
 
 **3. Demonstrate FLOAT vs DECIMAL rounding.** Approach: Insert values and compare results.
 
 ```sql
 SELECT 0.1 + 0.2;     -- FLOAT/DOUBLE rounding
-SELECT DECIMAL(10,2) + DECIMAL(10,2); -- precise
+SELECT CAST(10.50 AS DECIMAL(10,2)) + CAST(20.25 AS DECIMAL(10,2));
 ```
 
 **4. Use SET type to store multiple values.** Approach: Accept multiple predefined roles.
 
 ```sql
-CREATE TABLE accounts (
-    id INT PRIMARY KEY,
-    roles SET('ADMIN','EDITOR','VIEWER')
+CREATE TABLE one(
+  id  INT PRIMARY KEY AUTO_INCREMENT,
+  name VARCHAR(100) NOT NULL,
+  roles SET('ADMIN', 'EDITOR', 'CREATOR') NOT NULL
 );
+
+INSERT INTO one(name, roles) VALUES
+  ('Harshith', 'ADMIN,EDITOR'), 
+  ('Kura', 'CREATOR');
+  
+select * from one WHERE find_in_set('EDITOR', roles);
 ```
 
 **5. Optimize storage using the right integer type.** Approach: Use TINYINT/SMALLINT where appropriate to reduce storage.
