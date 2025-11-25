@@ -2546,3 +2546,113 @@ class Solution {
 }
 
 ```
+
+### Backtracking
+
+- subsets
+
+```js
+
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @return {number[][]}
+     */
+    subsets(nums) {
+        const output = [];
+        const res = [];
+        const dfs = (n = 0) => {
+            // base case
+            if(nums.length == n) {
+                output.push([...res]);
+                return;
+            }
+            res.push(nums[n]);
+            dfs(n+1);
+            res.pop();
+            dfs(n + 1);
+        }
+
+        dfs();
+
+        return output;
+    }
+}
+
+```
+
+- combination sum (my version)
+ 
+```js
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @param {number} target
+     * @returns {number[][]}
+     */
+    combinationSum(nums, target) {
+        const output = [];
+        nums.sort((a,b) => a - b);
+        const res = [];
+        const dfs = (curSum = 0, index = 0) => {
+            if(curSum == target) {
+                output.push([...res]);
+                return;
+            }
+            
+            if(curSum > target) {
+                return;
+            }
+            for(let i=index;i<nums.length;i++) {
+                res.push(nums[i]);
+                const cur = res.reduce((acc, cur) => acc + cur, 0);
+                dfs(cur, i);
+                res.pop();
+            }
+        }   
+        dfs();
+        return output;
+    }
+}
+
+```
+
+- counting sum ii
+
+```js
+class Solution {
+    /**
+     * @param {number[]} candidates
+     * @param {number} target
+     * @return {number[][]}
+     */
+    combinationSum2(candidates, target) {
+        const output = [];
+        candidates.sort((a,b) => a - b);
+        const res = [];
+        const dfs = (sum = 0, index = 0) => {
+            if(sum == target) {
+                output.push([...res]);
+                return;
+            }
+            if(sum > target) {
+                return;
+            }
+
+            for(let i=index;i<candidates.length;i++) {
+                if(i > index && candidates[i] == candidates[i-1]) {
+                    continue;
+                }
+                res.push(candidates[i]);
+                const sum = res.reduce((acc, s) => acc + s, 0);
+                dfs(sum, i + 1);
+                res.pop(); 
+            }
+        }   
+
+
+        dfs();
+        return output;
+    }
+}
+```
