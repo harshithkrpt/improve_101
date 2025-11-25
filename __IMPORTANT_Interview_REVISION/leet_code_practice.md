@@ -1853,6 +1853,83 @@ class Solution {
 
 ```
 
+- sub tree of another tree
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    constructor() {
+        this.res = [];
+    }
+
+    isSameTree(p, q) {
+        if(!p && !q) return true;
+        if(!p || !q || p.val != q.val) return false;
+        return (this.isSameTree(p.left, q.left) && this.isSameTree(p.right, q.right));
+    }
+
+    dfs(cur, val) {
+        if(!cur) {
+            return null;
+        }
+
+        if(cur.val == val) {
+            this.res.push(cur);
+        }
+
+        this.dfs(cur.left, val);
+        this.dfs(cur.right, val);
+    
+    }
+
+    /**
+     * @param {TreeNode} root
+     * @param {TreeNode} subRoot
+     * @return {boolean}
+     */
+    isSubtree(root, subRoot) {
+        // find the subroot node first in root
+        if(!root && !subRoot) {
+            return true;
+        }
+        if(root && !subRoot) {
+            return true;
+        }
+        if(!root && subRoot) {
+            return false;
+        }
+
+        this.res = [];
+
+        this.dfs(root, subRoot.val);
+        if(this.res.length) {
+            let isSameTree = false;
+            for(let i=0;i<this.res.length;i++) {
+                if(this.isSameTree(this.res[i], subRoot)) {
+                    isSameTree = true;
+                }
+            }
+
+            return isSameTree;
+        }
+        else {
+            return false;
+        }
+    }
+}
+
+```
+
 - binary tree level order traversal
 
 ```js
@@ -1935,6 +2012,48 @@ class Solution {
 
 ```
 
+- binary tree right side view
+
+```js
+/**
+ * Definition for a binary tree node.
+ * class TreeNode {
+ *     constructor(val = 0, left = null, right = null) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {TreeNode} root
+     * @return {number[]}
+     */
+    rightSideView(root) {
+        // in order traversal + last most element
+        if(!root) return [];
+        let q = [root];
+        let res = [];
+        while(q.length) {
+            let len = q.length;
+            for(let i=0;i<len;i++) {
+                let n = q.shift();
+                if(i == len - 1) {
+                    res.push(n.val);
+                }
+                n.left ? q.push(n.left) : null;
+                n.right ? q.push(n.right) : null;
+            }
+        }
+
+        return res;
+    }
+}
+
+```
+
 - is a valid binary search tree
 
 
@@ -1981,6 +2100,7 @@ class Solution {
 }
 
 ```
+
 
 
 ### Alternative approach for valid bst maintaining a left most valid , right most valid boundaries
