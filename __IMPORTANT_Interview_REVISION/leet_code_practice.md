@@ -2656,3 +2656,72 @@ class Solution {
     }
 }
 ```
+
+- permutations
+
+```js
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @return {number[][]}
+     */
+    permute(nums) {
+        const res = [];
+        const dfs = (out = [], set = new Set()) => {
+            if(set.size === nums.length) {
+                res.push([...out]);
+                return;
+            }
+
+            for(let i=0;i<nums.length;i++) {
+                if(set.has(nums[i])){
+                    continue;
+                }
+                out.push(nums[i]);
+                set.add(nums[i]);
+                dfs(out,set);
+                set.delete(nums[i]);
+                out.pop();
+            }
+        }
+
+        dfs();
+
+        return res;
+    }
+}
+
+```
+
+- subsets II
+
+```js
+class Solution {
+    /**
+     * @param {number[]} nums
+     * @return {number[][]}
+     */
+    subsetsWithDup(nums) {
+        const output = [];
+    
+        nums.sort((a,b) => a - b);
+        const dfs = (n = 0, res = []) => {
+            if(n === nums.length) {
+                output.push([...res]);
+                return;
+            }
+            res.push(nums[n]);
+            dfs(n+1, res);
+          
+            while(n + 1 < nums.length && nums[n] == nums[n+1]) {
+                n++;
+            }
+            res.pop();
+            dfs(n+1, res);
+        };
+        dfs();
+        return output;
+    }
+}
+
+```
