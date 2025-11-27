@@ -2725,3 +2725,185 @@ class Solution {
 }
 
 ```
+
+
+- generate parenthesis
+
+
+```js
+class Solution {
+    /**
+     * @param {number} n
+     * @return {string[]}
+     */
+    generateParenthesis(n) {
+        const output = [];
+        const stk = [];
+        const dfs = (open = 0, close = 0) => {
+            if(open == n && close == n) {
+                output.push(stk.join(''));
+                return;
+            }
+
+            if(open < n) {
+                stk.push('(');
+                dfs(open + 1, close);
+                stk.pop();
+            }
+            
+            if(close < open) {
+                stk.push(')');
+                dfs(open, close + 1);
+                stk.pop();
+            }
+        }
+        dfs();
+        return output;
+    }
+}
+
+```
+
+- word search
+
+```js
+class Solution {
+    /**
+     * @param {character[][]} board
+     * @param {string} word
+     * @return {boolean}
+     */
+    exist(board, word) {
+        if (!board || board.length === 0 || !word) return false;
+
+        const M = board.length;
+        const N = board[0].length;
+        const path = new Set();
+
+        const dfs = (x, y, i) => {
+            const key = `${x},${y}`;
+            if(i === word.length) {
+                return true;
+            }
+
+            if(x < 0 || y < 0 
+                || x >= M 
+                || y >= N 
+                || path.has(key) 
+                || board[x][y] !== word[i]
+            ) {
+                return false;
+            }
+
+            path.add(key);
+            const res = dfs(x + 1, y, i + 1) ||
+                        dfs(x - 1, y, i+1) ||
+                        dfs(x, y+1,i+1) || dfs(x, y - 1, i+1)
+            path.delete(key);
+            return res;
+        }
+        
+        
+       
+        for(let i=0;i<M;i++) {
+            for(let j=0;j<N;j++) {
+                if(board[i][j] === word[0] && dfs(i, j, 0)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+}
+
+```
+
+
+- palindrome partiotining
+
+```js
+class Solution {
+    /**
+     * @param {string} s
+     * @return {string[][]}
+     */
+    partition(s) {
+        // palindrome string
+        const res = [];
+        const part = [];
+
+        const dfs = (i = 0) => {
+            if(i >= s.length) {
+                res.push([...part]);
+                return;
+            }
+
+            for(let j=i;j<s.length;j++) {
+                if(this.isPali(s, i, j)) {
+                    part.push(s.slice(i, j+1));
+                    dfs(j+1)
+                    part.pop();
+                }
+            }
+        }
+
+        dfs();
+        return res;
+    }
+
+    isPali(s, l, r)
+    {
+        while(l < r) {
+            if(s[l] != s[r]){
+                return false;
+            }
+            l++;
+            r--;
+        }
+        return true;
+    }
+ }
+
+```
+
+- letter combinations of a phone number
+
+```js
+class Solution {
+    /**
+     * @param {string} digits
+     * @return {string[]}
+     */
+    letterCombinations(digits) {
+        const digitToChar = {
+            2: 'abc',
+            3: 'def',
+            4: 'ghi',
+            5: 'jkl',
+            6: 'mno',
+            7: 'qprs',
+            8: 'tuv',
+            9: 'wxyz',
+        };
+
+        const res = [];
+
+        const backtrack = (i, cstr) => {
+            if(cstr.length == digits.length) {
+                res.push(cstr);
+                return;
+            }
+            const str = digitToChar[digits[i]];
+            for(let j = 0;j<str.length;j++) {
+                backtrack(i+1, cstr + str[j]);
+            } 
+        }
+        if(digits) {
+            backtrack(0, "");
+        }
+        return res;
+    }
+}
+
+```
