@@ -7,21 +7,161 @@ Here comes a buffet of 50+ MySQL practice questions — pure questions only, nea
 ## **DDL (Data Definition Language)**
 
 1. Create a table `employees` with id, name, salary, and department.
-2. Alter a table to add a new column `created_at` with default current timestamp.
-3. Alter a column datatype from INT to BIGINT.
-4. Drop a column from a table.
-5. Rename a table from `orders` to `customer_orders`.
-6. Create a table with a foreign key referencing another table.
-7. Create a composite primary key on two columns.
-8. Add a UNIQUE constraint to the `email` column.
-9. Remove a primary key from a table.
-10. Change a column name in a table.
-11. Create an index on `last_name` column.
-12. Create a full-text index on a `description` column.
-13. Drop an index from a table.
-14. Create a table using `CHECK` constraint (MySQL 8+).
-15. Create a view named `active_users` that filters only active users.
 
+```sql
+CREATE TABLE employees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    salary DECIMAL(10, 2) NOT NULL CHECK (salary > 0),
+    department VARCHAR(50)
+);
+```
+
+2. Alter a table to add a new column `created_at` with default current timestamp.
+```sql
+ALTER TABLE employees ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP;
+```
+
+3. Alter a column datatype from INT to BIGINT.
+```sql
+ALTER TABLE employees MODIFY COLUMN id BIGINT;
+```
+4. Drop a column from a table.
+```sql
+ALTER TABLE employees DROP COLUMN department;
+```
+
+> or
+
+```sql
+ALTER TABLE employees DROP department;
+```
+
+5. Rename a table from `orders` to `customer_orders`.
+```sql
+CREATE TABLE orders(
+    name VARCHAR(100)
+);
+RENAME TABLE orders to customer_orders;
+```
+6. Create a table with a foreign key referencing another table.
+```sql
+CREATE TABLE department (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE employees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    dept_id INT NOT NULL,
+    FOREIGN KEY (dept_id) REFERENCES department(id)
+);
+
+CREATE TABLE tasks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    task_name VARCHAR(255) NOT NULL,
+    task_description VARCHAR(500) NOT NULL,
+    starts_at DATETIME,
+    ends_at DATETIME
+);
+
+CREATE TABLE user_task (
+    u_id INT NOT NULL,
+    t_id INT NOT NULL,
+    PRIMARY KEY (u_id, t_id),
+    FOREIGN KEY (u_id) REFERENCES employees(id),
+    FOREIGN KEY (t_id) REFERENCES tasks(id)
+);
+
+```
+
+7. Create a composite primary key on two columns.
+```sql
+CREATE TABLE students (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE courses (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE registrations (
+    s_id INT NOT NULL,
+    c_id INT NOT NULL,
+    PRIMARY KEY (s_id, c_id),
+    FOREIGN KEY (s_id) REFERENCES students(id),
+    FOREIGN KEY (c_id) REFERENCES courses(id)
+);
+
+```
+
+8. Add a UNIQUE constraint to the `email` column.
+```sql
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
+);
+```
+
+9. Remove a primary key from a table.
+```sql
+ALTER TABLE planets
+DROP PRIMARY KEY;
+
+```
+- After this, the AUTO_INCREMENT on id is silently stripped away because it only works on a primary key or on a unique key. The column becomes an ordinary integer flapping in the solar wind.
+
+10. Change a column name in a table.
+```sql
+ALTER TABLE department RENAME COLUMN full_name TO name;
+```
+
+- old syntax 5
+
+```sql
+ALTER TABLE department CHANGE COLUMN full_name name VARCHAR(100);
+```
+
+11. Create an index on `last_name` column.
+
+```sql
+ALTER TABLE employees ADD COLUMN last_name VARCHAR(255) NOT NULL;
+CREATE INDEX idx_last_name ON employees(last_name);
+```
+
+12. Create a full-text index on a `description` column.
+```sql
+ALTER TABLE employees ADD COLUMN description TEXT;
+CREATE FULLTEXT INDEX f_tx_idx_desc ON employees(description);
+```
+
+13. Drop an index from a table.
+
+```sql
+DROP INDEX f_tx_idx_desc ON employees;
+```
+
+- official syntax
+
+```sql
+ALTER TABLE employees DROP INDEX f_tx_idx_desc;
+```
+
+
+14. Create a table using `CHECK` constraint (MySQL 8+).
+```sql
+CREATE TABLE check_op (
+    name VARCHAR(100) NOT NULL,
+    age INT CHECK(age > 18 AND age < 110)
+);
+```
+15. Create a view named `active_users` that filters only active users.
+```sql
+CREATE VIEW adult_users AS SELECT e.last_name, e.age FROM employees e WHERE e.age > 18;
+```
 ---
 
 ## **DML (Data Manipulation Language)**
