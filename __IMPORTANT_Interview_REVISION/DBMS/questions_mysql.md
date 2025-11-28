@@ -374,26 +374,153 @@ WHERE e1.manager_id IS NOT NULL
 ## **SUBQUERIES**
 
 46. Get employees who earn more than the average salary.
+```sql
+SELECT * FROM employees WHERE salary > (SELECT AVG(salary) FROM employees);
+```
 47. Select users who placed more orders than the average number of orders.
+```sql
+SELECT name, COUNT(o.order_id) 
+    FROM users u 
+    LEFT JOIN orders o ON u.user_id = o.user_id 
+    GROUP BY u.user_id 
+    HAVING COUNT(o.order_id) > 
+        (
+            SELECT AVG(order_count)
+                FROM (
+                    SELECT COUNT(*) as order_count
+                    FROM orders 
+                    RIGHT JOIN users ON users.user_id = orders.user_id
+                    GROUP BY users.user_id
+                ) as t
+        );
+```
+
 48. Find the employee with the highest salary using a subquery.
+
+
+--- complex
+```sql
+ SELECT * FROM employees e WHERE NOT EXISTS (SELECT 1 FROM employees e2 WHERE e.salary < e2.salary);
+```
+
+- straight forward
+
+```sql
+SELECT *
+FROM employees
+WHERE salary = (SELECT MAX(salary) FROM employees);
+```
+
 49. Delete users who placed zero orders using subquery.
+```sql
+ DELETE FROM users u WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE u.user_id = o.user_id);
+```
 50. Select all products whose price is higher than all their category average prices.
+```sql
+SELECT * FROM products p
+    WHERE p.price > (SELECT AVG(p2.price) FROM products p2 WHERE p.category = p2.category);
+```
 51. Use correlated subquery to fetch each employee with their department’s avg salary.
+```sql
+ SELECT e.id, e.name, e.salary, e.dept_id, (SELECT AVG(e2.salary) FROM employees e2 WHERE e2.dept_id = e.dept_id)  AS dept_avg FROM employees e;
+```
 
 ---
 
 ## **TCL (Transaction Control)**
 
 52. Write a transaction block using START TRANSACTION, COMMIT, and ROLLBACK.
+```sql
+START TRANSACTION;
+
+UPDATE employees e SET salary = salary - 10 WHERE e.id = 1;
+
+UPDATE employees e SET salary = salary + 10 WHERE e.id = 2;
+
+COMMIT;
+
+ROLLBACK;
+```
 53. Update multiple rows in a transaction and intentionally roll back.
+```sql
+START TRANSACTION;UPDATE employees SET salary = salary - 10 WHERE e.id IN (1,2,3);ROLLBACk;
+
+```
 54. Demonstrate SAVEPOINT and ROLLBACK TO SAVEPOINT.
+```sql
+START TRANSACTION;
+
+-- Step 1: reduce salary of employee 1
+UPDATE employees 
+SET salary = salary - 500 
+WHERE id = 1;
+
+SAVEPOINT sp_after_emp1;
+
+-- Step 2: reduce salary of employee 2
+UPDATE employees 
+SET salary = salary - 500 
+WHERE id = 2;
+
+SAVEPOINT sp_after_emp2;
+
+-- Step 3: reduce salary of employee 3
+UPDATE employees 
+SET salary = salary - 500 
+WHERE id = 3;
+
+-- Uh-oh, maybe step 3 was a terrible idea.
+ROLLBACK TO SAVEPOINT sp_after_emp2;
+
+-- Now employees 1 and 2 are changed, employee 3 is untouched.
+
+COMMIT;
+
+```
 55. Simulate money transfer between accounts with transaction consistency.
+
+- note below wont run in mysql client
+
+```sql
+SET @from_id = 1
+SET @to_id = 2
+SET @amount = 300
+
+START TRANSACTION;
+
+-- LOCK SOURCE , TARGET ROWS
+SELECT account_id, balance FROM accounts WHERE account_id IN (@from_id, @to_id) FOR UPDATE;
+
+-- STORE SOURCE BALANCE
+SELECT balance INTO @from_balance FROM accounts WHERE account_id = @from_id FOR UPDATE;
+
+IF @from_balance < @amount THEN
+    ROLLBACK;
+    SELECT 'INSUFFICIET_FUNDS' AS status, @from_balance as current_balance;
+ELSE
+    UPDATE accounts 
+        SET balance = balance - @amount
+        WHERE account_id = @from_id;
+
+    UPDATE accounts
+        SET balance = balance + @amount
+        WHERE account_id = @to_id;
+    
+    COMMIT;
+    SELECT 'COMMITED' AS status;
+END IF;
+
+```
 
 ---
 
 ## **ADVANCED / MISC**
 
 56. Use window functions to rank employees by salary.
+```sql
+SELECT name, RANK() OVER (ORDER BY salary) FROM employees;
+```
+
 57. Use LEAD/LAG to compare current row salary with previous row salary.
 58. Create a stored procedure to return employee details.
 59. Create a trigger to update `updated_at` on every row update.
