@@ -167,35 +167,141 @@ CREATE VIEW adult_users AS SELECT e.last_name, e.age FROM employees e WHERE e.ag
 ## **DML (Data Manipulation Language)**
 
 16. Insert a new row into the `employees` table.
-17. Insert multiple rows in a single insert query.
-18. Update salary of all employees in "HR" department by 10%.
-19. Delete all employees with salary below 30000.
-20. Insert a row only if email is not already present.
-21. Update a row using a JOIN with another table.
-22. Delete records from one table using a subquery.
-23. Insert into a table selecting data from another table.
-24. Replace a row if duplicate primary key is inserted.
-25. Use `ON DUPLICATE KEY UPDATE` while inserting.
 
+```sql
+
+INSERT INTO employees(name, salary, department) VALUES 
+('Harshith', 1800000, 'Full Stack');
+```
+17. Insert multiple rows in a single insert query.
+
+```sql
+INSERT INTO employees (name, salary, department) VALUES
+('John', 900000, 'Backend'),
+('Meera', 1200000, 'Frontend');
+
+INSERT INTO employees (name, salary, department) VALUES
+('HR Emp 1', 100000, 'HR'),
+('HR Emp 2', 110000, 'HR');
+```
+
+18. Update salary of all employees in "HR" department by 10%.
+
+```sql
+UPDATE employees SET salary = salary * 1.10 WHERE department = 'HR';
+```
+
+19. Delete all employees with salary below 300000.
+```sql
+DELETE FROM employees WHERE salary < 300000;
+```
+
+20. Insert a row only if email is not already present.
+
+```sql
+INSERT IGNORE INTO employees(name, salary, email, department)
+VALUES ('harshith', 20, 'harshith@gmail.com', 'IT');
+```
+
+21. Update a row using a JOIN with another table.
+```sql
+UPDATE employees e  
+    JOIN departments d 
+    ON d.id = e.dept_id 
+    SET e.salary = e.salary * 1.10 
+WHERE d.name = 'IT';
+```
+22. Delete records from one table using a subquery.
+```sql
+DELETE FROM employees
+WHERE dept_id IN (
+    SELECT id
+    FROM departments
+    WHERE name IS NULL
+);
+```
+
+23. Insert into a table selecting data from another table.
+
+```sql
+INSERT INTO archive_employees(name, salary, dept_id) SELECT name, salary, dept_id FROM employees WHERE id = 2;
+```
+
+24. Replace a row if duplicate primary key is inserted.
+
+```sql
+REPLACE INTO employees(id, name, salary, department) VALUES (2, 'Harshith', 3834, 'IT');
+```
+
+25. Use `ON DUPLICATE KEY UPDATE` while inserting.
+```sql
+INSERT INTO employees(id, name, salary) VALUES (2, 'Harshith K', 3834) ON DUPLICATE KEY UPDATE name = VALUES(name), salary = VALUES(salary);
+```
 ---
 
 ## **DQL (Data Query Language — SELECT)**
 
 26. Select all columns from a table.
+```sql
+SELECT * FROM employees;
+```
 27. Select only distinct cities from a table.
+```sql
+SELECT DISTINCT city FROM employees;
+```
 28. Order results by salary descending.
+```sql
+SELECT * FROM employees ORDER BY salary DESC;
+```
 29. Get the top 5 highest paid employees.
+```sql
+SELECT * FROM employees ORDER BY salary DESC LIMIT 5;
+```
 30. Count total rows in a table.
+```sql
+SELECT COUNT(e.id) as total FROM employees e;
+```
 31. Count distinct values of a column.
+```sql
+SELECT COUNT(DISTINCT city) FROM employees;
+```
 32. Get the average salary of each department.
+```sql
+SELECT e.department as department_name, AVG(e.salary) as avg_salary FROM employees e GROUP BY e.department;
+```
 33. Group employees by department and sum salaries.
+```sql
+SELECT e.department as department_name, SUM(e.salary) as sum_salaries FROM employees e GROUP BY e.department;
+```
 34. Retrieve rows where name starts with ‘A’.
+```sql
+SELECT * FROM employees e WHERE e.name LIKE 'A%';
+```
 35. Retrieve rows where email ends with ‘gmail.com’.
+```sql
+SELECT * FROM employees e WHERE e.email LIKE '%gmail.com';
+```
 36. Use BETWEEN to get employees with salary between 50k and 80k.
+```sql
+SELECT * FROM employees e WHERE e.salary BETWEEN 50000 AND 80000;
+```
 37. Use LIKE to find names containing ‘an’.
+```sql
+SELECT * FROM employees e WHERE e.name LIKE '%an%';
+```
 38. Sort by multiple columns.
+```sql
+SELECT * FROM employees ORDER BY salary DESC, name DESC;
+```
+
 39. Fetch NULL records from a column.
+```sql
+SELECT * FROM employees WHERE department is NULL;
+```
 40. Replace NULL values using `IFNULL` in a query.
+```sql
+SELECT IFNULL(e.department, 'Misc') AS department FROM employees e;
+```
 
 ---
 
