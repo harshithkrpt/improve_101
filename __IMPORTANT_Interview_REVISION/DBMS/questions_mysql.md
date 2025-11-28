@@ -307,11 +307,67 @@ SELECT IFNULL(e.department, 'Misc') AS department FROM employees e;
 
 ## **JOINS**
 
+```sql
+CREATE TABLE locations (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    city VARCHAR(100) NOT NULL,
+    country VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE departments (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    location_id INT NOT NULL,
+    FOREIGN KEY (location_id) REFERENCES locations(id)
+);
+
+CREATE TABLE employees (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    salary INT NOT NULL,
+    dept_id INT NOT NULL,
+    FOREIGN KEY (dept_id) REFERENCES departments(id)
+);
+
+```
+
 41. Get all employees and their department names using INNER JOIN.
+```sql
+SELECT e.name as employee_name, d.name as department_name, e.salary FROM employees e JOIN departments d ON d.id = e.dept_id;
+```
 42. Fetch employees even if they don't have a department using LEFT JOIN.
+```sql
+SELECT e.id,
+       e.name                     AS employee_name,
+       COALESCE(d.name, '')       AS department_name,
+       e.salary
+FROM employees e
+LEFT JOIN departments d ON d.id = e.dept_id;
+
+```
 43. List departments with no employees (RIGHT JOIN or LEFT JOIN).
+
+```sql
+SELECT d.id, d.name
+FROM departments d
+LEFT JOIN employees e ON d.id = e.dept_id
+WHERE e.id IS NULL;
+
+```
 44. Join three tables: employees, departments, locations.
+```sql
+SELECT * FROM employees e 
+    JOIN departments d ON d.id = e.dept_id
+    JOIN locations l ON l.id = d.location_id;
+```
 45. Use a self-join to find employees with the same manager.
+```sql
+SELECT DISTINCT e2.id, e2.name
+FROM employees e1
+JOIN employees e2 ON e1.manager_id = e2.manager_id
+WHERE e1.manager_id IS NOT NULL
+  AND e1.id <> e2.id;
+```
 
 ---
 
