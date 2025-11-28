@@ -1920,6 +1920,258 @@ USE INDEX
 FORCE INDEX
 ```
 
+Here we go — the performance chapter. A fun one, because this is where SQL feels like debugging a tiny invisible robot that insists on taking the slowest possible path unless you nudge it.
+
+I’ll keep the examples crisp, interview-friendly, and query-rich. No fluff. Just the tasty SQL.
+
+---
+
+## **🔹 9. Performance & Indexing (Interview-Focused)**
+
+---
+
+# **1️⃣ EXPLAIN**
+
+Used to check how MySQL executes your query: table scans, index scans, key used, rows examined… all the forensic goodies.
+
+### **Q1: Basic EXPLAIN on SELECT**
+
+```sql
+EXPLAIN
+SELECT * FROM employees WHERE department_id = 10;
+```
+
+### **Q2: EXPLAIN with JOIN**
+
+```sql
+EXPLAIN
+SELECT e.name, d.name
+FROM employees e
+JOIN departments d ON e.department_id = d.id
+WHERE d.location = 'Bangalore';
+```
+
+### **Q3: EXPLAIN to detect table scan (no index)**
+
+```sql
+EXPLAIN
+SELECT * FROM employees WHERE salary > 50000;
+```
+
+### **Q4: EXPLAIN with ORDER BY (to see filesort)**
+
+```sql
+EXPLAIN
+SELECT * FROM orders ORDER BY created_at DESC;
+```
+
+### **Q5: EXPLAIN on GROUP BY**
+
+```sql
+EXPLAIN
+SELECT department_id, COUNT(*)
+FROM employees
+GROUP BY department_id;
+```
+
+### **Q6: EXPLAIN with subqueries**
+
+```sql
+EXPLAIN
+SELECT *
+FROM employees
+WHERE id IN (SELECT employee_id FROM salaries WHERE amount > 100000);
+```
+
+### **Q7: EXPLAIN ANALYZE (MySQL 8+)**
+
+```sql
+EXPLAIN ANALYZE
+SELECT * FROM employees WHERE email = 'harshith@example.com';
+```
+
+---
+
+# **2️⃣ INDEX**
+
+Indexes let MySQL avoid full table scans; MySQL interviews absolutely love this topic.
+
+### **Q1: Create a simple index**
+
+```sql
+CREATE INDEX idx_emp_dept ON employees(department_id);
+```
+
+### **Q2: Composite Index**
+
+```sql
+CREATE INDEX idx_user_city_age ON users(city, age);
+```
+
+### **Q3: Query using the composite index**
+
+```sql
+SELECT * FROM users WHERE city = 'Hyderabad' AND age > 25;
+```
+
+### **Q4: Wrong order → index not used**
+
+```sql
+SELECT * FROM users WHERE age > 25;
+-- city must come first for composite index(city, age)
+```
+
+### **Q5: UNIQUE index**
+
+```sql
+CREATE UNIQUE INDEX idx_email_unique ON users(email);
+```
+
+### **Q6: Index on text column (prefix index)**
+
+```sql
+CREATE INDEX idx_emp_name ON employees(name(20));
+```
+
+### **Q7: Drop index**
+
+```sql
+DROP INDEX idx_emp_name ON employees;
+```
+
+---
+
+# **3️⃣ USE INDEX**
+
+A polite suggestion to MySQL: “I’d like you to prefer this index.”
+
+### **Q1: SELECT with USE INDEX**
+
+```sql
+SELECT *
+FROM employees USE INDEX (idx_emp_dept)
+WHERE department_id = 20;
+```
+
+### **Q2: USE INDEX to avoid unwanted index**
+
+```sql
+SELECT *
+FROM orders USE INDEX (idx_created_at)
+WHERE created_at > '2025-01-01';
+```
+
+### **Q3: USE INDEX with join**
+
+```sql
+SELECT e.name, d.name
+FROM employees e USE INDEX (idx_emp_dept)
+JOIN departments d ON e.department_id = d.id;
+```
+
+### **Q4: USE INDEX but query ignores it (bad cardinality)**
+
+```sql
+SELECT * FROM employees USE INDEX (idx_gender)
+WHERE gender = 'M';
+-- Low selectivity → MySQL may still avoid index
+```
+
+---
+
+# **4️⃣ FORCE INDEX**
+
+This is the rude cousin of USE INDEX.
+"Use this index. I don’t care about your feelings."
+
+Interviewers *love* scenarios where FORCE INDEX saves a slow query.
+
+### **Q1: FORCE index usage**
+
+```sql
+SELECT *
+FROM employees FORCE INDEX (idx_emp_dept)
+WHERE department_id = 5;
+```
+
+### **Q2: FORCE INDEX to avoid full table scan**
+
+```sql
+SELECT *
+FROM logs FORCE INDEX (idx_log_date)
+WHERE log_date >= '2025-01-01';
+```
+
+### **Q3: Forcing index when MySQL prefers another**
+
+```sql
+SELECT *
+FROM products FORCE INDEX (idx_category_price)
+WHERE category = 'Electronics' AND price > 50000;
+```
+
+### **Q4: FORCE INDEX with JOIN**
+
+```sql
+SELECT o.id, p.amount
+FROM orders o FORCE INDEX (idx_user_id)
+JOIN payments p ON p.order_id = o.id
+WHERE o.user_id = 100;
+```
+
+### **Q5: Forcing index to support ORDER BY**
+
+```sql
+SELECT *
+FROM orders FORCE INDEX (idx_created_at)
+ORDER BY created_at DESC;
+```
+
+---
+
+# **Interviewer-Style Scenarios (Very Common)**
+
+### **Scenario 1: Query is slow; EXPLAIN shows full table scan**
+
+Fix:
+
+```sql
+CREATE INDEX idx_emp_email ON employees(email);
+
+EXPLAIN SELECT * FROM employees WHERE email = 'x@example.com';
+```
+
+### **Scenario 2: Composite index not used**
+
+Fix:
+
+```sql
+CREATE INDEX idx_city_age ON users(city, age);
+SELECT * FROM users WHERE city='Chennai' AND age > 20;
+```
+
+### **Scenario 3: MySQL keeps choosing wrong index**
+
+```sql
+SELECT * FROM orders FORCE INDEX (idx_user_id)
+WHERE user_id = 50;
+```
+
+### **Scenario 4: Check if ORDER BY uses index**
+
+```sql
+EXPLAIN
+SELECT * FROM orders ORDER BY created_at DESC;
+```
+
+### **Scenario 5: Low-selectivity column**
+
+```sql
+SELECT * FROM users WHERE gender='M';
+-- Even with index, MySQL may skip → interviewer trick
+```
+
+
 ---
 
 ## **🔹 10. Views, Procedures, Triggers**
@@ -1941,6 +2193,257 @@ JSON_SET
 JSON_ARRAY
 JSON_OBJECT
 ```
+
+time to wander into the pleasantly weird world of **MySQL JSON**. Interviewers love JSON because it forces candidates to mix relational discipline with semi-structured chaos. Let’s turn each keyword into *multiple* practical, interview-grade SQL questions and example queries.
+
+To keep things lively but clear, I’ll sprinkle a little narrative logic and avoid the robotic list-dump. These are realistic patterns used in real systems (profiles, settings, logs, attributes).
+
+---
+
+# 🔹 **11. JSON (MySQL) — Interview-Focused Coverage**
+
+---
+
+# **1) JSON_EXTRACT**
+
+*(Reads values from a JSON column. Also known as -> or ->> operator.)*
+
+### ❓ **Interview Q1:**
+
+Fetch a user’s theme preference stored in a JSON `settings` column.
+
+```sql
+SELECT 
+    id,
+    JSON_EXTRACT(settings, '$.preferences.theme') AS theme
+FROM users;
+```
+
+### ❓ **Interview Q2:**
+
+Find users whose notifications are enabled inside a JSON object.
+
+```sql
+SELECT *
+FROM users
+WHERE JSON_EXTRACT(settings, '$.notifications.email') = TRUE;
+```
+
+### ❓ **Interview Q3:**
+
+Retrieve all product attributes stored under a JSON array.
+
+```sql
+SELECT 
+    id,
+    JSON_EXTRACT(attributes, '$.specs[0]') AS first_spec
+FROM products;
+```
+
+### ❓ **Interview Q4:**
+
+Filter records where JSON key is missing or null.
+
+```sql
+SELECT *
+FROM events
+WHERE JSON_EXTRACT(metadata, '$.source') IS NULL;
+```
+
+---
+
+# **2) JSON_SET**
+
+*(Updates/replaces values inside JSON without rewriting the whole column.)*
+
+### ❓ **Interview Q1:**
+
+Update a user’s theme preference without overwriting other settings.
+
+```sql
+UPDATE users
+SET settings = JSON_SET(settings, '$.preferences.theme', 'dark')
+WHERE id = 10;
+```
+
+### ❓ **Interview Q2:**
+
+Insert a new field if not present (JSON_SET always creates it).
+
+```sql
+UPDATE users
+SET settings = JSON_SET(settings, '$.last_login.ip', '192.168.1.10');
+```
+
+### ❓ **Interview Q3:**
+
+Update value inside JSON array.
+
+```sql
+UPDATE products
+SET attributes = JSON_SET(attributes, '$.tags[1]', 'UpdatedTag')
+WHERE id = 5;
+```
+
+### ❓ **Interview Q4:**
+
+Increment a numeric value inside JSON.
+
+```sql
+UPDATE stats
+SET data = JSON_SET(
+    data,
+    '$.views',
+    JSON_EXTRACT(data, '$.views') + 1
+);
+```
+
+---
+
+# **3) JSON_ARRAY**
+
+*(Creates JSON arrays. Useful for constructing JSON responses.)*
+
+### ❓ **Interview Q1:**
+
+Return categories as a JSON array instead of multiple rows.
+
+```sql
+SELECT 
+    JSON_ARRAY(category1, category2, category3) AS categories
+FROM product_meta;
+```
+
+### ❓ **Interview Q2:**
+
+Insert a JSON array into a table.
+
+```sql
+INSERT INTO articles (title, tags)
+VALUES ('AI Revolution', JSON_ARRAY('ai', 'ml', 'future'));
+```
+
+### ❓ **Interview Q3:**
+
+Build array from combined SQL expression.
+
+```sql
+SELECT 
+    id,
+    JSON_ARRAY(name, email, city) AS info
+FROM users;
+```
+
+### ❓ **Interview Q4:**
+
+Store order items as JSON array.
+
+```sql
+INSERT INTO orders (user_id, items)
+VALUES (
+    3,
+    JSON_ARRAY(JSON_OBJECT('item', 'Laptop', 'qty', 1),
+               JSON_OBJECT('item', 'Mouse', 'qty', 2))
+);
+```
+
+---
+
+# **4) JSON_OBJECT**
+
+*(Creates key-value JSON objects. Great for constructing nested or dynamic JSON.)*
+
+### ❓ **Interview Q1:**
+
+Build a JSON response per user.
+
+```sql
+SELECT 
+    id,
+    JSON_OBJECT(
+        'name', name,
+        'email', email,
+        'city', city
+    ) AS profile
+FROM users;
+```
+
+### ❓ **Interview Q2:**
+
+Insert a product with JSON attributes.
+
+```sql
+INSERT INTO products (name, attributes)
+VALUES (
+    'iPhone',
+    JSON_OBJECT(
+        'color', 'black',
+        'storage', '128GB',
+        'battery', 90
+    )
+);
+```
+
+### ❓ **Interview Q3:**
+
+Dynamic object combining columns + expressions.
+
+```sql
+SELECT 
+    JSON_OBJECT(
+        'user', name,
+        'age', age,
+        'is_adult', age >= 18
+    ) AS obj
+FROM users;
+```
+
+### ❓ **Interview Q4:**
+
+Create nested objects.
+
+```sql
+SELECT 
+    JSON_OBJECT(
+        'order_id', id,
+        'user', JSON_OBJECT('id', user_id, 'city', city),
+        'items', JSON_EXTRACT(items_json, '$')
+    )
+FROM orders;
+```
+
+---
+
+# ⭐ **Bonus: Mixed JSON Interview Scenarios**
+
+These often appear as *combined* questions.
+
+### **Q: Update JSON if key exists, else insert.**
+
+```sql
+UPDATE users
+SET settings = JSON_SET(settings, '$.login_count',
+    COALESCE(JSON_EXTRACT(settings, '$.login_count'), 0) + 1
+);
+```
+
+### **Q: Query all orders containing an item “Laptop” inside JSON array.**
+
+```sql
+SELECT *
+FROM orders
+WHERE JSON_CONTAINS(items, JSON_OBJECT('item', 'Laptop'), '$');
+```
+
+### **Q: Get nth item from a JSON array of activities.**
+
+```sql
+SELECT id, JSON_EXTRACT(activity_log, '$[2]') AS third_activity
+FROM logs;
+```
+
+---
+
 
 ---
 
