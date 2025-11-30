@@ -641,6 +641,68 @@ var checkInclusion = function(s1, s2) {
 };
 ```
 
+- actual neetcode way of solving permutation in a string
+
+```js
+class Solution {
+    /**
+     * @param {string} s1
+     * @param {string} s2
+     * @return {boolean}
+     */
+    checkInclusion(s1, s2) {
+        if(s1.length > s2.length) return false;
+
+        const arr1 = new Array(26).fill(0);
+        const arr2 = new Array(26).fill(0);
+
+        for(let i=0;i<s1.length;i++) {
+            const index1 = s1.charCodeAt(i) - 'a'.charCodeAt(0);
+            const index2 = s2.charCodeAt(i) - 'a'.charCodeAt(0);
+
+            arr1[index1]++;
+            arr2[index2]++;
+        }
+        let matches = 0;
+        for(let i=0;i<26;i++) {
+            if(arr1[i] == arr2[i]) {
+                matches++;
+            }
+        }
+
+        let l = 0;
+        for(let r=s1.length;r<s2.length;r++) {
+             console.log(matches);
+            if(matches == 26) return true;
+            let idx = s2.charCodeAt(r) - 97;
+            arr2[idx]++;
+            if(arr1[idx] == arr2[idx]) {
+                matches++;
+            }
+            else if(arr1[idx] + 1 == arr2[idx]) {
+                matches--;
+            }
+
+            idx = s2.charCodeAt(l) - 97;
+            arr2[idx]--;
+
+            if(arr1[idx] == arr2[idx]) {
+                matches++;
+            }
+            else if(arr1[idx] - 1 == arr2[idx]) {
+                matches--;
+            }
+
+            l++;
+        }
+
+       
+        return matches == 26;
+    }    
+}
+
+```
+
 - valid parenthesis
 
 ```js
