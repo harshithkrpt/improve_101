@@ -3013,3 +3013,89 @@ var successfulPairs = function(spells, potions, success) {
 };
 
 ```
+
+- matcsticks to square
+
+https://leetcode.com/problems/matchsticks-to-square/ 
+
+```js
+/**
+ * @param {number[]} matchsticks
+ * @return {boolean}
+ */
+var makesquare = function(matchsticks) {
+    const sum = matchsticks.reduce((a, s) => a + s, 0);
+    const length = Math.floor(sum / 4);
+    if(sum / 4 !== length) {
+        return false;
+    }
+    const sides = new Array(4).fill(0);
+    matchsticks.sort((a, b) => b - a);
+    function backtracking(i) {
+        if(i === matchsticks.length) { 
+            return true;
+        }
+
+        for(let j=0;j<4;j++) {
+            if(sides[j] + matchsticks[i] <= length) {
+                sides[j] += matchsticks[i];
+                if(backtracking(i + 1)) {
+                    return true;
+                }
+                sides[j] -= matchsticks[i];
+            }
+        }
+
+        return false;
+    }
+    
+    return backtracking(0);
+};
+```
+
+- number of islands 
+
+```js
+class Solution {
+    /**
+     * @param {character[][]} grid
+     * @return {number}
+     */
+    numIslands(grid) {
+        const rows = grid.length;
+        const cols = grid[0].length;
+        const visited = Array.from({length: rows}, () => {
+            return Array(cols).fill(false);
+        });
+        const directions = [[0,1],[0,-1],[1,0],[-1,0]]
+        let res = 0;
+        function bfs(i, j) {
+            const q = [[i,j]];
+            visited[i][j] = true;
+            while(q.length) {
+                const [r, c] = q.shift();
+                for(let dir of directions) {
+                    const nx = r + dir[0];
+                    const ny = c + dir[1];
+                    if(nx >= 0 && nx < rows && ny >= 0 && ny < cols && !visited[nx][ny] && grid[nx][ny] === '1'){
+                            visited[nx][ny] = true;
+                            q.push([nx,ny]);
+                    }
+                }
+            }
+        }
+
+        for(let i=0;i<rows;i++) {
+            for(let j=0;j<cols;j++) {
+                if(!visited[i][j] && grid[i][j] === '1') {
+                    bfs(i, j);
+                    res++;
+                }
+            }
+        }
+
+        return res;
+    }
+}
+
+```
