@@ -2969,3 +2969,47 @@ class Solution {
 }
 
 ```
+
+- successfulPairs (binary search)
+
+```js
+/**
+ * @param {number[]} spells
+ * @param {number[]} potions
+ * @param {number} success
+ * @return {number[]}
+ */
+var successfulPairs = function(spells, potions, success) {
+    const output = [];
+    potions.sort((a, b) => a - b); // sort ascending
+
+    const firstIndexAtLeast = (search) => {
+        let l = 0, r = potions.length - 1;
+        let res = potions.length; // default: not found
+
+        while (l <= r) {
+            const m = Math.floor((l + r) / 2);
+
+            if (potions[m] >= search) {
+                res = m;      // candidate index
+                r = m - 1;    // try to find an even smaller index
+            } else {
+                l = m + 1;
+            }
+        }
+
+        // if res == potions.length, there is no potion >= search
+        return res === potions.length ? 0 : potions.length - res;
+    };
+
+    for (let spell of spells) {
+        // spell * potion >= success  => potion >= success / spell
+        const search = Math.ceil(success / spell);
+        const count = firstIndexAtLeast(search);
+        output.push(count);
+    }
+
+    return output;
+};
+
+```
