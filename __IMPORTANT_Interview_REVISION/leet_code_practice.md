@@ -3099,3 +3099,58 @@ class Solution {
 }
 
 ```
+
+- max area of island
+
+```js
+class Solution {
+    /**
+     * @param {number[][]} grid
+     * @return {number}
+     */
+    maxAreaOfIsland(grid) {
+        const rows = grid.length;
+        const cols = grid[0].length;
+        const vis = Array.from({length: rows}, () => Array(cols).fill(false));
+        let max = 0;
+        const dir = [[0,1],[0,-1],[-1,0],[1,0]];
+        const bfs = (i, j) => {
+            const q = [[i,j]];
+            let count = 1;
+            if(!vis[i][j]) {
+                vis[i][j] = true;
+            }
+
+            while(q.length) {
+                const [qR,qC] = q.shift();
+                for(let d of dir) {
+                    const [nX, nY] = [qR + d[0], qC + d[1]];
+                    if(
+                        nX >= 0 && nX < rows 
+                        && nY >= 0 && nY < cols
+                        && !vis[nX][nY] 
+                        && grid[nX][nY] === 1
+                    ) {
+                        count++;
+                        vis[nX][nY] = true;
+                        q.push([nX, nY]);
+                    }
+                }
+            }
+
+            return count;
+        }
+
+        for(let i=0;i<rows;i++) {
+            for(let j=0;j<cols;j++) {
+                if(!vis[i][j] && grid[i][j] === 1) {
+                    max = Math.max(max, bfs(i,j));
+                }
+            }
+        }
+
+        return max;
+    }
+}
+
+```
