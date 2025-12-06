@@ -3199,3 +3199,44 @@ class Solution {
 }
 
 ```
+
+- clone graph with dfs
+
+```js
+/**
+ * // Definition for a Node.
+ * class Node {
+ *     constructor(val = 0, neighbors = []) {
+ *       this.val = val;
+ *       this.neighbors = neighbors;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {Node} node
+     * @return {Node}
+     */
+    cloneGraph(node) {
+        if(!node) return null;
+        const map = new Map();
+        const dfs = (node) => {
+            if(map.get(node)) {
+                return map.get(node);
+            }
+
+            const clone = new Node(node.val);
+            map.set(node, clone);
+            for(let n of node.neighbors) {
+                clone.neighbors.push(dfs(n));
+            }
+
+            return clone;
+        }
+
+        return dfs(node);
+    }
+}
+
+```
