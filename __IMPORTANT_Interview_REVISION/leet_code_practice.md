@@ -3240,3 +3240,109 @@ class Solution {
 }
 
 ```
+
+- walls & gates graph problem
+
+```js
+class Solution {
+    /**
+     * @param {number[][]} grid
+     */
+    islandsAndTreasure(grid) {
+        const ROWS = grid.length;
+        const COLS = grid[0].length;
+        const vis = new Set();
+        const q = [];
+        
+        for(let i=0;i<ROWS;i++) {
+            for(let j=0;j<COLS;j++) {
+                if(grid[i][j] === 0) {
+                    q.push([i, j]);
+                    vis.add(`${i}-${j}`)
+                }
+            }
+        }
+        
+        const add = (i,j) => {
+            if(i < 0 || i === ROWS || j < 0 || j === COLS || vis.has(`${i}-${j}`) || grid[i][j] === -1) {
+                return;
+            }
+            vis.add(`${i}-${j}`);
+            q.push([i,j]);
+        } 
+
+        let dist = 0;
+        while(q.length) {
+            let l = q.length;
+            for (let i=0;i<l;i++) {
+                const [r, c] = q.shift();
+                grid[r][c] = dist;
+                add(r + 1, c);
+                add(r - 1, c);
+                add(r , c + 1);
+                add(r , c - 1);  
+            }
+            dist += 1
+        }
+    }
+}
+
+```
+
+- rotten oranges
+
+```js
+class Solution {
+    /**
+     * @param {number[][]} grid
+     * @return {number}
+     */
+    orangesRotting(grid) {
+        const ROWS = grid.length;
+        const COLS = grid[0].length;
+        const vis = new Set();
+        const q = [];
+        for(let i=0;i<ROWS;i++) {
+            for(let j=0;j<COLS;j++) {
+                if(grid[i][j] === 2) {
+                    q.push([i,j]);
+                    vis.add(`${i}-${j}`);
+                }
+            }
+        }
+
+        const add = (r,c) => {
+            if(r < 0 || r === ROWS || c < 0 || c === COLS || vis.has(`${r}-${c}`) || grid[r][c] === 0) {
+                return;
+            }
+            vis.add(`${r}-${c}`);
+            q.push([r,c]);
+        }
+
+        let dist = 2;
+        let maxDist = 2;
+        while(q.length) {
+            const len = q.length;
+            for(let i=0;i< len;i++) {
+                const [r, c] = q.shift();
+                grid[r][c] = dist;
+                maxDist = Math.max(maxDist, dist);
+                add(r + 1, c);
+                add(r - 1, c);
+                add(r, c + 1);
+                add(r, c - 1);
+            }
+            dist++;
+        }
+
+        for(let i=0;i<ROWS;i++) {
+            for(let j=0;j<COLS;j++) {
+                if(grid[i][j] === 1) return -1;
+            }
+        }
+
+        return maxDist - 2;
+    }
+}
+
+```
