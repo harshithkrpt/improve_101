@@ -3154,3 +3154,48 @@ class Solution {
 }
 
 ```
+
+- clone graph
+
+```js
+
+/**
+ * // Definition for a Node.
+ * class Node {
+ *     constructor(val = 0, neighbors = []) {
+ *       this.val = val;
+ *       this.neighbors = neighbors;
+ *     }
+ * }
+ */
+
+class Solution {
+    /**
+     * @param {Node} node
+     * @return {Node}
+     */
+    cloneGraph(node) {
+        if(!node) return null;
+        
+        const dopal = new Map();
+        let clone = new Node(node.val);
+        const q = [node];
+        dopal.set(node, clone);
+        while(q.length) {
+            const item = q.shift();
+            
+            for(let nei of item.neighbors) {
+                if(!dopal.has(nei)) {
+                    q.push(nei);
+                    dopal.set(nei, new Node(nei.val));
+                }
+
+                dopal.get(item).neighbors.push(dopal.get(nei));
+            }
+        }
+
+        return clone;
+    }
+}
+
+```
