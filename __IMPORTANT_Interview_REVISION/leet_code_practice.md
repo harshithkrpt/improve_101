@@ -3346,3 +3346,72 @@ class Solution {
 }
 
 ```
+
+### Heaps
+
+- K Closest Points to Origin
+
+```py
+import heapq
+
+class Solution:
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+        data = []
+        for x in points:
+            x1, y1 = x
+            dist = ((x1) ** 2 + (y1) ** 2) ** 1/2
+            data.append((-dist, x))
+        heapq.heapify(data)
+        while len(data) != k:
+            heapq.heappop(data)
+        t_data = list(map(lambda x: x[1] ,data))
+        return t_data
+```
+
+- Kth Largest Element in a Stream
+
+```py
+
+import heapq
+
+class KthLargest:
+
+    def __init__(self, k: int, nums: List[int]):
+        self.heap = nums
+        self.k = k
+        heapq.heapify(self.heap)
+        while len(self.heap) > k:
+            heapq.heappop(self.heap)
+        
+
+    def add(self, val: int) -> int:
+        heapq.heappush(self.heap, val)
+        if len(self.heap) > self.k:
+            heapq.heappop(self.heap)
+        return self.heap[0]
+        
+
+```
+
+Last Stone Weight
+
+```py
+import heapq
+
+class Solution:
+    def lastStoneWeight(self, stones: List[int]) -> int:
+        data = [-d for d in stones]
+        heapq.heapify(data)
+        while len(data) >= 2:
+            big = -heapq.heappop(data)
+            next_big = -heapq.heappop(data)
+            w = abs(big - next_big)
+            if w != 0:
+                heapq.heappush(data, -w)
+        if len(data):
+            d = heapq.heappop(data)
+            return -d
+        else:
+            return 0
+       
+```
