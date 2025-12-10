@@ -27,3 +27,5 @@ class Solution:
                     queue.append(node.right)
             res.append(cur)
         return res
+
+# right side view of tree

@@ -3513,3 +3513,38 @@ class Solution:
         return True
 
 ```
+
+Course Schedule - II
+
+```py
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        prereq = { c: [] for c in range(numCourses) }
+        for cse, pre in prerequisites:
+            prereq[cse].append(pre)
+        vis, cyc = set(), set()
+        output = []
+        def dfs(crs):
+            if crs in cyc:
+                return False
+            if crs in vis:
+                return True
+            
+            cyc.add(crs)
+            
+            for pre in prereq[crs]:
+                if not dfs(pre):
+                    return False
+            
+            cyc.remove(crs)
+            vis.add(crs)
+            output.append(crs)
+            return True
+
+
+        for c in range(numCourses):
+            if not dfs(c):
+                return []
+        
+        return output
+```
