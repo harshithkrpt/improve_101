@@ -3457,3 +3457,243 @@ These guardrails keep the system from oscillating like a nervous squirrel.
 Most real-world systems start with target tracking, add step scaling for edge cases, and sprinkle in scheduled scaling where predictability exists.
 
 The deeper idea is that scaling policies encode your assumptions about reality. When those assumptions are wrong, the graphs will tell you—politely, but persistently.
+
+
+Let’s take a calm, engineer-friendly tour through **AWS S3 storage classes**—what they are, when to use them, and how pricing *behaves* (not exact cents, which change by region and year).
+
+![Image](https://www.cloudkeeper.com/cms-assets/s3fs-public/2023-07/diagram%203.png)
+
+![Image](https://docs.aws.amazon.com/images/AmazonS3/latest/userguide/images/lifecycle-transitions-v4.png)
+
+![Image](https://zesty.co/wp-content/uploads/2022/04/amazon-s3-aws-storage-classes.png)
+
+---
+
+## What “S3 storage classes” really mean
+
+**Amazon Web Services** S3 storage classes are not different buckets or APIs.
+They’re *cost–availability–latency trade-offs* applied **per object**.
+
+You keep the same S3 interface. AWS quietly swaps physics and accounting behind the curtain.
+
+---
+
+## 1. S3 Standard
+
+**What it is**
+The default. High availability, low latency, multi-AZ replication.
+
+**Use cases**
+
+* Web & mobile app assets
+* Data lakes (hot data)
+* APIs, images, videos
+* Anything frequently accessed
+
+**Pricing behavior**
+
+* Highest storage cost
+* No retrieval fees
+* No minimum storage duration
+
+**Mental model**
+“Keep this on fast SSDs with bodyguards.”
+
+---
+
+## 2. S3 Intelligent-Tiering
+
+**What it is**
+S3 watches access patterns and automatically moves objects between tiers.
+
+**Use cases**
+
+* Unknown or changing access patterns
+* Large datasets where guessing wrong is expensive
+* Analytics data that *might* go cold
+
+**Pricing behavior**
+
+* Slight monitoring fee per object
+* Storage cost optimized automatically
+* No retrieval fees
+
+**Gotcha**
+
+* Small objects → monitoring overhead may outweigh savings
+
+**Mental model**
+“A Roomba that cleans your storage bill.”
+
+---
+
+## 3. S3 Standard-IA (Infrequent Access)
+
+**What it is**
+Same durability as Standard, cheaper storage, but retrieval costs money.
+
+**Use cases**
+
+* Backups accessed occasionally
+* Older application logs
+* Disaster recovery copies
+
+**Pricing behavior**
+
+* ~40–50% cheaper storage than Standard
+* Retrieval fee per GB
+* 30-day minimum storage duration
+
+**Mental model**
+“Still online, but you pay when you wake it up.”
+
+---
+
+## 4. S3 One Zone-IA
+
+**What it is**
+Like Standard-IA, but stored in **one AZ** instead of multiple.
+
+**Use cases**
+
+* Re-creatable data
+* Secondary backups
+* Temporary analytics outputs
+
+**Pricing behavior**
+
+* Cheaper than Standard-IA
+* Retrieval fees apply
+* Higher risk (single AZ)
+
+**Mental model**
+“Budget storage with fewer safety nets.”
+
+---
+
+## 5. S3 Glacier Instant Retrieval
+
+**What it is**
+Cold storage, but with millisecond access.
+
+**Use cases**
+
+* Archived data accessed a few times a year
+* Compliance data with occasional audits
+
+**Pricing behavior**
+
+* Much cheaper storage than IA
+* Retrieval fees
+* 90-day minimum storage duration
+
+**Mental model**
+“Frozen, but with a heated handle.”
+
+---
+
+## 6. S3 Glacier Flexible Retrieval (formerly Glacier)
+
+**What it is**
+Classic archive storage with retrieval delays.
+
+**Retrieval options**
+
+* Expedited: 1–5 minutes
+* Standard: 3–5 hours
+* Bulk: 5–12 hours
+
+**Use cases**
+
+* Long-term backups
+* Compliance & legal archives
+* Historical data
+
+**Pricing behavior**
+
+* Very low storage cost
+* Retrieval cost + delay
+* 90-day minimum
+
+**Mental model**
+“Put it in a vault. Request access forms.”
+
+---
+
+## 7. S3 Glacier Deep Archive
+
+**What it is**
+The cheapest storage AWS offers.
+
+**Retrieval time**
+
+* 12–48 hours
+
+**Use cases**
+
+* Regulatory retention (7–10+ years)
+* Data you *hope* you never need
+
+**Pricing behavior**
+
+* Lowest storage cost
+* Highest retrieval friction
+* 180-day minimum duration
+
+**Mental model**
+“Bury it in a salt mine.”
+
+---
+
+## Quick comparison table (conceptual)
+
+| Class               | Access       | Cost | Retrieval Fee | Typical Use       |
+| ------------------- | ------------ | ---- | ------------- | ----------------- |
+| Standard            | Frequent     | $$$  | No            | Active workloads  |
+| Intelligent-Tiering | Variable     | $$   | No            | Unknown patterns  |
+| Standard-IA         | Infrequent   | $$   | Yes           | Backups           |
+| One Zone-IA         | Infrequent   | $    | Yes           | Re-creatable data |
+| Glacier Instant     | Rare         | $    | Yes           | Archives, audits  |
+| Glacier Flexible    | Very rare    | ¢    | Yes           | Long-term archive |
+| Deep Archive        | Almost never | ¢¢   | Yes           | Compliance        |
+
+---
+
+## Pricing philosophy (important)
+
+AWS pricing depends on:
+
+* Region
+* Storage GB/month
+* Retrieval GB
+* Requests (PUT, GET)
+* Data transfer out
+
+So instead of memorizing numbers, memorize **behavior**:
+
+* Hot data → pay more per GB
+* Cold data → pay more per access
+* Colder data → pay with time
+
+---
+
+## Pro tip: Lifecycle policies
+
+Most real systems use **Lifecycle Rules**:
+
+* Day 0–30 → Standard
+* Day 31–90 → Standard-IA
+* Day 180 → Glacier
+* Year 1 → Deep Archive
+
+Automation beats guessing.
+
+---
+
+If you want, we can map these classes onto:
+
+* a real production architecture
+* backup strategy math
+* or cost-optimization traps engineers fall into when they trust “cheap storage” too literally
+
+Cloud billing is physics wearing a suit.
