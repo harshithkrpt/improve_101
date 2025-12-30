@@ -180,3 +180,75 @@ It’s metadata, not the object itself. S3 tells you *what* happened, not *hands
 In philosophical terms: S3 events turn storage from a passive box into an *active participant* in your system. Data stops sitting there and starts causing things to happen—an underrated kind of magic.
 
 From here, the natural continuation is **event-driven architecture design** and how S3 notifications fit into larger, loosely coupled systems.
+
+
+Let’s talk **Amazon S3 encryption**—how your data gets wrapped in cryptographic bubble-wrap before anyone can peek at it.
+
+![Image](https://media.amazonwebservices.com/blog/s3_sse_3.png)
+
+![Image](https://jayendrapatil.com/wp-content/uploads/2022/11/SSE-C.png)
+
+![Image](https://d2908q01vomqb2.cloudfront.net/22d200f8670dbdb3e253a90eee5098477c95c23d/2019/11/11/EncryptBoundaries-Solution-for-social.jpg)
+
+![Image](https://d2908q01vomqb2.cloudfront.net/e1822db470e60d090affd0956d743cb0e7cdf113/2023/05/01/Figure-2.png)
+
+## What “S3 encryption” really means
+
+In **Amazon S3**, encryption happens in two places:
+
+* **At rest**: data stored on disks inside AWS
+* **In transit**: data moving between you and S3
+
+Both matter. Locking the door but leaving the windows open is a classic mistake.
+
+## Encryption at rest (the big three)
+
+S3 gives you three server-side options. Same house, different keys.
+
+**SSE-S3**
+S3 encrypts objects with keys fully managed by AWS. Zero setup, minimal control. Good default when compliance isn’t breathing down your neck.
+
+**SSE-KMS**
+Encryption keys are managed by **AWS Key Management Service**.
+This buys you:
+
+* Fine-grained IAM permissions
+* Audit logs (who used which key, when)
+* Key rotation
+  Slightly higher cost and latency, much higher governance.
+
+**SSE-C**
+You provide the key on every request. AWS never stores it.
+Powerful, but sharp—lose the key and the data is permanently unreadable.
+
+## Client-side encryption (the DIY route)
+
+You encrypt data **before** uploading it to S3. AWS only ever sees ciphertext.
+Maximum control, maximum responsibility. You now own key storage, rotation, backups, and all the ways humans can mess that up.
+
+## Encryption in transit
+
+S3 supports **TLS (HTTPS)**. Always use it.
+You can even enforce it with bucket policies that reject plain HTTP requests. Cryptography is strongest when it’s boring and mandatory.
+
+## How this looks in practice
+
+Most production systems land here:
+
+* **SSE-KMS** for sensitive or regulated data
+* **TLS enforced** for all access
+* Bucket policies + IAM to prevent accidental plaintext uploads
+
+The elegant part: you can turn default encryption on at the bucket level and forget about it—future objects inherit safety automatically.
+
+## Mental model to keep
+
+S3 encryption isn’t about hiding data from AWS; it’s about **limiting blast radius**:
+
+* Stolen disks → useless
+* Misconfigured access → auditable
+* Compromised credentials → containable
+
+Security isn’t a single lock. It’s layers that assume failure and stay calm anyway.
+
+From here, the natural next step is tying encryption to IAM policies and threat models—deciding *who* can decrypt *what* and *why*, instead of treating encryption as a checkbox.
