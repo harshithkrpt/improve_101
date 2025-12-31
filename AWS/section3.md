@@ -1189,3 +1189,69 @@ Placement strategies don’t change *what* runs—only *where* it runs.
 They’re about **risk vs cost**, not functionality.
 
 If you want, the next natural step is mapping these strategies to **ECS Services vs Standalone Tasks**, and how deployments behave during **rolling updates and scale-out events**.
+
+![Image](https://docs.aws.amazon.com/images/architecture-diagrams/latest/modernize-applications-with-microservices-using-amazon-eks/images/modernize-applications-with-microservices-using-amazon-eks.png)
+
+![Image](https://docs.aws.amazon.com/images/eks/latest/userguide/images/k8sinaction.png)
+
+![Image](https://docs.aws.amazon.com/images/eks/latest/best-practices/images/reliability/eks-data-plane-connectivity.jpeg)
+
+Think of **AWS EKS** as Amazon saying: “You bring your containers and Kubernetes ideas; we’ll babysit the hard parts.” It’s a managed way to run **Kubernetes**, the container orchestrator that schedules, scales, and heals your containerized apps when reality gets messy.
+
+### What EKS actually is
+
+EKS (Elastic Kubernetes Service) is a managed Kubernetes control plane run by **Amazon Web Services**. AWS runs and patches the Kubernetes brain for you; you focus on what your app should do, not how etcd survives a bad day.
+
+### The moving pieces (at human scale)
+
+**Cluster**
+A cluster is the whole party. It has:
+
+* a **control plane** (managed by AWS), and
+* **worker nodes** (where your containers actually run).
+
+**Control plane (AWS-managed)**
+This includes the Kubernetes API server, scheduler, and controllers. You don’t SSH into it. You don’t upgrade it by hand. AWS keeps it highly available across multiple AZs.
+
+**Worker nodes**
+These are EC2 instances (or serverless compute) that run your Pods.
+
+* **Managed Node Groups**: EC2 nodes AWS helps you manage.
+* **Self-managed nodes**: More control, more responsibility.
+* **Fargate**: No nodes at all; you run Pods, AWS runs the machines.
+
+**Pods & Deployments**
+Your app lives in containers, wrapped in Pods. Deployments describe how many replicas you want and Kubernetes keeps reality aligned with that wish.
+
+### How traffic and access work
+
+**Networking (VPC-native)**
+EKS uses the AWS VPC CNI. Pods get real VPC IPs, which is powerful and occasionally terrifying if you don’t plan IP ranges carefully.
+
+**Load balancing**
+Ingress controllers and AWS load balancers expose your services to the outside world or to internal networks.
+
+**IAM + Kubernetes RBAC**
+Authentication is IAM-based; authorization is Kubernetes RBAC. You map AWS identities to Kubernetes permissions. This is elegant once understood, confusing until then.
+
+### Why people use EKS
+
+* You want **standard Kubernetes**, not a proprietary variant.
+* You want AWS to handle upgrades, availability, and control plane security.
+* You already live in the AWS ecosystem (VPC, IAM, ALB, CloudWatch).
+
+### Trade-offs to know early
+
+* EKS is powerful, not simple. The learning curve is real.
+* You pay for the control plane plus compute.
+* Misconfigured networking can hurt scalability faster than you expect.
+
+### A minimal mental model
+
+EKS is Kubernetes where:
+
+* AWS runs the brain,
+* you run the muscles,
+* and YAML is the language of spells.
+
+Once that clicks, the rest is just disciplined configuration and a healthy respect for distributed systems. The next natural layer to explore is how Pods talk to each other (Services, Ingress, and DNS), because that’s where “it works on my laptop” officially dies and becomes something better.
