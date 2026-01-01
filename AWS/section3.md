@@ -1255,3 +1255,316 @@ EKS is Kubernetes where:
 * and YAML is the language of spells.
 
 Once that clicks, the rest is just disciplined configuration and a healthy respect for distributed systems. The next natural layer to explore is how Pods talk to each other (Services, Ingress, and DNS), because that’s where “it works on my laptop” officially dies and becomes something better.
+
+![Image](https://docs.aws.amazon.com/images/elasticbeanstalk/latest/dg/images/aeb-architecture2.png)
+
+![Image](https://docs.aws.amazon.com/images/elasticbeanstalk/latest/dg/images/aeb-overview.png)
+
+![Image](https://blog.shikisoft.com/images/post_imgs/20181008/eb-blue-green-success.jpg)
+
+![Image](https://cms.cloudoptimo.com/uploads/Elastic_Beanstalk_Architecture_26ad9faaab.png)
+
+Here’s a clean, no-nonsense mental model of **AWS Elastic Beanstalk**, the “I want to deploy, not babysit servers” service.
+
+Elastic Beanstalk (EB) is a **Platform-as-a-Service** layer. You give it code. It quietly assembles EC2, Load Balancers, Auto Scaling, security groups, logs, and monitoring—then gets out of your way.
+
+Think of it as *CloudFormation with opinions and a comforting tone of voice*.
+
+---
+
+### What Elastic Beanstalk actually does
+
+You upload an application (ZIP, WAR, Docker image, etc.). EB provisions:
+
+* EC2 instances (or containers)
+* Auto Scaling Group
+* Load Balancer (optional but common)
+* Security groups + IAM roles
+* CloudWatch logs & metrics
+
+You focus on **code + config**, not infra wiring.
+
+---
+
+### Supported platforms (the runtime menu)
+
+EB supports prebuilt stacks like:
+
+* Node.js
+* Java (Tomcat, Corretto)
+* Python
+* Go
+* PHP
+* .NET
+* Docker (single & multi-container)
+
+You can also bring a **custom platform** if you enjoy advanced suffering.
+
+---
+
+### Core building blocks (important words you’ll hear)
+
+* **Application**: Logical container for everything.
+* **Environment**: Actual running infra (dev, stage, prod).
+* **Application Version**: A specific deployable artifact.
+* **Environment Configuration**: Instance type, scaling, env vars, etc.
+
+One application → many environments → many versions.
+
+---
+
+### Deployment models (how new code lands)
+
+EB supports multiple strategies:
+
+* **All at once** – Fast, risky.
+* **Rolling** – Safer, slower.
+* **Rolling with extra batch** – No capacity drop.
+* **Immutable** – New instances first, then swap (very safe).
+* **Blue/Green** – Two environments, flip traffic.
+
+Immutable + Blue/Green are the “sleep well at night” options.
+
+---
+
+### Environment types
+
+* **Single instance**
+  Cheap, no load balancer, mostly for dev.
+* **Load balanced**
+  Production-grade: ALB + Auto Scaling.
+
+---
+
+### Configuration & customization
+
+* **Environment variables** (via console / config files)
+* **`.ebextensions/`**
+  YAML files to tweak:
+
+  * packages
+  * services
+  * files
+  * commands
+* **Platform hooks** (`.platform/`)
+  For deeper OS-level customization.
+
+EB is friendly until you go wild here—then it becomes… educational.
+
+---
+
+### Monitoring & logs
+
+* Built-in CloudWatch metrics
+* Health dashboard (green/yellow/red)
+* Log streaming & snapshots
+* Enhanced health = instance-level insights
+
+You don’t lose observability just because EB is abstracting things.
+
+---
+
+### Scaling & availability
+
+* Auto Scaling based on CPU, request count, or custom metrics
+* Multi-AZ support
+* Managed rolling updates for OS patches
+
+EB handles elasticity; you decide the rules.
+
+---
+
+### Pricing (important reality check)
+
+Elastic Beanstalk itself is **free**.
+You pay for:
+
+* EC2
+* Load Balancers
+* S3
+* CloudWatch
+* Data transfer
+
+EB is a manager, not a landlord.
+
+---
+
+### When Elastic Beanstalk shines
+
+* You want **fast deployment** without deep AWS plumbing
+* Small to mid-size apps
+* Teams that value convention over configuration
+* MVPs, internal tools, classic web backends
+
+---
+
+### When it starts to creak
+
+* Highly custom networking
+* Complex microservices (ECS/EKS fits better)
+* Fine-grained infra control
+* Heavy multi-tenant architectures
+
+At that point, EB politely steps aside and hands you ECS, EKS, or raw EC2.
+
+---
+
+### One-sentence summary
+
+Elastic Beanstalk is AWS saying:
+“Give me your app. I’ll handle the boring parts. You can yell at me later.”
+
+From here, the natural next step is comparing **Elastic Beanstalk vs ECS (Fargate)** or walking through a **hands-on Node.js / Java EB deployment** to see where the abstraction line really lives.
+
+## AWS Elastic Beanstalk deployment types (decoded without the fog)
+
+Elastic Beanstalk looks simple on the surface—`git push`, magic happens—but under the hood it gives you **four distinct deployment strategies**. Each one is a different answer to the same philosophical question: *how much downtime, risk, and cost are you willing to tolerate in exchange for speed?*
+
+Let’s tour them.
+
+---
+
+## 1) **All at Once** – the YOLO deploy 🚀
+
+![Image](https://blog.shikisoft.com/images/post_imgs/20181008/eb-all-at-once.jpg)
+
+![Image](https://webmobilez.com/wp-content/uploads/2020/04/2020-04-25__08-55-02-1.png)
+
+Beanstalk takes **all EC2 instances**, stops the old app, and deploys the new version everywhere in one shot.
+
+What actually happens:
+
+* Old version goes down
+* New version comes up
+* Traffic resumes
+
+Trade-offs:
+
+* Fastest deployment
+* **Full downtime**
+* If something breaks, everything breaks together
+
+Mental model:
+Like changing all four tires of a moving car by stopping the car completely.
+
+Best for:
+
+* Dev / test environments
+* Internal tools
+* “Ship it now, fix it later” moments
+
+---
+
+## 2) **Rolling** – controlled, civilized progress 🐢
+
+![Image](https://blog.shikisoft.com/images/post_imgs/20181008/eb-rolling-process.jpg)
+
+![Image](https://webmobilez.com/wp-content/uploads/2020/04/2020-04-25__09-04-48-1.png)
+
+Instances are updated **in batches**. One batch updates while others keep serving traffic.
+
+What actually happens:
+
+* Take batch 1 out of load balancer
+* Deploy new version
+* Put batch 1 back
+* Repeat
+
+Trade-offs:
+
+* **No full downtime**
+* Reduced capacity during deployment
+* Old and new versions coexist briefly
+
+Mental model:
+Renovating a hotel floor-by-floor while guests still stay in other floors.
+
+Best for:
+
+* Most production apps
+* When you want safety without doubling infrastructure cost
+
+---
+
+## 3) **Rolling with Additional Batch** – zero-capacity-loss rolling 🧠
+
+Same as Rolling, but Beanstalk first launches **extra instances** to preserve full capacity.
+
+What actually happens:
+
+* Extra batch is created
+* Rolling update happens without reducing serving capacity
+* Extra batch is removed at the end
+
+Trade-offs:
+
+* No downtime
+* No capacity drop
+* Slightly higher cost during deployment
+
+Mental model:
+Hiring temporary workers so business never slows during renovation.
+
+Best for:
+
+* High-traffic production systems
+* Latency-sensitive APIs
+* When traffic spikes are unforgiving
+
+---
+
+## 4) **Immutable** – safety first, always 🧬
+
+![Image](https://blog.spikeseed.cloud/assets/images/posts/2021-04-20-elastic-beanstalk-bluegreen-deployment-with-ansible/header.png)
+
+![Image](https://blog.shikisoft.com/images/post_imgs/20181008/eb-immutable-start.jpg)
+
+Beanstalk creates **entirely new instances** with the new version, tests them, then swaps traffic.
+
+What actually happens:
+
+* New Auto Scaling group is created
+* New version is deployed there
+* Health checks pass → traffic switches
+* Old instances are terminated
+
+Trade-offs:
+
+* Zero downtime
+* Clean rollback (just kill the new group)
+* Highest cost during deploy
+* Slower than rolling
+
+Mental model:
+Building a new bridge next to the old one, then redirecting traffic.
+
+Best for:
+
+* Mission-critical production
+* Risk-averse teams
+* When rollback speed matters more than cost
+
+---
+
+## One-glance comparison (street-level truth)
+
+* **Fastest:** All at Once
+* **Cheapest:** All at Once
+* **Most common prod choice:** Rolling
+* **No capacity loss:** Rolling with Additional Batch
+* **Safest:** Immutable
+
+---
+
+### A practical recommendation (engineer-to-engineer)
+
+For real-world systems:
+
+* Dev → **All at Once**
+* Normal prod APIs → **Rolling**
+* High-traffic prod → **Rolling with Additional Batch**
+* Payments, auth, core platforms → **Immutable**
+
+Elastic Beanstalk is opinionated, but not naive—it quietly hands you the same deployment trade-offs you’d design manually with ECS or Kubernetes, just pre-wired and politely hidden.
+
+Once you see that, Beanstalk stops being “basic” and starts being… honest.
