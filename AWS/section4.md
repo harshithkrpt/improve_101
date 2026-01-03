@@ -1641,3 +1641,834 @@ Mappings decide **what values** it gets.
 Parameters decide **what the user meant**.
 
 CloudFormation stays sane when each does exactly one job—and doesn’t pretend to be Python.
+
+CloudFormation intrinsic functions are the **little Lisp spells** hidden inside YAML/JSON that let a template reason about itself. They don’t *do* things at runtime like code; they **resolve values at stack creation/update time**. Think of them as compile-time macros for infrastructure.
+
+I’ll keep this clean, practical, and interview-ready.
+
+---
+
+### What intrinsic functions are (in one breath)
+
+They dynamically compute values inside a CloudFormation template—references, conditions, string building, lookups, and wiring resources together—without hard-coding anything.
+
+Syntax styles:
+
+* **Long form**: `Fn::Join`, `Fn::Sub`
+* **Short YAML form**: `!Join`, `!Sub`, `!Ref`
+
+---
+
+## Core Intrinsic Functions (the ones you *must* know)
+
+### `Ref`
+
+The atom. Everything starts here.
+
+What it does:
+
+* Returns **value of a parameter**
+* Or **physical ID of a resource**
+
+Example:
+
+```yaml
+InstanceType: !Ref InstanceTypeParam
+```
+
+Special twist:
+Some AWS pseudo-parameters also use `Ref`:
+
+* `AWS::Region`
+* `AWS::AccountId`
+* `AWS::StackName`
+
+---
+
+### `Fn::GetAtt` / `!GetAtt`
+
+Pulls **attributes** from a resource, not just its ID.
+
+Example:
+
+```yaml
+BucketDomain:
+  !GetAtt MyBucket.DomainName
+```
+
+Rule of thumb:
+
+* `Ref` → ID
+* `GetAtt` → metadata about the resource
+
+---
+
+### `Fn::Join` / `!Join`
+
+Concatenates strings.
+
+Example:
+
+```yaml
+BucketName:
+  !Join ["-", ["myapp", !Ref AWS::Region, "logs"]]
+```
+
+Used when:
+
+* You need deterministic names
+* `Fn::Sub` is overkill
+
+---
+
+### `Fn::Sub` / `!Sub`
+
+String interpolation. Cleaner than `Join`.
+
+Example:
+
+```yaml
+BucketName: !Sub "myapp-${AWS::Region}-logs"
+```
+
+With variables:
+
+```yaml
+!Sub
+  - "arn:aws:s3:::${Bucket}/*"
+  - { Bucket: !Ref MyBucket }
+```
+
+This is the **most loved** intrinsic in real projects.
+
+---
+
+## Conditional Logic (CloudFormation’s “if statements”)
+
+### `Fn::If` / `!If`
+
+Conditionally returns one of two values.
+
+Example:
+
+```yaml
+InstanceType:
+  !If [IsProd, "t3.large", "t3.micro"]
+```
+
+Used *inside* resource properties.
+
+---
+
+### `Fn::Equals`
+
+Boolean comparison.
+
+```yaml
+!Equals [!Ref Env, "prod"]
+```
+
+---
+
+### `Fn::And`, `Fn::Or`, `Fn::Not`
+
+Logical composition.
+
+```yaml
+!And
+  - !Equals [!Ref Env, "prod"]
+  - !Equals [!Ref Region, "ap-south-1"]
+```
+
+Conditions live in the `Conditions:` section, not inline.
+
+---
+
+## Lookups & Mappings
+
+### `Fn::FindInMap`
+
+Reads from `Mappings`.
+
+Example:
+
+```yaml
+InstanceType:
+  !FindInMap [EnvMap, !Ref Env, InstanceType]
+```
+
+Mental model:
+Mappings = static config table
+Parameters = user input
+Conditions = logic
+Intrinsic functions = glue
+
+---
+
+### `Fn::Select`
+
+Picks an item from a list.
+
+```yaml
+!Select [0, !GetAZs ""]
+```
+
+---
+
+### `Fn::GetAZs`
+
+Returns Availability Zones for a region.
+
+```yaml
+!GetAZs !Ref AWS::Region
+```
+
+Often paired with `Select`.
+
+---
+
+## Encoding & Stack Plumbing
+
+### `Fn::Base64`
+
+Mostly for **UserData** in EC2.
+
+```yaml
+UserData:
+  Fn::Base64: !Sub |
+    #!/bin/bash
+    echo "Hello from ${AWS::StackName}"
+```
+
+---
+
+### `Fn::ImportValue`
+
+Imports values exported from another stack.
+
+```yaml
+VpcId: !ImportValue SharedVpcId
+```
+
+This is how stacks **talk without knowing each other**.
+
+---
+
+## Lesser-Used but Useful
+
+### `Fn::Split`
+
+Splits strings into lists.
+
+```yaml
+!Split [",", "a,b,c"]
+```
+
+---
+
+### `Fn::Cidr`
+
+Generates CIDR blocks programmatically.
+
+```yaml
+!Cidr [ "10.0.0.0/16", 4, 8 ]
+```
+
+Rare, but powerful in VPC templates.
+
+---
+
+## Quick mental map (interview gold)
+
+* **Dynamic values** → `Ref`, `GetAtt`
+* **Strings** → `Sub` (preferred), `Join`
+* **Conditions** → `If`, `Equals`, `And`, `Or`, `Not`
+* **Config lookup** → `FindInMap`
+* **Cross-stack** → `ImportValue`
+* **Lists / AZs** → `Select`, `GetAZs`
+* **EC2 bootstrap** → `Base64`
+
+---
+
+### Final nerd note
+
+CloudFormation is *deliberately constrained*. No loops, no variables, no arithmetic beyond CIDR math. Intrinsic functions are AWS saying:
+“Here’s just enough logic to keep you honest.”
+
+Once these click, templates stop feeling verbose and start feeling… precise.
+
+Next natural expansions:
+
+* Intrinsics **inside ECS task definitions**
+* `Conditions` + `Mappings` for **multi-env templates**
+* Common **template anti-patterns** (and how to avoid them)
+
+CloudFormation rollback is AWS’s built-in **“undo button”**—but it’s a very literal, slightly grumpy undo button. It only undoes what *it* did, and only according to the rules it understands.
+
+Let’s ground this without ceremony.
+
+---
+
+## What rollback means (plain English)
+
+If a **stack creation or update fails**, CloudFormation tries to return the stack to the **last known stable state**.
+
+* **Create failed** → delete everything it created
+* **Update failed** → revert to previous resource versions
+* **Delete failed** → stop and leave leftovers
+
+Rollback happens **automatically by default**.
+
+---
+
+## When rollback is triggered
+
+Rollback kicks in when:
+
+* A resource fails to create or update
+* A dependency can’t be resolved
+* A timeout is hit (common with EC2, ALB, RDS)
+* You hit a service limit (subnets, ENIs, IAM roles, etc.)
+
+CloudFormation doesn’t panic early. It waits until a resource **explicitly fails**.
+
+---
+
+## Stack states you’ll see (very important)
+
+Creation:
+
+* `CREATE_IN_PROGRESS`
+* `CREATE_FAILED`
+* `ROLLBACK_IN_PROGRESS`
+* `ROLLBACK_COMPLETE`
+
+Update:
+
+* `UPDATE_IN_PROGRESS`
+* `UPDATE_FAILED`
+* `UPDATE_ROLLBACK_IN_PROGRESS`
+* `UPDATE_ROLLBACK_COMPLETE`
+
+If you remember nothing else:
+**`*_ROLLBACK_COMPLETE` = stack exists but is frozen until fixed or deleted.**
+
+---
+
+## What rollback actually does
+
+### During **stack creation**
+
+* Deletes **all successfully created resources**
+* Order is reversed (last created → first deleted)
+* If deletion fails → `ROLLBACK_FAILED`
+
+Result:
+
+* Stack is gone (unless rollback fails)
+
+---
+
+### During **stack update**
+
+* Reverts resources to **previous template + parameters**
+* Some resources are **replaced**, others are **updated in place**
+* If *rollback itself* fails → stack gets stuck
+
+Result:
+
+* Stack remains, but update is canceled
+
+---
+
+## Important limitations (this trips people)
+
+Rollback **cannot**:
+
+* Undo **manual changes** made outside CloudFormation
+* Restore **deleted data** (S3 objects, RDS data)
+* Recreate resources with **new physical IDs** if deletion fails
+* Fix broken IAM policies automatically
+
+CloudFormation is not a time machine. It’s a disciplined librarian.
+
+---
+
+## Rollback control flags
+
+### Disable rollback (for debugging)
+
+```bash
+aws cloudformation create-stack \
+  --stack-name test \
+  --template-body file://template.yaml \
+  --disable-rollback
+```
+
+Why you’d do this:
+
+* Inspect partially created resources
+* Debug failures without everything vanishing
+
+⚠️ Use sparingly. This leaves orphaned infra.
+
+---
+
+### Continue rollback after fixing issues
+
+If rollback failed:
+
+```bash
+aws cloudformation continue-update-rollback \
+  --stack-name my-stack
+```
+
+This is how you **unstick** a stack.
+
+---
+
+## Typical rollback failure causes
+
+* Security groups still attached to ENIs
+* IAM roles in use
+* Load balancers with active listeners
+* ECS services still running
+* RDS deletion protection enabled
+
+CloudFormation is polite. AWS services are not.
+
+---
+
+## Best practices (earned the hard way)
+
+* Always enable **termination protection** on prod stacks
+* Use **change sets** before updates
+* Split stacks: network / compute / app
+* Never mix manual changes with CloudFormation
+* Logically name resources (rollback logs are literal)
+
+---
+
+## Mental model to keep
+
+CloudFormation rollback is **transaction-like**, not transactional.
+
+* Best effort
+* Orderly
+* Deterministic
+* Not omnipotent
+
+It tries to leave your account in a *less broken* state than before—no promises beyond that.
+
+Next natural rabbit holes:
+
+* Rollback vs **change sets**
+* Why **nested stacks** reduce blast radius
+* How rollback behaves with **ECS + ALB + Auto Scaling**
+
+Infrastructure, like reality, prefers reversible decisions.
+
+A **CloudFormation service role** is AWS saying:
+“Instead of acting as *you*, CloudFormation will act as *this IAM role* when creating and updating resources.”
+
+That’s it. But the consequences are deliciously important.
+
+---
+
+## What it is (clean definition)
+
+A CloudFormation **service role** is an **IAM role that AWS CloudFormation assumes** to perform stack operations on your behalf.
+
+Instead of:
+
+> *User → creates EC2, ALB, IAM, RDS…*
+
+You get:
+
+> *User → tells AWS CloudFormation → assumes role → creates resources*
+
+CloudFormation temporarily wears that role’s permissions like a lab coat.
+
+---
+
+## Why this exists (the real reason)
+
+Three big motivations:
+
+**1. Principle of least privilege**
+Your user or CI pipeline doesn’t need permissions for EC2, IAM, ECS, RDS, etc.
+CloudFormation does.
+
+**2. Separation of duties**
+
+* Developers: can create/update stacks
+* Security team: controls what the role is allowed to do
+
+**3. Predictability & safety**
+Every stack action uses the **same permission boundary**, regardless of who triggered it.
+
+---
+
+## How it works (mental model)
+
+1. You create an IAM role
+2. Trust policy allows `cloudformation.amazonaws.com`
+3. Attach permissions (EC2, ECS, IAM, etc.)
+4. You pass this role when creating/updating a stack
+5. CloudFormation **assumes the role**
+6. All resource creation uses *that role’s permissions*
+
+If CloudFormation can’t assume the role → stack fails immediately.
+
+---
+
+## Where you specify it
+
+### Console
+
+* Stack creation → **Advanced options**
+* “IAM role” → select the service role
+
+### CLI
+
+```bash
+aws cloudformation create-stack \
+  --stack-name my-stack \
+  --template-body file://template.yaml \
+  --role-arn arn:aws:iam::123456789012:role/CFN-ServiceRole
+```
+
+Same for `update-stack`.
+
+---
+
+## What permissions go into the role
+
+Only what the stack needs.
+
+Example:
+
+* EC2 stacks → `ec2:*`, `elasticloadbalancing:*`
+* ECS stacks → `ecs:*`, `iam:PassRole`
+* IAM resources → explicit `iam:CreateRole`, `iam:AttachRolePolicy`
+
+Critical detail:
+If your template creates **IAM roles**, the service role **must include `iam:PassRole`** or the stack will fail.
+
+This is a classic interview trap.
+
+---
+
+## What happens if you don’t use a service role
+
+CloudFormation uses **the caller’s permissions**.
+
+That means:
+
+* CI/CD pipelines need massive IAM permissions
+* Different users → different outcomes
+* Security audits become painful
+
+Using a service role avoids all that chaos.
+
+---
+
+## Service role vs execution role (common confusion)
+
+* **CloudFormation service role**
+  Used by CloudFormation *during stack operations*
+
+* **ECS task role / Lambda execution role**
+  Used by *your application at runtime*
+
+Different layers. Different lifetimes. Different responsibilities.
+
+---
+
+## Best practices (battle-tested)
+
+* Always use service roles in **prod**
+* One role per **stack type** (network, app, data)
+* Lock it down tighter than a spaceship airlock
+* Never reuse human IAM roles as service roles
+* Log role usage via CloudTrail
+
+---
+
+## One-line summary to remember
+
+A CloudFormation service role answers the question:
+**“With whose authority should this infrastructure be created?”**
+
+And in mature AWS setups, the answer is *never* “mine.”
+
+**CloudFormation capabilities** are explicit permission flags that tell AWS:
+“Yes, I know this template does *powerful or risky things*. Proceed.”
+
+They exist to prevent accidental privilege escalation.
+
+---
+
+## What capabilities are
+
+Capabilities are **acknowledgements**, not features.
+You pass them when creating or updating a stack to allow certain actions.
+
+If required capabilities are missing → **stack fails immediately**.
+
+---
+
+## The main capabilities you should know
+
+### `CAPABILITY_IAM`
+
+Required when the template:
+
+* Creates **IAM users, roles, groups**
+* Attaches **inline policies** to IAM resources
+
+It does **not** allow:
+
+* Named roles (yet)
+* Broad permission changes without review
+
+Mental note:
+“Basic IAM stuff? → CAPABILITY_IAM”
+
+---
+
+### `CAPABILITY_NAMED_IAM`
+
+Required when the template:
+
+* Creates IAM roles or users with a **fixed name**
+
+  ```yaml
+  RoleName: MyAppExecutionRole
+  ```
+
+Why AWS cares:
+
+* Named IAM resources are **global within the account**
+* Accidental overwrite = security incident
+
+Rule:
+
+* Auto-generated names → `CAPABILITY_IAM`
+* Explicit names → `CAPABILITY_NAMED_IAM`
+
+---
+
+### `CAPABILITY_AUTO_EXPAND`
+
+Required when using:
+
+* **Macros**
+* **Nested stacks**
+* Transforms that expand templates (like `AWS::Include`)
+
+Example:
+
+```yaml
+Transform: AWS::Serverless-2016-10-31
+```
+
+This tells AWS:
+“I accept that this template may expand into many resources.”
+
+---
+
+## Where you specify capabilities
+
+### CLI
+
+```bash
+aws cloudformation create-stack \
+  --stack-name my-stack \
+  --template-body file://template.yaml \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
+### Console
+
+There’s a checkbox that says (paraphrased):
+
+> “I acknowledge that AWS CloudFormation might create IAM resources”
+
+That checkbox = capabilities.
+
+---
+
+## What happens if you forget
+
+* Stack goes to `CREATE_FAILED`
+* Error clearly says which capability is missing
+* Nothing is created (safe failure)
+
+AWS is strict here, by design.
+
+---
+
+## Quick interview cheat sheet
+
+* IAM resources? → **CAPABILITY_IAM**
+* Named IAM resources? → **CAPABILITY_NAMED_IAM**
+* Nested stacks / macros / SAM? → **CAPABILITY_AUTO_EXPAND**
+* Capabilities ≠ permissions
+* They are **explicit consent**, not power grants
+
+---
+
+## Final mental model
+
+Capabilities are CloudFormation asking:
+“Are you *aware* this template can change security or expand massively?”
+
+If you don’t say “yes” explicitly, it refuses to act.
+
+Infrastructure with guardrails beats infrastructure with regrets.
+
+**DeletionPolicy** in CloudFormation is a small switch with big consequences. It tells AWS **what to do with a resource when the stack is deleted or replaced**.
+
+Think of it as deciding whether infrastructure gets **destroyed, preserved, or snapshotted** when the stack goes away.
+
+---
+
+## What DeletionPolicy is
+
+`DeletionPolicy` is a **resource-level attribute** (not global, not a function).
+
+It applies when:
+
+* You delete a stack
+* A resource is **replaced** during a stack update
+
+It does **nothing** during normal operation.
+
+---
+
+## Where it sits in a template
+
+```yaml
+MyDB:
+  Type: AWS::RDS::DBInstance
+  DeletionPolicy: Snapshot
+  Properties:
+    ...
+```
+
+Simple rule:
+If it’s under a resource → it controls that resource’s fate.
+
+---
+
+## The main DeletionPolicy options
+
+### `Delete` (default)
+
+* Resource is deleted when stack is deleted
+* You usually don’t write this explicitly
+
+Use when:
+
+* Resource is disposable
+* Stateless infrastructure
+
+---
+
+### `Retain`
+
+* Resource is **left behind**
+* Stack deletes, resource stays
+* CloudFormation **forgets** about it
+
+Use when:
+
+* Data is critical
+* You want manual control afterward
+
+Classic examples:
+
+* RDS databases
+* S3 buckets with data
+* Manually managed prod resources
+
+⚠️ Retained resources are **not managed anymore** by AWS CloudFormation.
+
+---
+
+### `Snapshot`
+
+* Takes a snapshot
+* Deletes the original resource
+
+Supported mainly by:
+
+* RDS
+* Redshift
+* ElastiCache (limited cases)
+* EBS volumes
+
+Use when:
+
+* You want backup *and* cleanup
+
+---
+
+## DeletionPolicy vs UpdateReplacePolicy (important distinction)
+
+* **DeletionPolicy**
+
+  * Triggered on **stack deletion**
+* **UpdateReplacePolicy**
+
+  * Triggered when a resource is **replaced during update**
+
+Best practice:
+
+```yaml
+DeletionPolicy: Retain
+UpdateReplacePolicy: Retain
+```
+
+This prevents accidental data loss during both delete *and* update.
+
+---
+
+## Common real-world patterns
+
+* **Databases** → `Snapshot` or `Retain`
+* **S3 buckets** → `Retain` (especially prod)
+* **EC2 instances** → default `Delete`
+* **Networking (VPC, subnets)** → usually `Delete`
+* **Logs / audit data** → `Retain`
+
+---
+
+## What DeletionPolicy does *not* protect you from
+
+* Manual deletion outside CloudFormation
+* Data loss caused by application logic
+* Rollback failures
+* Accidental overwrites during updates (unless paired with `UpdateReplacePolicy`)
+
+DeletionPolicy is a seatbelt, not an airbag factory.
+
+---
+
+## Interview one-liner
+
+> DeletionPolicy controls what happens to a resource when a stack is deleted or replaced—delete it, keep it, or snapshot it—helping prevent accidental data loss.
+
+---
+
+## Mental model to keep
+
+CloudFormation is excellent at **building** infrastructure.
+DeletionPolicy is how you teach it **when to let go**.
+
+The next logical expansions:
+
+* `UpdateReplacePolicy` deep dive
+* Why S3 + `Retain` can still fail deletion
+* How DeletionPolicy interacts with rollback
