@@ -41,3 +41,6 @@ build/
 *.tfstate
 *.tfstate.backup
 .terraform/
+
+terraform-key
+terraform-key.pub

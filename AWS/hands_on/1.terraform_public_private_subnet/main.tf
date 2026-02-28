@@ -62,9 +62,35 @@ resource "aws_route_table_association" "public" {
     route_table_id = aws_route_table.public.id
 }
 
+
+
+
+# Create NAT Gateway in Public Subnet
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+
+  tags = {
+    Name = "terraform-nat-eip"
+  }
+}
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.public.id
+
+  tags = {
+    Name = "terraform-nat-gateway"
+  }
+}
+
 # Create Route Table for Private Subnet
 resource "aws_route_table" "private" {
     vpc_id = aws_vpc.main.id
+
+    route {
+        cidr_block     = "0.0.0.0/0"
+        nat_gateway_id = aws_nat_gateway.nat.id
+    }
 
     tags = {
       Name = "terraform-private-rt"
@@ -161,6 +187,7 @@ resource "aws_instance" "public_instance" {
       Name = "terraform-public-instance"
     }
 }
+
 
 # Create EC2 Instance in Private Subnet
 resource "aws_instance" "private_instance" {
