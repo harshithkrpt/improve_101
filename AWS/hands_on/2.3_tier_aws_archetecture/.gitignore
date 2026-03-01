@@ -25,3 +25,5 @@ override.tf.json
 
 # Dependency lock file (optional — see note below)
 .terraform.lock.hcl
+
+*.pem

@@ -66,3 +66,16 @@ variable "exclude_azs" {
   type        = list(string)
   default     = ["ap-south-1c"]
 }
+
+variable "instance_type" {
+  type        = string
+  default     = "t3.micro"
+  description = "AWS EC2 Instance Type"
+}
+
+variable "instance_keypair" {
+  type        = string
+  default     = "terraform_practice"
+  description = "ec2 key pair"
+}
+ 
